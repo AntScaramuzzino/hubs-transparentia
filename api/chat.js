@@ -1,7 +1,7 @@
 // Vercel Serverless Function — proxy Anthropic API
 // ANTHROPIC_API_KEY deve essere configurata in Vercel → Settings → Environment Variables
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -46,4 +46,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(502).json({ error: 'Errore di rete verso Anthropic: ' + err.message });
   }
-}
+};
