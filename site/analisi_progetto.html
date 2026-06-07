@@ -161,6 +161,10 @@ table.t6d tr:hover td{background:#FFF7ED}
 .ab-left{display:flex;gap:9px;flex-wrap:wrap}
 .ab-right{font-size:.76rem;color:var(--sub);max-width:280px;text-align:right;line-height:1.5}
 
+/* ── Drop zone ── */
+#drop-zone.dz-over{border-color:var(--accent);background:#FEE9D4}
+#drop-zone.dz-loaded{border-style:solid;border-color:var(--accent);background:var(--accent-light)}
+
 /* ── Helpers ── */
 .hidden{display:none!important}
 .section-label{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;margin-top:20px}
@@ -263,7 +267,24 @@ table.t6d tr:hover td{background:#FFF7ED}
 
       <div class="form-group">
         <label>Voce 5.3 — Descrizione attività del progetto *</label>
-        <textarea id="f-testo" placeholder="Incolla qui il testo della voce 5.3 del progetto...
+
+        <!-- Drop zone .md -->
+        <div id="drop-zone"
+          ondragover="event.preventDefault();this.classList.add('dz-over')"
+          ondragleave="this.classList.remove('dz-over')"
+          ondrop="handleDrop(event)"
+          onclick="document.getElementById('md-file-input').click()"
+          style="border:2px dashed var(--accent-border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;background:var(--accent-light)">
+          <i class="fa-solid fa-file-arrow-up" style="font-size:1.4rem;color:var(--accent);flex-shrink:0"></i>
+          <div>
+            <div style="font-size:.85rem;font-weight:700;color:var(--accent-dark)">Carica file <code style="background:#fff;padding:1px 5px;border-radius:4px;font-size:.8rem">.md</code></div>
+            <div style="font-size:.76rem;color:var(--sub);margin-top:2px">Trascina qui un file Markdown oppure clicca per selezionarlo — il testo verrà inserito automaticamente</div>
+          </div>
+          <div id="dz-filename" style="margin-left:auto;font-size:.76rem;color:var(--accent-dark);font-weight:600;white-space:nowrap;display:none"></div>
+          <input type="file" id="md-file-input" accept=".md,text/markdown,text/plain" style="display:none" onchange="handleFileSelect(this)">
+        </div>
+
+        <textarea id="f-testo" placeholder="…oppure incolla qui il testo della voce 5.3 del progetto.
 
 Esempio:
 Gli operatori volontari saranno impegnati nelle seguenti attività:
@@ -403,6 +424,45 @@ Gli operatori volontari saranno impegnati nelle seguenti attività:
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════
+// FILE UPLOAD (.md)
+// ══════════════════════════════════════════════════════════
+function loadMdIntoTextarea(file) {
+  if (!file) return;
+  if (!file.name.endsWith('.md') && file.type !== 'text/markdown' && file.type !== 'text/plain') {
+    alert('Seleziona un file .md (Markdown).');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('f-testo').value = e.target.result;
+    // Update drop zone UI
+    const dz = document.getElementById('drop-zone');
+    dz.classList.add('dz-loaded');
+    const fn = document.getElementById('dz-filename');
+    fn.textContent = '✓ ' + file.name;
+    fn.style.display = 'block';
+    // Auto-fill project name from filename if empty
+    const nameField = document.getElementById('f-progetto');
+    if (!nameField.value) {
+      nameField.value = file.name.replace(/\.md$/i,'').replace(/[-_]/g,' ');
+    }
+  };
+  reader.onerror = () => alert('Errore nella lettura del file.');
+  reader.readAsText(file, 'UTF-8');
+}
+
+function handleFileSelect(input) {
+  if (input.files && input.files[0]) loadMdIntoTextarea(input.files[0]);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dz-over');
+  const file = e.dataTransfer.files[0];
+  if (file) loadMdIntoTextarea(file);
+}
+
 // ══════════════════════════════════════════════════════════
 // SYSTEM PROMPT
 // ══════════════════════════════════════════════════════════
