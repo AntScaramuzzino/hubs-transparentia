@@ -14,6 +14,10 @@
       "destination": "/site/mappatore_competenze_ada.html"
     },
     {
+      "source": "/mappatore-competenze",
+      "destination": "/site/mappatore_lifecomp_entrecomp.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/site/$1"
     }
