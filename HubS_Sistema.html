@@ -185,14 +185,17 @@ h3{font-size:1rem;font-weight:600;margin-bottom:8px}
 .progress-fill{height:100%;border-radius:3px;transition:width .3s;background:var(--pc,#27ae60)}
 
 /* DOC PREVIEW (A5) */
-#doc-preview{background:#fff;border:1px solid #ccc;padding:30px 40px;max-width:800px;margin:0 auto;font-family:'Times New Roman',serif;font-size:13px;line-height:1.5;box-shadow:var(--shadow)}
-#doc-preview h1{font-size:1.1rem;text-align:center;margin-bottom:4px}
-#doc-preview h2{font-size:.95rem;text-align:center;color:var(--sub);margin-bottom:16px}
-#doc-preview .doc-section{margin-bottom:20px}
-#doc-preview .doc-section h3{font-size:.85rem;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:4px;margin-bottom:10px}
-#doc-preview table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:8px}
-#doc-preview th{background:#eee;border:1px solid #ccc;padding:5px 8px;text-align:left;font-size:.75rem}
-#doc-preview td{border:1px solid #ccc;padding:5px 8px;vertical-align:top}
+#doc-preview,#patto-preview{background:#fff;border:1px solid #ccc;padding:30px 40px;max-width:800px;margin:0 auto;font-family:'Times New Roman',serif;font-size:13px;line-height:1.5;box-shadow:var(--shadow)}
+#doc-preview h1,#patto-preview h1{font-size:1.1rem;text-align:center;margin-bottom:4px}
+#doc-preview h2,#patto-preview h2{font-size:.95rem;text-align:center;color:var(--sub);margin-bottom:16px}
+#doc-preview .doc-section,#patto-preview .doc-section{margin-bottom:20px}
+#doc-preview .doc-section h3,#patto-preview .doc-section h3{font-size:.85rem;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:4px;margin-bottom:10px}
+#doc-preview table,#patto-preview table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:8px}
+#doc-preview th,#patto-preview th{background:#eee;border:1px solid #ccc;padding:5px 8px;text-align:left;font-size:.75rem}
+#doc-preview td,#patto-preview td{border:1px solid #ccc;padding:5px 8px;vertical-align:top}
+#patto-preview .firma-box{border:1px solid #ccc;padding:12px 16px;margin-top:8px;background:#fafafa}
+#patto-preview .firma-line{display:flex;gap:24px;margin-top:20px}
+#patto-preview .firma-line .firma-item{flex:1;border-top:1px solid #333;padding-top:4px;font-size:.75rem;color:#555}
 
 /* WELCOME */
 #screen-welcome{max-width:700px;margin:0 auto;padding:20px 0}
@@ -248,7 +251,7 @@ h3{font-size:1rem;font-weight:600;margin-bottom:8px}
 @media print{
   #hdr,#sidebar,#app .agent-nav-footer,#app .agent-hdr .ahnum{display:none}
   #main{padding:0}
-  #doc-preview{box-shadow:none;border:none}
+  #doc-preview,#patto-preview{box-shadow:none;border:none}
 }
 
 /* ═══ AGENT TABS + CHAT AI ═══════════════════════════════════ */
@@ -503,8 +506,12 @@ h3{font-size:1rem;font-weight:600;margin-bottom:8px}
 
       <div class="card">
         <div class="card-title">Bozza Patto di Servizio</div>
-        <button class="btn btn-a1 btn-sm" onclick="generatePatto()">⚙ Genera testo</button>
-        <div class="mt8"><textarea id="a1-patto" rows="12" style="font-family:monospace;font-size:.78rem;width:100%;padding:8px;border:1px solid var(--border);border-radius:5px" placeholder="Clicca 'Genera testo' per compilare automaticamente..."></textarea></div>
+        <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn btn-a1" onclick="renderPattoPreview()">🔄 Aggiorna anteprima</button>
+          <button class="btn btn-a1" onclick="downloadPattoDocx()">📄 Scarica DOCX (Word)</button>
+          <button class="btn btn-outline" onclick="downloadPattoPdf()">🖨 Stampa / PDF</button>
+        </div>
+        <div id="patto-preview-container"></div>
       </div>
     </div>
   </div>
@@ -853,7 +860,7 @@ function collectAll() {
 }
 
 function populateAll() {
-  populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); renderDocPreview();
+  populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); renderDocPreview(); renderPattoPreview();
 }
 
 function updateSidebar() {
@@ -914,7 +921,6 @@ function collectA1() {
   r.doc=getVal('a1-req-doc');
   S.a1.obiettivi=[getVal('a1-obj-0'),getVal('a1-obj-1'),getVal('a1-obj-2')];
   S.a1.note=getVal('a1-note');
-  S.a1.patto=getVal('a1-patto');
   updateNavStatus();
 }
 
@@ -934,7 +940,6 @@ function populateA1() {
   setVal('a1-req-doc',r.doc);
   (S.a1.obiettivi||['','','']).forEach((v,i)=>setVal('a1-obj-'+i,v));
   setVal('a1-note',S.a1.note||'');
-  setVal('a1-patto',S.a1.patto||'');
   calcPresenza();
 }
 
@@ -970,71 +975,150 @@ function calcPresenza() {
   }
 }
 
-function generatePatto() {
+function renderPattoPreview() {
   collectA1();
   const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
-  const obj = (S.a1.obiettivi||[]).filter(Boolean).map((o,i)=>(i+1)+'. '+o).join('\n') || '1. _____________________\n2. _____________________\n3. _____________________';
-  const testo = `PROGETTO PERSONALIZZATO / PATTO DI SERVIZIO
-HubS – Spazi di Innovazione Sociale
-Rif. Art. 5 comma 1 lett. b) DI 31 luglio 2025
+  const objs = (S.a1.obiettivi||[]).filter(Boolean);
+  const objRows = objs.length
+    ? objs.map((o,i)=>`<tr><td style="text-align:center;width:30px">${i+1}</td><td>${o}</td></tr>`).join('')
+    : `<tr><td style="text-align:center">1</td><td style="color:#aaa">_____________________</td></tr>
+       <tr><td style="text-align:center">2</td><td style="color:#aaa">_____________________</td></tr>
+       <tr><td style="text-align:center">3</td><td style="color:#aaa">_____________________</td></tr>`;
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DATI VOLONTARIO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nome e Cognome: ${v.nome} ${v.cognome}
-Data di nascita: ${v.dob||'___________'}
-Luogo di nascita: ${v.luogoNascita||'___________'}
-Codice Fiscale: ${v.cf||'___________'}
-Residenza: ${v.residenza||'___________'}
+  const html=`<div id="patto-preview">
+    <h1>PROGETTO PERSONALIZZATO / PATTO DI SERVIZIO</h1>
+    <h2>HubS – Spazi di Innovazione Sociale<br>
+    <small style="font-size:.8rem">Rif. Art. 5 comma 1 lett. b) DI 31 luglio 2025</small></h2>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ENTE DI ACCOGLIENZA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Denominazione: ${e.denominazione||'___________'}
-Tipologia: ${e.tipo||'___________'}
-Tutor / Responsabile: ${e.tutor||'___________'}
-Codice progetto HubS: ${e.codice||'___________'}
+    <div class="doc-section">
+      <h3>1 — Dati del Volontario</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Cognome e Nome</strong></td><td>${(v.cognome||'___')+' '+(v.nome||'___')}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Codice Fiscale</strong></td><td>${v.cf||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Residenza</strong></td><td>${v.residenza||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Titolo di studio</strong></td><td>${v.titoloStudio||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Situazione occupazionale</strong></td><td>${v.occupazione||'___'}</td></tr>
+      </tbody></table>
+    </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PERCORSO PREVISTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Settore di attività: ${p.settore||'___________'}
-Attività principali: ${p.attivita||'___________'}
-Luogo: ${p.luogo||'___________'}
-Durata: da ${p.dataInizio||'___'} a ${p.dataFine||'___'}
-Ore previste: ${p.orePreviste||60}h (soglia minima: 60h su 12 mesi)
-Presenza minima richiesta: 75%
+    <div class="doc-section">
+      <h3>2 — Ente di Accoglienza</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Denominazione</strong></td><td>${e.denominazione||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Tipologia</strong></td><td>${e.tipo||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Indirizzo</strong></td><td>${e.indirizzo||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Rappresentante legale</strong></td><td>${e.repLegale||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Tutor / Responsabile</strong></td><td>${e.tutor||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Codice progetto HubS</strong></td><td>${e.codice||'___'}</td></tr>
+      </tbody></table>
+    </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-OBIETTIVI DI APPRENDIMENTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${obj}
+    <div class="doc-section">
+      <h3>3 — Percorso Previsto</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Attività principali</strong></td><td>${p.attivita||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Luogo di svolgimento</strong></td><td>${p.luogo||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data fine prevista</strong></td><td>${p.dataFine||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Ore previste totali</strong></td><td>${p.orePreviste||60}h <small>(soglia minima: 60h su 12 mesi — Art. 5 DI 31/07/2025)</small></td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Presenza minima richiesta</strong></td><td>75%</td></tr>
+      </tbody></table>
+    </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-IMPEGNI DEL VOLONTARIO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Partecipare alle attività secondo il calendario concordato
-- Raggiungere la soglia minima di presenze (75%)
-- Partecipare ai colloqui di tutoraggio previsti (min. 3)
-- Collaborare alla costruzione del Dossier delle Evidenze
-- Partecipare al processo di autovalutazione delle competenze
+    <div class="doc-section">
+      <h3>4 — Obiettivi di Apprendimento</h3>
+      <table><thead><tr><th style="width:30px">#</th><th>Obiettivo</th></tr></thead><tbody>${objRows}</tbody></table>
+    </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-IMPEGNI DELL'ENTE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Garantire un accompagnamento tutor qualificato per tutta la durata
-- Fornire le condizioni necessarie per lo sviluppo delle competenze previste
-- Procedere alla messa in trasparenza delle competenze maturate (DI 31/07/2025)
-- Custodire il Documento di Trasparenza secondo le norme GDPR 2016/679
+    <div class="doc-section">
+      <h3>5 — Impegni del Volontario</h3>
+      <table><tbody>
+        <tr><td>Partecipare alle attività secondo il calendario concordato con l'ente</td></tr>
+        <tr><td>Raggiungere la soglia minima di presenze (75% delle ore previste)</td></tr>
+        <tr><td>Partecipare ai colloqui di tutoraggio previsti (min. 3 nell'arco del percorso)</td></tr>
+        <tr><td>Collaborare alla costruzione del Dossier delle Evidenze (Agente 3)</td></tr>
+        <tr><td>Partecipare al processo di autovalutazione delle competenze (Agente 2)</td></tr>
+        <tr><td>Comunicare tempestivamente eventuali impedimenti o variazioni al tutor</td></tr>
+      </tbody></table>
+    </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FIRME
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Volontario/a: _____________________   Data: __________
-Tutor: _____________________          Data: __________
+    <div class="doc-section">
+      <h3>6 — Impegni dell'Ente di Accoglienza</h3>
+      <table><tbody>
+        <tr><td>Garantire un accompagnamento tutor qualificato per tutta la durata del percorso</td></tr>
+        <tr><td>Fornire le condizioni necessarie allo sviluppo delle competenze previste</td></tr>
+        <tr><td>Procedere alla messa in trasparenza delle competenze maturate (Art. 5 DI 31/07/2025)</td></tr>
+        <tr><td>Predisporre il Documento di Trasparenza conforme all'Allegato A del DI 5 gennaio 2021</td></tr>
+        <tr><td>Custodire e trattare i dati personali nel rispetto del GDPR 2016/679/UE</td></tr>
+      </tbody></table>
+    </div>
 
-Documento generato da HubS-TransparentIA — ${today()}`;
-  setVal('a1-patto', testo);
+    <div class="doc-section">
+      <h3>7 — Firme</h3>
+      <p style="font-size:.78rem;color:#666;margin-bottom:10px">Il presente Patto di Servizio è stato letto, compreso e sottoscritto dai soggetti indicati. Documento generato da HubS-TransparentIA — ${today()}</p>
+      <div class="firma-line">
+        <div class="firma-item">Volontario/a: ${(v.nome||'')+' '+(v.cognome||'')}<br><br>Data: _______________</div>
+        <div class="firma-item">Tutor: ${e.tutor||'_______________'}<br><br>Data: _______________</div>
+        <div class="firma-item">Rappresentante legale: ${e.repLegale||'_______________'}<br><br>Data: _______________</div>
+      </div>
+    </div>
+  </div>`;
+  el('patto-preview-container').innerHTML=html;
+}
+
+function downloadPattoDocx() {
+  collectA1(); renderPattoPreview();
+  const preview=el('patto-preview'); if(!preview) return;
+  const name=((S.a1.vol.cognome||'')+'_'+(S.a1.vol.nome||'volontario')).replace(/\s/g,'_');
+  const htmlContent=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8">
+    <style>
+      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
+      table{border-collapse:collapse;width:100%}
+      td,th{border:1px solid #ccc;padding:4pt 6pt;font-size:9pt}
+      th{background:#eeeeee;font-weight:bold}
+      h1{font-size:14pt;text-align:center}h2{font-size:12pt;text-align:center}
+      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
+      .firma-line{display:flex;gap:24pt;margin-top:20pt}
+      .firma-item{flex:1;border-top:1px solid #333;padding-top:4pt;font-size:9pt}
+    </style></head>
+    <body>${preview.innerHTML}</body></html>`;
+  const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`HubS_PattoDiServizio_${name}_${new Date().toISOString().slice(0,10)}.docx`;
+  a.click();
+}
+
+function downloadPattoPdf() {
+  collectA1(); renderPattoPreview();
+  const preview=el('patto-preview'); if(!preview) return;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>Patto di Servizio — HubS</title>
+    <style>
+      *{box-sizing:border-box}
+      body{font-family:Arial,sans-serif;font-size:10pt;margin:15mm;color:#000}
+      table{border-collapse:collapse;width:100%;font-size:8.5pt;margin-bottom:10pt}
+      td,th{border:1px solid #ccc;padding:4pt 6pt;vertical-align:top}
+      th{background:#eee;font-weight:bold}
+      h1{font-size:13pt;text-align:center;margin-bottom:4pt}
+      h2{font-size:10pt;text-align:center;color:#555;margin-bottom:12pt}
+      h3{font-size:9pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin:12pt 0 6pt}
+      .firma-line{display:flex;gap:24pt;margin-top:20pt}
+      .firma-item{flex:1;border-top:1px solid #333;padding-top:4pt;font-size:8pt;color:#333}
+      @page{size:A4;margin:15mm}
+      @media print{@page{size:A4;margin:15mm}}
+    </style></head>
+    <body>${preview.innerHTML}
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
 }
 
 // ============================================================
