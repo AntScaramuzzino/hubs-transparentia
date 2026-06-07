@@ -100,7 +100,9 @@ textarea{min-height:210px;resize:vertical;line-height:1.65}
 
 /* ── Activity pills ── */
 .activities-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
-.activity-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:20px;font-size:.81rem;color:var(--accent-dark);font-weight:500}
+.activity-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:20px;font-size:.81rem;color:var(--accent-dark);font-weight:500;cursor:pointer;transition:.15s}
+.activity-pill:hover{background:#FEE9D4;border-color:var(--accent)}
+.pill-ada{font-size:.68rem;background:var(--accent);color:#fff;padding:2px 7px;border-radius:8px;font-weight:700;white-space:nowrap}
 
 /* ── Mapping cards ── */
 .mapping-grid{display:flex;flex-direction:column;gap:14px}
@@ -630,10 +632,24 @@ async function avviaAnalisi() {
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
 
-    const m = text.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('Risposta non JSON valida dall\'AI');
+    // Robust JSON extraction: handle ```json...``` wrappers and bare JSON
+    let jsonStr = null;
+    const cbMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (cbMatch) {
+      jsonStr = cbMatch[1].trim();
+    } else {
+      // Find the outermost { ... } block
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start !== -1 && end > start) jsonStr = text.slice(start, end+1);
+    }
+    if (!jsonStr) throw new Error('Risposta non valida dall\'AI: nessun JSON trovato');
 
-    result = JSON.parse(m[0]);
+    let parsed;
+    try { parsed = JSON.parse(jsonStr); }
+    catch(pe) { throw new Error('JSON malformato: ' + pe.message + '\n\nRiprova — l\'AI ha restituito una risposta non strutturata.'); }
+
+    result = parsed;
     result._meta = meta;
 
     renderResults(result);
@@ -659,10 +675,15 @@ function renderResults(d) {
   qb.textContent = lbl;
   document.getElementById('qnota').textContent = d.nota_qualità || '';
 
-  // Activities
+  // Activities — from mappatura so each pill shows its ADA code
+  // Clicking a pill opens the corresponding mapping card
   document.getElementById('act-list').innerHTML =
-    (d.attività_estratte||[]).map(a =>
-      `<span class="activity-pill"><i class="fa-solid fa-check" style="font-size:.7rem"></i>${escHtml(a)}</span>`
+    (d.mappatura||[]).map((m,i) =>
+      `<span class="activity-pill" onclick="openMapping(${i})" title="Apri la mappatura completa">
+        <i class="fa-solid fa-check" style="font-size:.7rem"></i>
+        ${escHtml(m.attività)}
+        <span class="pill-ada">${escHtml(m.ada_code||'')}</span>
+      </span>`
     ).join('');
 
   // Competenze chiave
@@ -722,6 +743,19 @@ function renderResults(d) {
         <td style="font-size:.76rem">${(m.entrecomp||[]).join('<br>')}</td>
       </tr>
     `).join('');
+}
+
+function openMapping(i) {
+  switchTab('mappatura');
+  const b = document.getElementById('mcb'+i);
+  const c = document.getElementById('chev'+i);
+  if (!b.classList.contains('open')) {
+    b.classList.add('open');
+    c.style.transform = 'rotate(90deg)';
+  }
+  setTimeout(() => {
+    b.closest('.mc').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 60);
 }
 
 function toggleCard(i) {
