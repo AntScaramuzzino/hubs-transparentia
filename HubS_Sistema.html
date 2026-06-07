@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HubS-TransparentIA — Sistema Completo</title>
+<style>
+:root {
+  --c-a1:#1a5276; --c-a1l:#2e86c1; --c-a1bg:#eaf2fb;
+  --c-a2:#1b6b3a; --c-a2l:#27ae60; --c-a2bg:#eafaf1;
+  --c-a3:#a04000; --c-a3l:#e67e22; --c-a3bg:#fef5e7;
+  --c-a4:#4a235a; --c-a4l:#8e44ad; --c-a4bg:#f5eef8;
+  --c-a5:#7b241c; --c-a5l:#c0392b; --c-a5bg:#fdedec;
+  --grey:#f4f6f8; --border:#dde1e7; --text:#1a1a2e; --sub:#6c757d;
+  --radius:8px; --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:var(--text);background:#f0f2f5;min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}
+h2{font-size:1.15rem;font-weight:700;margin-bottom:12px}
+h3{font-size:1rem;font-weight:600;margin-bottom:8px}
+
+/* HEADER */
+#hdr{background:#1a1a2e;color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#hdr .logo{font-size:1.2rem;font-weight:800;letter-spacing:-0.5px;white-space:nowrap}
+#hdr .logo span{color:#27ae60}
+#hdr .sess-name{flex:1;font-size:.85rem;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hdr .hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.8rem;white-space:nowrap}
+#hdr .hbtn:hover{background:rgba(255,255,255,.22)}
+#hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
+#hdr .hbtn.green:hover{background:#1e8449}
+
+/* LAYOUT */
+#app{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+#sidebar{width:220px;min-width:220px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.nav-section{padding:12px 14px 4px;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--grey)}
+.nav-item.active{border-left-color:var(--ac,#333);background:var(--acbg,#f0f2f5)}
+.nav-item .nav-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;background:var(--ac,#888);flex-shrink:0}
+.nav-item .nav-info{flex:1;min-width:0}
+.nav-item .nav-title{font-size:.8rem;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-item .nav-sub{font-size:.7rem;color:var(--sub);display:block}
+.nav-item .nav-status{font-size:1rem;flex-shrink:0}
+.nav-item[data-a="a1"]{--ac:var(--c-a1);--acbg:var(--c-a1bg)}
+.nav-item[data-a="a2"]{--ac:var(--c-a2);--acbg:var(--c-a2bg)}
+.nav-item[data-a="a3"]{--ac:var(--c-a3);--acbg:var(--c-a3bg)}
+.nav-item[data-a="a4"]{--ac:var(--c-a4);--acbg:var(--c-a4bg)}
+.nav-item[data-a="a5"]{--ac:var(--c-a5);--acbg:var(--c-a5bg)}
+.nav-divider{border:none;border-top:1px solid var(--border);margin:6px 0}
+#sidebar .sess-info{padding:12px 14px;margin-top:auto;border-top:1px solid var(--border);font-size:.75rem;color:var(--sub)}
+
+/* MAIN */
+#main{flex:1;overflow-y:auto;padding:20px}
+.screen{display:none}
+.screen.active{display:block}
+
+/* AGENT HEADER */
+.agent-hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 18px;border-radius:var(--radius);color:#fff}
+.agent-hdr.a1{background:linear-gradient(135deg,var(--c-a1),var(--c-a1l))}
+.agent-hdr.a2{background:linear-gradient(135deg,var(--c-a2),var(--c-a2l))}
+.agent-hdr.a3{background:linear-gradient(135deg,var(--c-a3),var(--c-a3l))}
+.agent-hdr.a4{background:linear-gradient(135deg,var(--c-a4),var(--c-a4l))}
+.agent-hdr.a5{background:linear-gradient(135deg,var(--c-a5),var(--c-a5l))}
+.agent-hdr .ahnum{font-size:2rem;font-weight:800;opacity:.5}
+.agent-hdr .ahtxt h2{margin:0;font-size:1.1rem}
+.agent-hdr .ahtxt p{font-size:.8rem;opacity:.85;margin-top:2px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:.85rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* FORMS */
+.frow{margin-bottom:10px}
+.frow label{display:block;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:4px}
+.frow input,.frow select,.frow textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:.85rem;font-family:inherit;color:var(--text);transition:border-color .15s}
+.frow input:focus,.frow select:focus,.frow textarea:focus{outline:none;border-color:#27ae60}
+.frow textarea{resize:vertical;min-height:70px}
+.frow .hint{font-size:.72rem;color:var(--sub);margin-top:3px}
+.frow.inline{display:flex;gap:8px;align-items:flex-end}
+.frow.inline>*{flex:1}
+.frow.inline>.narrow{flex:0 0 90px}
+.required-mark{color:#e74c3c;margin-left:2px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:5px;cursor:pointer;font-size:.82rem;font-weight:600;font-family:inherit;transition:all .15s}
+.btn-primary{background:#1a1a2e;color:#fff}.btn-primary:hover{background:#2c3e50}
+.btn-success{background:#27ae60;color:#fff}.btn-success:hover{background:#1e8449}
+.btn-a1{background:var(--c-a1);color:#fff}.btn-a1:hover{background:#154360}
+.btn-a2{background:var(--c-a2);color:#fff}.btn-a2:hover{background:#145a32}
+.btn-a3{background:var(--c-a3);color:#fff}.btn-a3:hover{background:#7d3c00}
+.btn-a4{background:var(--c-a4);color:#fff}.btn-a4:hover{background:#311b4a}
+.btn-a5{background:var(--c-a5);color:#fff}.btn-a5:hover{background:#5b1917}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--grey)}
+.btn-danger{background:#e74c3c;color:#fff}.btn-danger:hover{background:#c0392b}
+.btn-sm{padding:4px 10px;font-size:.78rem}
+
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:5px;font-size:.82rem;margin-bottom:12px;border-left:3px solid}
+.alert-ok{background:#eafaf1;border-color:#27ae60;color:#1b6b3a}
+.alert-warn{background:#fef9e7;border-color:#f39c12;color:#7d6608}
+.alert-err{background:#fdedec;border-color:#e74c3c;color:#7b241c}
+.alert-info{background:#eaf2fb;border-color:#2e86c1;color:#1a5276}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.badge-ok{background:#eafaf1;color:#1b6b3a}
+.badge-warn{background:#fef9e7;color:#7d6608}
+.badge-err{background:#fdedec;color:#7b241c}
+.badge-info{background:#eaf2fb;color:#1a5276}
+.badge-grey{background:#f0f2f5;color:var(--sub)}
+
+/* LEVEL SELECTOR */
+.level-sel{display:flex;gap:4px;flex-wrap:wrap}
+.level-sel label{cursor:pointer}
+.level-sel input[type=radio]{display:none}
+.level-sel input[type=radio]+span{display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border:2px solid var(--border);border-radius:5px;font-weight:700;font-size:.85rem;transition:all .15s}
+.level-sel input[type=radio]:checked+span{color:#fff;border-color:var(--lc,#333);background:var(--lc,#333)}
+.level-sel.lc-a1 input[type=radio]:checked+span{--lc:var(--c-a1);background:var(--c-a1);border-color:var(--c-a1)}
+.level-sel.lc-a2 input[type=radio]:checked+span{background:var(--c-a2);border-color:var(--c-a2)}
+.level-sel.lc-a4 input[type=radio]:checked+span{background:var(--c-a4);border-color:var(--c-a4)}
+.level-desc{font-size:.7rem;color:var(--sub);margin-top:3px}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px}
+.tab-btn{padding:8px 14px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit}
+.tab-btn.active{color:var(--tc,#333);border-bottom-color:var(--tc,#333)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* COMPETENCY CARD */
+.comp-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.comp-card-hdr{padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--grey)}
+.comp-card-hdr:hover{background:#e8eaed}
+.comp-card-hdr .comp-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;background:var(--sub);flex-shrink:0}
+.comp-card-hdr .comp-name{font-weight:600;font-size:.85rem;flex:1}
+.comp-card-hdr .comp-area{font-size:.7rem;color:var(--sub);padding:2px 7px;background:#fff;border-radius:10px;border:1px solid var(--border)}
+.comp-card-body{padding:12px 14px;background:#fff;border-top:1px solid var(--border);display:none}
+.comp-card-body.open{display:block}
+.questions-hint{background:var(--grey);border-radius:5px;padding:10px 12px;margin-bottom:10px;font-size:.8rem}
+.questions-hint p{margin-bottom:4px;color:var(--sub);font-weight:600;font-size:.72rem;text-transform:uppercase}
+.questions-hint li{margin-left:16px;margin-bottom:4px;line-height:1.4}
+
+/* EVIDENCE LAYOUT */
+#ev-layout{display:grid;grid-template-columns:240px 1fr;gap:14px;min-height:400px}
+#ev-list{border:1px solid var(--border);border-radius:var(--radius);background:#fff;overflow-y:auto}
+#ev-list-header{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ev-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.ev-item:hover{background:var(--grey)}
+.ev-item.selected{background:var(--c-a3bg);border-left:3px solid var(--c-a3)}
+.ev-item .ev-title{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-item .ev-meta{font-size:.7rem;color:var(--sub);margin-top:2px}
+#ev-detail{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;overflow-y:auto}
+
+/* EQVAL */
+.eqval-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.eqval-item{border:1px solid var(--border);border-radius:5px;padding:8px;text-align:center}
+.eqval-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase}
+.eqval-item select{width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.78rem}
+
+/* LEVER 4R */
+.lever-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.lever-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:5px;cursor:pointer}
+.lever-item input[type=checkbox]{margin-top:2px;flex-shrink:0}
+.lever-item .lever-label{font-size:.78rem;font-weight:600}
+.lever-item .lever-desc{font-size:.7rem;color:var(--sub);display:block}
+
+/* ADA CARDS (A4) */
+.ada-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.ada-card-hdr{padding:10px 14px;display:flex;align-items:center;gap:10px;background:var(--grey)}
+.ada-card-code{font-family:monospace;font-size:.8rem;font-weight:700;color:var(--c-a4);background:#fff;padding:2px 8px;border-radius:4px;border:1px solid var(--c-a4bg)}
+.ada-card-desc{flex:1;font-size:.85rem;font-weight:600}
+.ada-card-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700}
+.ada-l1{background:#dfe6e9;color:#2d3436}
+.ada-l2{background:#f5eef8;color:var(--c-a4)}
+.ada-card-body{padding:12px 14px;background:#fff;border-top:1px solid var(--border)}
+
+/* PROGRESSO */
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s;background:var(--pc,#27ae60)}
+
+/* DOC PREVIEW (A5) */
+#doc-preview{background:#fff;border:1px solid #ccc;padding:30px 40px;max-width:800px;margin:0 auto;font-family:'Times New Roman',serif;font-size:13px;line-height:1.5;box-shadow:var(--shadow)}
+#doc-preview h1{font-size:1.1rem;text-align:center;margin-bottom:4px}
+#doc-preview h2{font-size:.95rem;text-align:center;color:var(--sub);margin-bottom:16px}
+#doc-preview .doc-section{margin-bottom:20px}
+#doc-preview .doc-section h3{font-size:.85rem;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:4px;margin-bottom:10px}
+#doc-preview table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:8px}
+#doc-preview th{background:#eee;border:1px solid #ccc;padding:5px 8px;text-align:left;font-size:.75rem}
+#doc-preview td{border:1px solid #ccc;padding:5px 8px;vertical-align:top}
+
+/* WELCOME */
+#screen-welcome{max-width:700px;margin:0 auto;padding:20px 0}
+.welcome-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.welcome-agent{border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;background:#fff;border-left:4px solid var(--wc,#ccc)}
+.welcome-agent:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.welcome-agent[data-a="a1"]{--wc:var(--c-a1)}
+.welcome-agent[data-a="a2"]{--wc:var(--c-a2)}
+.welcome-agent[data-a="a3"]{--wc:var(--c-a3)}
+.welcome-agent[data-a="a4"]{--wc:var(--c-a4)}
+.welcome-agent[data-a="a5"]{--wc:var(--c-a5)}
+.welcome-agent .wa-num{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.welcome-agent .wa-name{font-size:.9rem;font-weight:700;margin:2px 0}
+.welcome-agent .wa-desc{font-size:.75rem;color:var(--sub)}
+
+/* CHECKBOX TOGGLE */
+.check-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.check-item:last-child{border:none}
+.check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;flex-shrink:0}
+.check-item label{font-size:.82rem;cursor:pointer}
+
+/* COMPLINK */
+.comp-link-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.comp-link-tag{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:600;border:1px solid;cursor:pointer;transition:all .15s}
+
+/* ESITO */
+.esito-sel{display:flex;gap:6px;flex-wrap:wrap}
+.esito-sel label{cursor:pointer}
+.esito-sel input[type=radio]{display:none}
+.esito-sel input[type=radio]+span{display:inline-block;padding:4px 12px;border:2px solid var(--border);border-radius:15px;font-size:.78rem;font-weight:600;transition:all .15s}
+.esito-sel input[type=radio][value=accettata]:checked+span{background:#eafaf1;border-color:#27ae60;color:#1b6b3a}
+.esito-sel input[type=radio][value=riserva]:checked+span{background:#fef9e7;border-color:#f39c12;color:#7d6608}
+.esito-sel input[type=radio][value=no]:checked+span{background:#fdedec;border-color:#e74c3c;color:#7b241c}
+
+/* OBIETTIVI */
+.obiettivi-list{counter-reset:obj}
+.obiettivi-list .obj-item{display:flex;gap:8px;align-items:center;margin-bottom:6px;counter-increment:obj}
+.obiettivi-list .obj-item::before{content:counter(obj);min-width:22px;height:22px;border-radius:50%;background:var(--c-a1);color:#fff;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.obiettivi-list .obj-item input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:.82rem;font-family:inherit}
+
+/* STICKY NAV FOOTER */
+.agent-nav-footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* UTIL */
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.mb0{margin-bottom:0}.text-center{text-align:center}
+.text-sub{color:var(--sub);font-size:.8rem}
+.fw{width:100%}
+.flex{display:flex}.gap8{gap:8px}.gap12{gap:12px}.wrap{flex-wrap:wrap}
+.align-center{align-items:center}
+.spacer{flex:1}
+
+@media print{
+  #hdr,#sidebar,#app .agent-nav-footer,#app .agent-hdr .ahnum{display:none}
+  #main{padding:0}
+  #doc-preview{box-shadow:none;border:none}
+}
+
+/* ═══ AGENT TABS + CHAT AI ═══════════════════════════════════ */
+.agent-tab-bar{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;margin-top:4px;flex-shrink:0}
+.atabtn{padding:9px 16px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:color .15s,border-color .15s;white-space:nowrap}
+.atabtn:hover{color:var(--text)}
+.atabtn.atabtn-act{color:var(--atc,var(--text));border-bottom-color:var(--atc,var(--text))}
+.chat-panel{display:flex;flex-direction:column;height:70vh;min-height:380px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.chat-toolbar{padding:11px 14px;border-bottom:1px solid var(--border);background:var(--grey);flex-shrink:0}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#fafbfc}
+.chat-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--grey);flex-shrink:0}
+.chat-msg{display:flex;gap:8px;align-items:flex-start}
+.chat-msg.user{flex-direction:row-reverse}
+.msg-bubble{background:var(--grey);border:1px solid var(--border);border-radius:10px;padding:9px 12px;max-width:86%;font-size:.84rem;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.chat-msg.user .msg-bubble{background:#dbeafe;border-color:#93c5fd}
+.msg-avatar{font-size:1.1rem;flex-shrink:0;margin-top:2px;line-height:1}
+.chat-thinking{text-align:center;color:var(--sub);font-size:.8rem;font-style:italic;padding:8px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="logo">HubS<span>·</span>TransparentIA</div>
+  <div class="sess-name" id="hdr-sess-name">Nessuna sessione caricata</div>
+  <button class="hbtn" onclick="openNewSession()">＋ Nuova</button>
+  <button class="hbtn" onclick="triggerLoad()">📂 Carica</button>
+  <button class="hbtn green" onclick="saveSession()">💾 Salva sessione</button>
+  <input type="file" id="load-input" accept=".json" style="display:none" onchange="loadSession(event)">
+</div>
+
+<div id="app">
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="nav-section">Processo</div>
+  <div class="nav-item" data-a="a1" onclick="showScreen('a1')">
+    <div class="nav-num">1</div>
+    <div class="nav-info">
+      <span class="nav-title">Orientatore</span>
+      <span class="nav-sub">Accoglienza</span>
+    </div>
+    <span class="nav-status" id="ns-a1">○</span>
+  </div>
+  <div class="nav-item" data-a="a2" onclick="showScreen('a2')">
+    <div class="nav-num" style="background:var(--c-a2)">2</div>
+    <div class="nav-info">
+      <span class="nav-title">Stimolatore Riflessivo</span>
+      <span class="nav-sub">Emersione</span>
+    </div>
+    <span class="nav-status" id="ns-a2">○</span>
+  </div>
+  <div class="nav-item" data-a="a3" onclick="showScreen('a3')">
+    <div class="nav-num" style="background:var(--c-a3)">3</div>
+    <div class="nav-info">
+      <span class="nav-title">Costruttore Dossier</span>
+      <span class="nav-sub">Evidenze</span>
+    </div>
+    <span class="nav-status" id="ns-a3">○</span>
+  </div>
+  <div class="nav-item" data-a="a4" onclick="showScreen('a4')">
+    <div class="nav-num" style="background:var(--c-a4)">4</div>
+    <div class="nav-info">
+      <span class="nav-title">Mappatore Normativo</span>
+      <span class="nav-sub">ADA / Atlante</span>
+    </div>
+    <span class="nav-status" id="ns-a4">○</span>
+  </div>
+  <div class="nav-item" data-a="a5" onclick="showScreen('a5')">
+    <div class="nav-num" style="background:var(--c-a5)">5</div>
+    <div class="nav-info">
+      <span class="nav-title">Redattore</span>
+      <span class="nav-sub">Documento finale</span>
+    </div>
+    <span class="nav-status" id="ns-a5">○</span>
+  </div>
+  <hr class="nav-divider">
+  <div class="nav-item" onclick="showScreen('welcome')">
+    <div class="nav-num" style="background:#95a5a6">🏠</div>
+    <div class="nav-info"><span class="nav-title">Dashboard</span></div>
+  </div>
+  <div class="sess-info" id="sidebar-sess-info">Sessione non salvata</div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div style="max-width:680px;margin:0 auto">
+    <h2>🎯 HubS-TransparentIA</h2>
+    <p class="text-sub" style="margin-bottom:16px">Sistema di supporto alla messa in trasparenza delle competenze dei volontari — DI 31 luglio 2025</p>
+    <div id="welcome-alert"></div>
+    <div class="welcome-grid">
+      <div class="welcome-agent" data-a="a1" onclick="showScreen('a1')">
+        <div class="wa-num">Agente 1</div>
+        <div class="wa-name">Orientatore</div>
+        <div class="wa-desc">Dati volontario, verifica 60h, Patto di Servizio</div>
+      </div>
+      <div class="welcome-agent" data-a="a2" onclick="showScreen('a2')">
+        <div class="wa-num">Agente 2</div>
+        <div class="wa-name">Stimolatore Riflessivo</div>
+        <div class="wa-desc">Domande Youthpass, autovalutazione EU8/DigComp/LifeComp/EntreComp</div>
+      </div>
+      <div class="welcome-agent" data-a="a3" onclick="showScreen('a3')">
+        <div class="wa-num">Agente 3</div>
+        <div class="wa-name">Costruttore del Dossier</div>
+        <div class="wa-desc">Evidenze, criteri eQval (17), Lever Up 4R</div>
+      </div>
+      <div class="welcome-agent" data-a="a4" onclick="showScreen('a4')">
+        <div class="wa-num">Agente 4</div>
+        <div class="wa-name">Mappatore Normativo</div>
+        <div class="wa-desc">Competenze → ADA Atlante del Lavoro INAPP</div>
+      </div>
+      <div class="welcome-agent" data-a="a5" onclick="showScreen('a5')" style="grid-column:1/-1">
+        <div class="wa-num">Agente 5</div>
+        <div class="wa-name">Redattore di Trasparenza</div>
+        <div class="wa-desc">Documento di Trasparenza conforme Allegato A — DI 5 gennaio 2021 — export DOCX + PDF</div>
+      </div>
+    </div>
+    <div class="card mt16">
+      <div class="card-title">Avvio sessione</div>
+      <div class="frow">
+        <label>Nome sessione (es. nome volontario)</label>
+        <input type="text" id="ws-name" placeholder="Es. Mario Rossi — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
+      </div>
+      <button class="btn btn-success" onclick="startSession()">▶ Avvia nuova sessione</button>
+      &nbsp;
+      <button class="btn btn-outline" onclick="triggerLoad()">📂 Carica sessione esistente (.json)</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGENTE 1 -->
+<div id="screen-a1" class="screen">
+  <div class="agent-hdr a1">
+    <div class="ahnum">01</div>
+    <div class="ahtxt">
+      <h2>Orientatore</h2>
+      <p>Raccolta dati volontario · Verifica requisiti DI 31/07/2025 · Bozza Patto di Servizio</p>
+    </div>
+  </div>
+  <div id="a1-alert"></div>
+  <div class="grid2">
+    <!-- COLONNA SINISTRA: volontario + ente -->
+    <div>
+      <div class="card">
+        <div class="card-title">Dati del Volontario</div>
+        <div class="frow inline">
+          <div><label>Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome"></div>
+          <div><label>Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome"></div>
+        </div>
+        <div class="frow inline">
+          <div><label>Data di nascita</label><input type="date" id="a1-vol-dob"></div>
+          <div><label>Luogo di nascita</label><input type="text" id="a1-vol-luogoNascita"></div>
+        </div>
+        <div class="frow"><label>Codice Fiscale</label><input type="text" id="a1-vol-cf" maxlength="16" style="text-transform:uppercase"></div>
+        <div class="frow"><label>Residenza</label><input type="text" id="a1-vol-residenza" placeholder="Via, Città, CAP"></div>
+        <div class="frow inline">
+          <div><label>Cittadinanza</label><input type="text" id="a1-vol-cittadinanza" value="Italia"></div>
+          <div><label>Titolo di studio</label>
+            <select id="a1-vol-titoloStudio">
+              <option value="">— seleziona —</option>
+              <option>Licenza media</option>
+              <option>Diploma secondario superiore</option>
+              <option>Laurea triennale</option>
+              <option>Laurea magistrale</option>
+              <option>Dottorato</option>
+              <option>Altro</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <label>Situazione occupazionale</label>
+          <select id="a1-vol-occupazione">
+            <option value="">— seleziona —</option>
+            <option>Occupato/a</option>
+            <option>Disoccupato/a</option>
+            <option>Studente</option>
+            <option>NEET</option>
+            <option>Pensionato/a</option>
+            <option>Altro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Ente di Accoglienza</div>
+        <div class="frow"><label>Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione"></div>
+        <div class="frow inline">
+          <div><label>Codice Fiscale ente</label><input type="text" id="a1-ente-cfEnte"></div>
+          <div><label>Tipologia</label>
+            <select id="a1-ente-tipo">
+              <option value="">— seleziona —</option>
+              <option>APS</option>
+              <option>ODV</option>
+              <option>Cooperativa sociale</option>
+              <option>ETS altro</option>
+              <option>CSV</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow"><label>Indirizzo sede legale</label><input type="text" id="a1-ente-indirizzo"></div>
+        <div class="frow"><label>Rappresentante legale</label><input type="text" id="a1-ente-repLegale"></div>
+        <div class="frow"><label>Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor"></div>
+        <div class="frow"><label>Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
+      </div>
+    </div>
+
+    <!-- COLONNA DESTRA: percorso + requisiti -->
+    <div>
+      <div class="card">
+        <div class="card-title">Dati del Percorso</div>
+        <div class="frow"><label>Descrizione attività svolta</label><textarea id="a1-percorso-attivita" rows="2" placeholder="Descrivi brevemente le attività di volontariato svolte..."></textarea></div>
+        <div class="frow"><label>Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
+        <div class="frow"><label>Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
+        <div class="frow inline">
+          <div><label>Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()"></div>
+          <div><label>Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
+        </div>
+        <div class="frow inline">
+          <div class="narrow"><label>Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()"></div>
+          <div class="narrow"><label>Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()"></div>
+          <div><label>% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700"></div>
+        </div>
+        <div id="a1-presenza-alert"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Verifica Requisiti Minimi — Art. 5 DI 31/07/2025</div>
+        <div id="a1-req-60h-alert"></div>
+        <div class="check-item"><input type="checkbox" id="a1-req-primaInfo"><label for="a1-req-primaInfo">Prima informazione fornita e firmata</label></div>
+        <div class="check-item"><input type="checkbox" id="a1-req-progetto"><label for="a1-req-progetto">Progetto personalizzato firmato da entrambe le parti</label></div>
+        <div class="check-item"><input type="checkbox" id="a1-req-tutoraggio"><label for="a1-req-tutoraggio">Attività di tutoraggio attiva (min. 3 colloqui)</label></div>
+        <div class="check-item"><input type="checkbox" id="a1-req-doc"><label for="a1-req-doc">Documento di Trasparenza predisposto (questo sistema)</label></div>
+        <div id="a1-req-status" class="mt8"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Obiettivi di apprendimento iniziali</div>
+        <div class="obiettivi-list" id="a1-obiettivi-list">
+          <div class="obj-item"><input type="text" id="a1-obj-0" placeholder="Obiettivo 1..."></div>
+          <div class="obj-item"><input type="text" id="a1-obj-1" placeholder="Obiettivo 2..."></div>
+          <div class="obj-item"><input type="text" id="a1-obj-2" placeholder="Obiettivo 3..."></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Note del tutor (fase di accoglienza)</div>
+        <div class="frow mb0"><textarea id="a1-note" rows="3" placeholder="Osservazioni iniziali, motivazioni emerse, contesto..."></textarea></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Bozza Patto di Servizio</div>
+        <button class="btn btn-a1 btn-sm" onclick="generatePatto()">⚙ Genera testo</button>
+        <div class="mt8"><textarea id="a1-patto" rows="12" style="font-family:monospace;font-size:.78rem;width:100%;padding:8px;border:1px solid var(--border);border-radius:5px" placeholder="Clicca 'Genera testo' per compilare automaticamente..."></textarea></div>
+      </div>
+    </div>
+  </div>
+  <div class="agent-nav-footer">
+    <button class="btn btn-outline" onclick="showScreen('welcome')">← Dashboard</button>
+    <div class="flex gap8">
+      <button class="btn btn-a1" onclick="collectA1();alert('Dati salvati nella sessione')">💾 Salva dati</button>
+      <button class="btn btn-a2" onclick="collectA1();showScreen('a2')">Agente 2: Stimolatore →</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGENTE 2 -->
+<div id="screen-a2" class="screen">
+  <div class="agent-hdr a2">
+    <div class="ahnum">02</div>
+    <div class="ahtxt">
+      <h2>Stimolatore Riflessivo</h2>
+      <p>Domande guida Youthpass · Autovalutazione EU8 · DigComp · LifeComp · EntreComp</p>
+    </div>
+  </div>
+  <div class="card" style="background:#eafaf1;border-color:#27ae60">
+    <p style="font-size:.82rem;color:#1b6b3a">💡 <strong>Come usare questo agente:</strong> Per ciascuna competenza, espandi il pannello, usa le <em>domande guida</em> per condurre il colloquio Youthpass con il volontario, prendi note nel campo apposito e seleziona il livello di padronanza osservato (1–4).</p>
+  </div>
+  <div class="tabs" id="a2-tabs">
+    <button class="tab-btn active" style="--tc:var(--c-a1)" onclick="switchA2Tab('eu8',this)">8 Competenze Chiave EU</button>
+    <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA2Tab('digcomp',this)">DigComp 2.2</button>
+    <button class="tab-btn" style="--tc:var(--c-a2)" onclick="switchA2Tab('lifecomp',this)">LifeComp</button>
+    <button class="tab-btn" style="--tc:var(--c-a3)" onclick="switchA2Tab('entrecomp',this)">EntreComp</button>
+    <button class="tab-btn" style="--tc:#7d3c00" onclick="switchA2Tab('riflessione',this)">Riflessione globale</button>
+  </div>
+  <div id="a2-tab-eu8" class="tab-pane active"></div>
+  <div id="a2-tab-digcomp" class="tab-pane"></div>
+  <div id="a2-tab-lifecomp" class="tab-pane"></div>
+  <div id="a2-tab-entrecomp" class="tab-pane"></div>
+  <div id="a2-tab-riflessione" class="tab-pane">
+    <div class="card">
+      <div class="card-title">Riflessione globale sull'esperienza (Learning Outcomes)</div>
+      <div class="frow">
+        <label>Le 3 cose più importanti imparate durante il percorso</label>
+        <div class="obiettivi-list">
+          <div class="obj-item"><input type="text" id="a2-rifl-top0" placeholder="Prima cosa..."></div>
+          <div class="obj-item"><input type="text" id="a2-rifl-top1" placeholder="Seconda cosa..."></div>
+          <div class="obj-item"><input type="text" id="a2-rifl-top2" placeholder="Terza cosa..."></div>
+        </div>
+      </div>
+      <div class="frow"><label>Momento più difficile e come è stato affrontato</label><textarea id="a2-rifl-difficolta" rows="3"></textarea></div>
+      <div class="frow"><label>Cosa è cambiato nel modo di vedere se stessi o il mondo</label><textarea id="a2-rifl-cambiamento" rows="3"></textarea></div>
+      <div class="frow"><label>Competenze che intende usare nel lavoro / nella vita futura</label><textarea id="a2-rifl-lavoro" rows="3"></textarea></div>
+    </div>
+  </div>
+  <div class="agent-nav-footer">
+    <button class="btn btn-outline" onclick="collectA2();showScreen('a1')">← Agente 1</button>
+    <div class="flex gap8">
+      <button class="btn btn-a2" onclick="collectA2();alert('Dati salvati')">💾 Salva dati</button>
+      <button class="btn btn-a3" onclick="collectA2();showScreen('a3')">Agente 3: Dossier →</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGENTE 3 -->
+<div id="screen-a3" class="screen">
+  <div class="agent-hdr a3">
+    <div class="ahnum">03</div>
+    <div class="ahtxt">
+      <h2>Costruttore del Dossier</h2>
+      <p>Analisi e validazione evidenze · eQval Standard 17 · Lever Up Matrice 4R</p>
+    </div>
+  </div>
+  <div id="a3-alert"></div>
+  <div id="ev-layout">
+    <div id="ev-list">
+      <div id="ev-list-header">
+        <span style="font-size:.8rem;font-weight:700">Evidenze (<span id="ev-count">0</span>)</span>
+        <button class="btn btn-a3 btn-sm" onclick="addEvidenza()">＋ Aggiungi</button>
+      </div>
+      <div id="ev-list-body"></div>
+    </div>
+    <div id="ev-detail">
+      <p class="text-sub text-center" style="padding:40px 0" id="ev-placeholder">Seleziona un'evidenza dalla lista o aggiungine una nuova.</p>
+      <div id="ev-form" style="display:none"></div>
+    </div>
+  </div>
+  <div class="agent-nav-footer">
+    <button class="btn btn-outline" onclick="showScreen('a2')">← Agente 2</button>
+    <div class="flex gap8">
+      <button class="btn btn-a3" onclick="alert('Dati salvati nella sessione')">💾 Salva dati</button>
+      <button class="btn btn-a4" onclick="showScreen('a4')">Agente 4: Mappatura →</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGENTE 4 -->
+<div id="screen-a4" class="screen">
+  <div class="agent-hdr a4">
+    <div class="ahnum">04</div>
+    <div class="ahtxt">
+      <h2>Mappatore Normativo</h2>
+      <p>Competenze → ADA Atlante del Lavoro INAPP · L1 DigComp (deterministico) · L2 SEP18 (inferenziale)</p>
+    </div>
+  </div>
+  <div id="a4-steps">
+    <div class="tabs">
+      <button class="tab-btn active" style="--tc:var(--c-a4)" onclick="switchA4Step(1,this)">1. Seleziona competenze</button>
+      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(2,this)">2. Riepilogo</button>
+      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(3,this)">3. Valida mappatura</button>
+      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(4,this)">4. Export</button>
+    </div>
+    <div id="a4-step-1" class="tab-pane active"></div>
+    <div id="a4-step-2" class="tab-pane"></div>
+    <div id="a4-step-3" class="tab-pane"></div>
+    <div id="a4-step-4" class="tab-pane"></div>
+  </div>
+  <div class="agent-nav-footer">
+    <button class="btn btn-outline" onclick="showScreen('a3')">← Agente 3</button>
+    <button class="btn btn-a5" onclick="showScreen('a5')">Agente 5: Documento finale →</button>
+  </div>
+</div>
+
+<!-- AGENTE 5 -->
+<div id="screen-a5" class="screen">
+  <div class="agent-hdr a5">
+    <div class="ahnum">05</div>
+    <div class="ahtxt">
+      <h2>Redattore di Trasparenza</h2>
+      <p>Documento di Trasparenza conforme Allegato A — DI 5 gennaio 2021 — GDPR 2016/679</p>
+    </div>
+  </div>
+  <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-a5" onclick="renderDocPreview()">🔄 Aggiorna anteprima</button>
+    <button class="btn btn-a5" onclick="downloadDocx()">📄 Scarica DOCX (Word)</button>
+    <button class="btn btn-outline" onclick="downloadPdf()">🖨 Stampa / PDF</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Note del tutor (documento finale)</div>
+    <div class="frow mb0"><textarea id="a5-notetutor" rows="3" placeholder="Osservazioni conclusive sull'esperienza e sullo sviluppo del volontario..."></textarea></div>
+  </div>
+  <div id="doc-preview-container"></div>
+  <div class="agent-nav-footer">
+    <button class="btn btn-outline" onclick="showScreen('a4')">← Agente 4</button>
+    <button class="btn btn-success" onclick="saveSession()">💾 Salva sessione completa</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const EU8 = [
+  {id:'eu1',nome:'Comunicazione in madrelingua',area:'EU',
+   domande:['Hai dovuto spiegare le tue attività di volontariato a qualcuno (utenti, famiglie, enti)? Come lo hai fatto?','Hai scritto testi, report, email o materiali durante l\'esperienza? Che tipo?','C\'è stato un momento in cui comunicare era particolarmente difficile? Come l\'hai gestito?']},
+  {id:'eu2',nome:'Comunicazione in lingue straniere',area:'EU',
+   domande:['Hai avuto occasione di usare una lingua straniera nel volontariato? In quale contesto?','Come ti sei sentito/a nel comunicare in un\'altra lingua? Cosa hai imparato?']},
+  {id:'eu3',nome:'Competenza matematica e scientifico-tecnologica',area:'EU',
+   domande:['Hai usato dati, numeri o statistiche nel tuo lavoro? (rendicontazione, raccolta dati, statistiche utenti)','Hai gestito budget, risorse materiali o fatto calcoli? Come?']},
+  {id:'eu4',nome:'Competenza digitale',area:'EU',skip:true,
+   domande:['→ Approfondisci nella scheda DigComp 2.2 (tab dedicato)']},
+  {id:'eu5',nome:'Imparare ad imparare',area:'EU',
+   domande:['Qual è la cosa più importante che hai imparato? Come è avvenuto questo apprendimento?','C\'era qualcosa che all\'inizio non sapevi fare e ora sai fare? Descrivi il percorso.','Come organizzi il tuo apprendimento? Cosa funziona meglio per te?']},
+  {id:'eu6',nome:'Competenze sociali e civiche',area:'EU',
+   domande:['Come hai lavorato con il team (colleghi, responsabili, utenti)? Descrivi il tuo ruolo nel gruppo.','C\'è stato un momento di tensione o conflitto? Come lo hai gestito?','Come pensi che il tuo volontariato contribuisca alla comunità in cui operi?']},
+  {id:'eu7',nome:'Spirito di iniziativa e imprenditorialità',area:'EU',
+   domande:['Hai avuto idee o proposte che hai portato avanti? Descrivi un esempio concreto.','C\'è stata una situazione in cui hai preso l\'iniziativa senza aspettare istruzioni?','Cosa ti motiva? Come mantieni la motivazione nei momenti difficili?']},
+  {id:'eu8',nome:'Consapevolezza ed espressione culturale',area:'EU',
+   domande:['Hai incontrato persone con culture, background o prospettive diverse dalle tue? Com\'è stata l\'esperienza?','C\'è qualcosa di questa esperienza che ha cambiato il tuo modo di vedere la diversità?']}
+];
+
+const DIGCOMP = [
+  {id:'dc1',nome:'Informazione e dati',area:'Area 1',ada:'ADA.QE.01.01',
+   domanda:'Descrivi come cerchi, valuti e gestisci le informazioni digitali nel tuo lavoro di volontario.'},
+  {id:'dc2',nome:'Comunicazione e collaborazione',area:'Area 2',ada:'ADA.QE.01.02',
+   domanda:'Quali strumenti digitali usi per comunicare e collaborare? (email, chat, drive, videoconferenze, social)'},
+  {id:'dc3',nome:'Creazione di contenuti digitali',area:'Area 3',ada:'ADA.QE.01.03',
+   domanda:'Hai creato contenuti digitali? (presentazioni, post, documenti, video, grafica, moduli)'},
+  {id:'dc4',nome:'Sicurezza digitale',area:'Area 4',ada:'ADA.QE.01.04',
+   domanda:'Come gestisci la privacy e la sicurezza dei dati delle persone con cui lavori?'},
+  {id:'dc5',nome:'Risoluzione di problemi',area:'Area 5',ada:'ADA.QE.01.05',
+   domanda:'Hai risolto problemi tecnici con i dispositivi digitali? Racconta un esempio pratico.'}
+];
+
+const LIFECOMP = [
+  {id:'lc1',nome:'Gestione delle emozioni',area:'Personale',domanda:'Come gestisci lo stress e le situazioni emotivamente difficili durante il volontariato?'},
+  {id:'lc2',nome:'Flessibilità e adattamento',area:'Personale',domanda:'C\'è stata una situazione inaspettata a cui hai dovuto adattarti rapidamente? Come?'},
+  {id:'lc3',nome:'Benessere e cura di sé',area:'Personale',domanda:'Come mantieni l\'equilibrio tra il volontariato e il tuo benessere personale?'},
+  {id:'lc4',nome:'Empatia',area:'Sociale',domanda:'C\'è stato un momento in cui hai dovuto metterti nei panni di qualcun altro? Descrivi.'},
+  {id:'lc5',nome:'Comunicazione interpersonale',area:'Sociale',domanda:'Come adatti il tuo modo di comunicare alle diverse persone (utenti vulnerabili, colleghi, responsabili)?'},
+  {id:'lc6',nome:'Collaborazione',area:'Sociale',domanda:'Descrivi come collabori con il team. Qual è il tuo ruolo tipico in un gruppo di lavoro?'},
+  {id:'lc7',nome:'Crescita continua',area:'Imparare ad imparare',domanda:'Quali nuove competenze hai sviluppato? Come continui a crescere professionalmente e personalmente?'},
+  {id:'lc8',nome:'Pensiero critico',area:'Imparare ad imparare',domanda:'Hai mai messo in discussione un\'idea o un approccio nel tuo lavoro di volontario? Racconta.'},
+  {id:'lc9',nome:'Gestione dell\'apprendimento',area:'Imparare ad imparare',domanda:'Come organizzi e valuti il tuo apprendimento? Usi strategie o strumenti specifici?'}
+];
+
+const ENTRECOMP = [
+  {id:'ec1',nome:'Creatività e generazione di idee',area:'Ideas & Opportunities',domanda:'Hai proposto soluzioni nuove o creative a problemi incontrati nel volontariato? Descrivi.'},
+  {id:'ec2',nome:'Pensiero strategico e visione',area:'Ideas & Opportunities',domanda:'Hai una visione di come migliorare le attività dell\'organizzazione? Cosa vorresti cambiare o sviluppare?'},
+  {id:'ec3',nome:'Motivazione e perseveranza',area:'Resources',domanda:'Cosa ti spinge a continuare anche quando è difficile? Come mantieni la perseveranza?'},
+  {id:'ec4',nome:'Mobilitare risorse',area:'Resources',domanda:'Hai mai cercato o coordinato risorse (materiali, persone, informazioni) per realizzare qualcosa?'},
+  {id:'ec5',nome:'Iniziativa e azione',area:'Into Action',domanda:'Descrivi una volta in cui hai trasformato un\'idea in un\'azione concreta, dall\'inizio alla fine.'},
+  {id:'ec6',nome:'Pianificazione e gestione',area:'Into Action',domanda:'Come pianifichi e organizzi il tuo lavoro? Usi strumenti o metodi specifici?'},
+  {id:'ec7',nome:'Lavorare con gli altri',area:'Into Action',domanda:'Come coinvolgi altri in un progetto? Come gestisci la collaborazione verso un obiettivo comune?'}
+];
+
+const ADA_DB = {
+  // L1 — Mapping deterministico DigComp 2.2 (fonte: GOL/EDO Regione Calabria n.15242/2025)
+  'ADA.QE.01.01':{code:'ADA.QE.01.01',desc:'Ricerca e gestione di informazioni, dati e contenuti digitali',sep:'QE.01',lvl:'L1',fw:'DigComp 2.2 — Area 1',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=1033',links:['dc1'],ra:[{code:'RA.QE.01.01.1',desc:'Realizzare ricerche di contenuti online usando metodi e strumenti appropriati'},{code:'RA.QE.01.01.2',desc:'Valutare e confrontare dati, informazioni e fonti digitali'},{code:'RA.QE.01.01.3',desc:'Gestire dati e informazioni in modo sicuro e organizzato'}]},
+  'ADA.QE.01.02':{code:'ADA.QE.01.02',desc:'Comunicazione e collaborazione tramite tecnologie digitali',sep:'QE.01',lvl:'L1',fw:'DigComp 2.2 — Area 2',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=1035',links:['dc2'],ra:[{code:'RA.QE.01.02.1',desc:'Usare piattaforme e strumenti di comunicazione digitale'},{code:'RA.QE.01.02.2',desc:'Collaborare tramite strumenti condivisi online'},{code:'RA.QE.01.02.3',desc:'Applicare netiquette e buone pratiche nella comunicazione digitale'}]},
+  'ADA.QE.01.03':{code:'ADA.QE.01.03',desc:'Creazione di contenuti digitali',sep:'QE.01',lvl:'L1',fw:'DigComp 2.2 — Area 3',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=1036',links:['dc3'],ra:[{code:'RA.QE.01.03.1',desc:'Creare e modificare documenti, presentazioni e contenuti digitali'},{code:'RA.QE.01.03.2',desc:'Produrre contenuti multimediali (immagini, video, audio)'},{code:'RA.QE.01.03.3',desc:'Rispettare licenze e diritti d\'autore nella produzione digitale'}]},
+  'ADA.QE.01.04':{code:'ADA.QE.01.04',desc:'Protezione e sicurezza nell\'ambiente digitale',sep:'QE.01',lvl:'L1',fw:'DigComp 2.2 — Area 4',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=1037',links:['dc4'],ra:[{code:'RA.QE.01.04.1',desc:'Proteggere dispositivi e dati personali da accessi non autorizzati'},{code:'RA.QE.01.04.2',desc:'Tutelare la privacy propria e delle persone con cui si lavora'},{code:'RA.QE.01.04.3',desc:'Identificare minacce digitali e reagire in modo adeguato'}]},
+  'ADA.QE.01.05':{code:'ADA.QE.01.05',desc:'Identificazione e risoluzione di problemi tecnici con strumenti digitali',sep:'QE.01',lvl:'L1',fw:'DigComp 2.2 — Area 5',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=1039',links:['dc5'],ra:[{code:'RA.QE.01.05.1',desc:'Diagnosticare e risolvere problemi tecnici comuni'},{code:'RA.QE.01.05.2',desc:'Applicare soluzioni o richiedere il supporto tecnico appropriato'},{code:'RA.QE.01.05.3',desc:'Aggiornare e manutenere strumenti e applicazioni digitali'}]},
+  // L2 — Mapping inferenziale SEP n.18 INAPP (ex ADA.23.xxx.xxx — URL ufficiali Atlante del Lavoro)
+  'ADA.18.01.06':{code:'ADA.18.01.06',desc:'Accoglienza e guida ai servizi per l\'occupabilità e l\'apprendimento permanente',sep:'SEP18',lvl:'L2',fw:'EU6/LifeComp Sociale',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=579&id_sequenza=179&id_processo=63',links:['eu6','lc5','lc4'],ra:[{code:'RA.18.01.06.1',desc:'Accogliere l\'utente e raccogliere informazioni sul bisogno espresso'},{code:'RA.18.01.06.2',desc:'Fornire informazioni chiare e orientamento ai servizi disponibili'},{code:'RA.18.01.06.3',desc:'Compilare schede di primo contatto e rilevazione del bisogno'}]},
+  'ADA.18.01.07':{code:'ADA.18.01.07',desc:'Orientamento informativo',sep:'SEP18',lvl:'L2',fw:'EU1/LifeComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=580&id_sequenza=179&id_processo=63',links:['eu1','lc5'],ra:[{code:'RA.18.01.07.1',desc:'Gestire archivi documentali e pratiche di servizio'},{code:'RA.18.01.07.2',desc:'Supportare la segreteria nell\'organizzazione e smistamento delle attività'}]},
+  'ADA.18.01.08':{code:'ADA.18.01.08',desc:'Analisi della domanda e definizione del patto di servizio',sep:'SEP18',lvl:'L2',fw:'EU5/EntreComp Into Action',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=581&id_sequenza=179&id_processo=63',links:['eu5','ec5','ec6'],ra:[{code:'RA.18.01.08.1',desc:'Collaborare alla preparazione di materiali e strumenti didattici'},{code:'RA.18.01.08.2',desc:'Supportare la conduzione di laboratori e attività formative'},{code:'RA.18.01.08.3',desc:'Raccogliere feedback sull\'efficacia delle attività formative realizzate'}]},
+  'ADA.18.01.09':{code:'ADA.18.01.09',desc:'Consulenza orientativa e bilancio di competenze',sep:'SEP18',lvl:'L2',fw:'LifeComp Sociale/EntreComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=582&id_sequenza=180&id_processo=63',links:['lc4','lc6','ec7'],ra:[{code:'RA.18.01.09.1',desc:'Facilitare dinamiche di gruppo e processi partecipativi'},{code:'RA.18.01.09.2',desc:'Promuovere coesione e collaborazione nel gruppo'},{code:'RA.18.01.09.3',desc:'Gestire conflitti e situazioni di tensione nel contesto di gruppo'}]},
+  'ADA.18.01.10':{code:'ADA.18.01.10',desc:'Supporto e accompagnamento alle transizioni e all\'inserimento lavorativo',sep:'SEP18',lvl:'L2',fw:'EU6/LifeComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=583&id_sequenza=180&id_processo=63',links:['eu6','lc4','lc1'],ra:[{code:'RA.18.01.10.1',desc:'Identificare bisogni e situazioni di marginalità sociale'},{code:'RA.18.01.10.2',desc:'Attivare reti di supporto e risorse disponibili nel territorio'},{code:'RA.18.01.10.3',desc:'Accompagnare percorsi di reinserimento e inclusione sociale'}]},
+  'ADA.18.01.11':{code:'ADA.18.01.11',desc:'Personalizzazione degli interventi formativi',sep:'SEP18',lvl:'L2',fw:'EU3/EntreComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=584&id_sequenza=181&id_processo=63',links:['eu3','ec4','ec6'],ra:[{code:'RA.18.01.11.1',desc:'Raccogliere dati di partecipazione e indicatori di impatto'},{code:'RA.18.01.11.2',desc:'Compilare report periodici sull\'andamento delle attività'},{code:'RA.18.01.11.3',desc:'Presentare i dati ai referenti organizzativi o agli stakeholder'}]},
+  'ADA.18.01.12':{code:'ADA.18.01.12',desc:'Coordinamento operativo delle attività formative',sep:'SEP18',lvl:'L2',fw:'EU1/DigComp/EntreComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=585&id_sequenza=181&id_processo=63',links:['eu1','dc2','ec1'],ra:[{code:'RA.18.01.12.1',desc:'Produrre contenuti comunicativi per diversi canali (social, newsletter, stampa)'},{code:'RA.18.01.12.2',desc:'Gestire comunicazioni con stakeholder, partner e comunità'}]},
+  'ADA.18.01.13':{code:'ADA.18.01.13',desc:'Erogazione delle attività didattiche',sep:'SEP18',lvl:'L2',fw:'EU6/EU8/EntreComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=586&id_sequenza=181&id_processo=63',links:['eu6','eu8','ec1'],ra:[{code:'RA.18.01.13.1',desc:'Organizzare eventi e iniziative di sensibilizzazione'},{code:'RA.18.01.13.2',desc:'Produrre materiali informativi su tematiche sociali rilevanti'},{code:'RA.18.01.13.3',desc:'Coinvolgere la comunità locale in iniziative di advocacy e partecipazione'}]},
+  'ADA.18.01.14':{code:'ADA.18.01.14',desc:'Tutoraggio in apprendimento',sep:'SEP18',lvl:'L2',fw:'EntreComp Resources',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=587&id_sequenza=181&id_processo=63',links:['ec4','ec6'],ra:[{code:'RA.18.01.14.1',desc:'Gestire materiali, attrezzature e risorse logistiche'},{code:'RA.18.01.14.2',desc:'Supportare la pianificazione operativa e l\'organizzazione dei servizi'}]},
+  'ADA.18.01.15':{code:'ADA.18.01.15',desc:'Tutoraggio in apprendimento a distanza (e-tutoring)',sep:'SEP18',lvl:'L2',fw:'EU5/LifeComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=588&id_sequenza=181&id_processo=63',links:['eu5','lc5','lc7'],ra:[{code:'RA.18.01.15.1',desc:'Supportare i pari nell\'acquisizione di conoscenze e competenze'},{code:'RA.18.01.15.2',desc:'Facilitare l\'apprendimento attraverso la relazione e l\'esempio'},{code:'RA.18.01.15.3',desc:'Monitorare i progressi e fornire feedback costruttivi e motivanti'}]},
+  'ADA.18.01.16':{code:'ADA.18.01.16',desc:'Valutazione degli apprendimenti',sep:'SEP18',lvl:'L2',fw:'EntreComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=589&id_sequenza=181&id_processo=63',links:['ec1','ec2','ec5','ec7'],ra:[{code:'RA.18.01.16.1',desc:'Partecipare a processi di co-progettazione con la comunità'},{code:'RA.18.01.16.2',desc:'Sviluppare idee e proposte progettuali in modo collaborativo'},{code:'RA.18.01.16.3',desc:'Presentare e difendere proposte progettuali ai decisori'}]},
+  'ADA.18.01.17':{code:'ADA.18.01.17',desc:'Supporto all\'individuazione e alla messa in trasparenza delle competenze',sep:'SEP18',lvl:'L2',fw:'EU5/EU6/LifeComp',url:'https://atlantelavoro.inapp.org/dettaglio_ada.php?id_ada=590&id_sequenza=182&id_processo=63',links:['eu5','eu6','lc7','lc8'],ra:[{code:'RA.18.01.17.1',desc:'Supportare il processo di autovalutazione delle competenze del volontario'},{code:'RA.18.01.17.2',desc:'Facilitare la riflessione sull\'esperienza di volontariato come fonte di apprendimento'},{code:'RA.18.01.17.3',desc:'Contribuire alla costruzione del portfolio documentale delle evidenze'}]}
+};
+
+// Reverse lookup: comp id -> [ada keys]
+const COMP_TO_ADA = {};
+Object.values(ADA_DB).forEach(ada => {
+  (ada.links||[]).forEach(cid => {
+    if(!COMP_TO_ADA[cid]) COMP_TO_ADA[cid]=[];
+    COMP_TO_ADA[cid].push(ada.code);
+  });
+});
+
+// ============================================================
+// STATE
+// ============================================================
+const DEFAULT_SESSION = {
+  meta:{created:null,modified:null,version:'2.0',name:''},
+  a1:{
+    vol:{nome:'',cognome:'',cf:'',dob:'',luogoNascita:'',residenza:'',cittadinanza:'Italia',titoloStudio:'',occupazione:''},
+    ente:{denominazione:'',cfEnte:'',tipo:'',indirizzo:'',repLegale:'',tutor:'',codice:''},
+    percorso:{dataInizio:'',dataFine:'',orePreviste:60,oreSvolte:0,settore:'',attivita:'',luogo:''},
+    req:{primaInfo:false,progetto:false,tutoraggio:false,doc:false},
+    obiettivi:['','',''],
+    note:'',patto:''
+  },
+  a2:{
+    eu:{},  // {eu1:{livello:0,note:''}, ...}
+    dc:{},  // {dc1:{livello:0,note:''}, ...}
+    lc:{},  // {lc1:{livello:0,note:''}, ...}
+    ec:{},  // {ec1:{livello:0,note:''}, ...}
+    rifl:{top:['','',''],difficolta:'',cambiamento:'',lavoro:''}
+  },
+  a3:{evidenze:[]},
+  a4:{selections:{},mappings:{}},
+  a5:{notetutor:'',dataChiusura:''}
+};
+
+let S = JSON.parse(JSON.stringify(DEFAULT_SESSION));
+let currentScreen = 'welcome';
+let selectedEvidenza = null;
+let a4ActiveStep = 1;
+let a2ActiveTab = 'eu8';
+
+// ============================================================
+// HELPERS
+// ============================================================
+const el = id => document.getElementById(id);
+const qs = (sel,ctx) => (ctx||document).querySelector(sel);
+
+function setVal(id, v) { const e=el(id); if(e){ if(e.type==='checkbox') e.checked=!!v; else e.value=v||''; } }
+function getVal(id) { const e=el(id); if(!e) return ''; if(e.type==='checkbox') return e.checked; return e.value||''; }
+
+function showAlert(containerId, msg, type='info') {
+  const c=el(containerId); if(!c) return;
+  c.innerHTML = msg ? `<div class="alert alert-${type}">${msg}</div>` : '';
+}
+
+function today() {
+  return new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+// ============================================================
+// SESSION MANAGEMENT
+// ============================================================
+function openNewSession() {
+  if(S.meta.name && !confirm('Avviare una nuova sessione? I dati non salvati andranno persi.')) return;
+  S = JSON.parse(JSON.stringify(DEFAULT_SESSION));
+  S.meta.created = new Date().toISOString();
+  const n = el('ws-name'); if(n) S.meta.name = n.value || '';
+  populateAll();
+  updateSidebar();
+  showScreen('a1');
+}
+
+function startSession() {
+  const n = el('ws-name');
+  S.meta.name = (n && n.value) ? n.value : 'Sessione ' + today();
+  S.meta.created = S.meta.created || new Date().toISOString();
+  updateSidebar();
+  showScreen('a1');
+}
+
+function saveSession() {
+  collectAll();
+  S.meta.modified = new Date().toISOString();
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const name = (S.meta.name||'sessione').replace(/[^a-zA-Z0-9_àèìòù]/g,'_');
+  a.download = `HubS_${name}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  updateSidebar();
+}
+
+function triggerLoad() { el('load-input').click(); }
+
+function loadSession(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      S = JSON.parse(e.target.result);
+      if(!S.meta) S.meta = {};
+      populateAll();
+      updateSidebar();
+      showScreen('a1');
+      showAlert('welcome-alert','Sessione caricata: <strong>'+(S.meta.name||'senza nome')+'</strong>','ok');
+    } catch(err) { alert('Errore nel caricamento del file: '+err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function collectAll() {
+  collectA1(); collectA2(); collectA3(); collectA4(); collectA5();
+}
+
+function populateAll() {
+  populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); renderDocPreview();
+}
+
+function updateSidebar() {
+  const name = S.meta.name||'Sessione senza nome';
+  setVal('hdr-sess-name',name);
+  const si = el('sidebar-sess-info');
+  if(si) si.textContent = S.meta.modified
+    ? 'Salvata: '+new Date(S.meta.modified).toLocaleDateString('it-IT')
+    : (S.meta.created ? 'Creata: '+new Date(S.meta.created).toLocaleDateString('it-IT') : 'Non salvata');
+  // update nav status dots
+  updateNavStatus();
+}
+
+function updateNavStatus() {
+  const a1ok = S.a1.vol.nome && S.a1.ente.denominazione;
+  const a2ok = Object.keys(S.a2.eu).length > 0 || Object.keys(S.a2.dc).length > 0;
+  const a3ok = S.a3.evidenze.length > 0;
+  const a4ok = Object.keys(S.a4.mappings).length > 0;
+  const a5ok = !!S.a5.notetutor;
+  setVal('ns-a1', a1ok ? '●' : '○');
+  setVal('ns-a2', a2ok ? '●' : '○');
+  setVal('ns-a3', a3ok ? '●' : '○');
+  setVal('ns-a4', a4ok ? '●' : '○');
+  setVal('ns-a5', a5ok ? '●' : '○');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const screen = el('screen-'+id);
+  if(screen) screen.classList.add('active');
+  const nav = document.querySelector('.nav-item[data-a="'+id+'"]');
+  if(nav) nav.classList.add('active');
+  currentScreen = id;
+  if(id==='a4') renderA4Step(a4ActiveStep);
+  if(id==='a5') { collectA5(); renderDocPreview(); }
+}
+
+// ============================================================
+// AGENTE 1 — ORIENTATORE
+// ============================================================
+function collectA1() {
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso, r=S.a1.req;
+  ['nome','cognome','cf','dob','luogoNascita','residenza','cittadinanza','titoloStudio','occupazione']
+    .forEach(k=>{ v[k]=getVal('a1-vol-'+k); });
+  ['denominazione','cfEnte','tipo','indirizzo','repLegale','tutor','codice']
+    .forEach(k=>{ e[k]=getVal('a1-ente-'+k); });
+  ['dataInizio','dataFine','settore','attivita','luogo']
+    .forEach(k=>{ p[k]=getVal('a1-percorso-'+k); });
+  p.orePreviste=parseFloat(getVal('a1-percorso-orePreviste'))||0;
+  p.oreSvolte=parseFloat(getVal('a1-percorso-oreSvolte'))||0;
+  r.primaInfo=getVal('a1-req-primaInfo');
+  r.progetto=getVal('a1-req-progetto');
+  r.tutoraggio=getVal('a1-req-tutoraggio');
+  r.doc=getVal('a1-req-doc');
+  S.a1.obiettivi=[getVal('a1-obj-0'),getVal('a1-obj-1'),getVal('a1-obj-2')];
+  S.a1.note=getVal('a1-note');
+  S.a1.patto=getVal('a1-patto');
+  updateNavStatus();
+}
+
+function populateA1() {
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso, r=S.a1.req;
+  ['nome','cognome','cf','dob','luogoNascita','residenza','cittadinanza','titoloStudio','occupazione']
+    .forEach(k=>setVal('a1-vol-'+k,v[k]));
+  ['denominazione','cfEnte','tipo','indirizzo','repLegale','tutor','codice']
+    .forEach(k=>setVal('a1-ente-'+k,e[k]));
+  ['dataInizio','dataFine','settore','attivita','luogo']
+    .forEach(k=>setVal('a1-percorso-'+k,p[k]));
+  setVal('a1-percorso-orePreviste',p.orePreviste||60);
+  setVal('a1-percorso-oreSvolte',p.oreSvolte||0);
+  setVal('a1-req-primaInfo',r.primaInfo);
+  setVal('a1-req-progetto',r.progetto);
+  setVal('a1-req-tutoraggio',r.tutoraggio);
+  setVal('a1-req-doc',r.doc);
+  (S.a1.obiettivi||['','','']).forEach((v,i)=>setVal('a1-obj-'+i,v));
+  setVal('a1-note',S.a1.note||'');
+  setVal('a1-patto',S.a1.patto||'');
+  calcPresenza();
+}
+
+function calcPresenza() {
+  const prev=parseFloat(getVal('a1-percorso-orePreviste'))||0;
+  const svolte=parseFloat(getVal('a1-percorso-oreSvolte'))||0;
+  const perc = prev>0 ? Math.round(svolte/prev*100) : 0;
+  setVal('a1-percorso-presenzaPerc', perc+'%');
+  const p75 = perc>=75;
+  const ore60 = svolte>=60;
+  // 60h check
+  let reqHtml='';
+  if(svolte>0) {
+    if(ore60) showAlert('a1-req-60h-alert','✅ Ore svolte ('+svolte+'h) ≥ 60h — requisito minimo soddisfatto (Art. 5 DI 31/07/2025)','ok');
+    else showAlert('a1-req-60h-alert','⚠ Ore svolte ('+svolte+'h) &lt; 60h — requisito minimo NON soddisfatto. Necessarie ancora '+(60-svolte)+'h.','warn');
+  } else {
+    showAlert('a1-req-60h-alert','','');
+  }
+  // presence check
+  if(svolte>0) {
+    if(p75) showAlert('a1-presenza-alert','✅ Presenza '+perc+'% ≥ 75% — soglia minima soddisfatta','ok');
+    else showAlert('a1-presenza-alert','⚠ Presenza '+perc+'% &lt; 75% — soglia minima non raggiunta','warn');
+  } else {
+    showAlert('a1-presenza-alert','','');
+  }
+  // req status
+  const allReq = [getVal('a1-req-primaInfo'),getVal('a1-req-progetto'),getVal('a1-req-tutoraggio'),getVal('a1-req-doc')];
+  const doneCount = allReq.filter(Boolean).length;
+  const rs = el('a1-req-status');
+  if(rs) {
+    if(doneCount===4 && ore60 && p75) rs.innerHTML='<div class="alert alert-ok">✅ Tutti i requisiti minimi Art. 5 DI 31/07/2025 soddisfatti — il volontario è eleggibile per la messa in trasparenza.</div>';
+    else rs.innerHTML='<div class="alert alert-warn">⚠ '+doneCount+'/4 requisiti documentali spuntati. Verificare prima di procedere.</div>';
+  }
+}
+
+function generatePatto() {
+  collectA1();
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+  const obj = (S.a1.obiettivi||[]).filter(Boolean).map((o,i)=>(i+1)+'. '+o).join('\n') || '1. _____________________\n2. _____________________\n3. _____________________';
+  const testo = `PROGETTO PERSONALIZZATO / PATTO DI SERVIZIO
+HubS – Spazi di Innovazione Sociale
+Rif. Art. 5 comma 1 lett. b) DI 31 luglio 2025
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DATI VOLONTARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nome e Cognome: ${v.nome} ${v.cognome}
+Data di nascita: ${v.dob||'___________'}
+Luogo di nascita: ${v.luogoNascita||'___________'}
+Codice Fiscale: ${v.cf||'___________'}
+Residenza: ${v.residenza||'___________'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ENTE DI ACCOGLIENZA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Denominazione: ${e.denominazione||'___________'}
+Tipologia: ${e.tipo||'___________'}
+Tutor / Responsabile: ${e.tutor||'___________'}
+Codice progetto HubS: ${e.codice||'___________'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PERCORSO PREVISTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Settore di attività: ${p.settore||'___________'}
+Attività principali: ${p.attivita||'___________'}
+Luogo: ${p.luogo||'___________'}
+Durata: da ${p.dataInizio||'___'} a ${p.dataFine||'___'}
+Ore previste: ${p.orePreviste||60}h (soglia minima: 60h su 12 mesi)
+Presenza minima richiesta: 75%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OBIETTIVI DI APPRENDIMENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${obj}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPEGNI DEL VOLONTARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Partecipare alle attività secondo il calendario concordato
+- Raggiungere la soglia minima di presenze (75%)
+- Partecipare ai colloqui di tutoraggio previsti (min. 3)
+- Collaborare alla costruzione del Dossier delle Evidenze
+- Partecipare al processo di autovalutazione delle competenze
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPEGNI DELL'ENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Garantire un accompagnamento tutor qualificato per tutta la durata
+- Fornire le condizioni necessarie per lo sviluppo delle competenze previste
+- Procedere alla messa in trasparenza delle competenze maturate (DI 31/07/2025)
+- Custodire il Documento di Trasparenza secondo le norme GDPR 2016/679
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FIRME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Volontario/a: _____________________   Data: __________
+Tutor: _____________________          Data: __________
+
+Documento generato da HubS-TransparentIA — ${today()}`;
+  setVal('a1-patto', testo);
+}
+
+// ============================================================
+// AGENTE 2 — STIMOLATORE RIFLESSIVO
+// ============================================================
+function switchA2Tab(tab, btn) {
+  document.querySelectorAll('#screen-a2 .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#screen-a2 .tab-pane').forEach(p=>p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const pane = el('a2-tab-'+tab);
+  if(pane) pane.classList.add('active');
+  a2ActiveTab = tab;
+}
+
+function buildCompCard(item, group, stored) {
+  const data = stored[item.id]||{livello:0,note:''};
+  const lvl = data.livello||0;
+  const levelDots = ['','○','◐','●','⬤'];
+  const isSkip = item.skip;
+  const questions = (item.domande||[item.domanda]).filter(Boolean);
+
+  let lvlHtml = '';
+  if(!isSkip) {
+    lvlHtml = `<div class="frow mt8">
+      <label>Livello di padronanza osservato</label>
+      <div class="level-sel lc-a2">
+        ${[1,2,3,4].map(n=>`<label><input type="radio" name="${group}_${item.id}_lvl" value="${n}" ${lvl===n?'checked':''}><span>${n}</span></label>`).join('')}
+      </div>
+      <div class="level-desc">1=Base con supporto · 2=Autonomia parziale · 3=Autonomia piena · 4=Expertise/trasferisce ad altri</div>
+    </div>`;
+  }
+
+  return `<div class="comp-card" id="cc-${item.id}">
+    <div class="comp-card-hdr" onclick="toggleCompCard('${item.id}')">
+      <div class="comp-num" style="background:${isSkip?'#aaa':'var(--c-a2)'}">${item.id.replace(/[a-z]/,'').replace(/\d/,'')}</div>
+      <div class="comp-name">${item.nome}</div>
+      <div class="comp-area">${item.area}</div>
+      <span style="font-size:1rem">${lvl?'●':'○'}</span>
+    </div>
+    <div class="comp-card-body" id="ccb-${item.id}">
+      <div class="questions-hint">
+        <p>💬 Domande guida per il colloquio (Youthpass Learning Interview)</p>
+        <ul>${questions.map(q=>`<li>${q}</li>`).join('')}</ul>
+      </div>
+      ${!isSkip?`<div class="frow">
+        <label>Note dal colloquio / Esempio narrato dal volontario</label>
+        <textarea id="${group}_${item.id}_note" rows="3" placeholder="Trascrivi brevemente quanto emerso dal colloquio...">${data.note||''}</textarea>
+      </div>`:''}
+      ${lvlHtml}
+    </div>
+  </div>`;
+}
+
+function toggleCompCard(id) {
+  const body = el('ccb-'+id);
+  if(body) body.classList.toggle('open');
+}
+
+function initA2() {
+  // EU8
+  el('a2-tab-eu8').innerHTML = EU8.map(it=>buildCompCard(it,'eu',S.a2.eu)).join('');
+  // DigComp
+  el('a2-tab-digcomp').innerHTML = `<div class="alert alert-info" style="margin-bottom:12px">
+    DigComp è mappato deterministicamente (L1) verso le 5 ADA.QE.01.0x nell'<strong>Agente 4</strong>.
+    Qui raccogli le note dal colloquio e il livello osservato.</div>`
+    + DIGCOMP.map(it=>buildCompCard(it,'dc',S.a2.dc)).join('');
+  // LifeComp
+  let lcHtml='', lcArea='';
+  LIFECOMP.forEach(it=>{
+    if(it.area!==lcArea){ lcHtml+=`<h3 style="margin:14px 0 8px;color:var(--c-a2)">${it.area}</h3>`; lcArea=it.area; }
+    lcHtml+=buildCompCard(it,'lc',S.a2.lc);
+  });
+  el('a2-tab-lifecomp').innerHTML = `<div class="alert alert-info" style="margin-bottom:12px">
+    La mappatura LifeComp→ADA è inferenziale (L2). Il metamodello INAPP è atteso per fine 2026.
+    Le competenze osservate saranno incluse nella Sezione 4.3 del Documento di Trasparenza.</div>`+lcHtml;
+  // EntreComp
+  let ecHtml='', ecArea='';
+  ENTRECOMP.forEach(it=>{
+    if(it.area!==ecArea){ ecHtml+=`<h3 style="margin:14px 0 8px;color:var(--c-a3)">${it.area}</h3>`; ecArea=it.area; }
+    ecHtml+=buildCompCard(it,'ec',S.a2.ec);
+  });
+  el('a2-tab-entrecomp').innerHTML = `<div class="alert alert-info" style="margin-bottom:12px">
+    La mappatura EntreComp→ADA è inferenziale (L2). Inclusa nella Sezione 4.4 del Documento di Trasparenza.</div>`+ecHtml;
+}
+
+function collectA2() {
+  // EU8
+  EU8.forEach(it=>{
+    if(it.skip) return;
+    const note=el('eu_'+it.id+'_note'), lvlEl=document.querySelector(`input[name="eu_${it.id}_lvl"]:checked`);
+    S.a2.eu[it.id]={livello:lvlEl?parseInt(lvlEl.value):0,note:note?note.value:''};
+  });
+  // DigComp
+  DIGCOMP.forEach(it=>{
+    const note=el('dc_'+it.id+'_note'), lvlEl=document.querySelector(`input[name="dc_${it.id}_lvl"]:checked`);
+    S.a2.dc[it.id]={livello:lvlEl?parseInt(lvlEl.value):0,note:note?note.value:''};
+  });
+  // LifeComp
+  LIFECOMP.forEach(it=>{
+    const note=el('lc_'+it.id+'_note'), lvlEl=document.querySelector(`input[name="lc_${it.id}_lvl"]:checked`);
+    S.a2.lc[it.id]={livello:lvlEl?parseInt(lvlEl.value):0,note:note?note.value:''};
+  });
+  // EntreComp
+  ENTRECOMP.forEach(it=>{
+    const note=el('ec_'+it.id+'_note'), lvlEl=document.querySelector(`input[name="ec_${it.id}_lvl"]:checked`);
+    S.a2.ec[it.id]={livello:lvlEl?parseInt(lvlEl.value):0,note:note?note.value:''};
+  });
+  // Riflessione
+  S.a2.rifl.top=[getVal('a2-rifl-top0'),getVal('a2-rifl-top1'),getVal('a2-rifl-top2')];
+  S.a2.rifl.difficolta=getVal('a2-rifl-difficolta');
+  S.a2.rifl.cambiamento=getVal('a2-rifl-cambiamento');
+  S.a2.rifl.lavoro=getVal('a2-rifl-lavoro');
+  updateNavStatus();
+}
+
+function populateA2() {
+  initA2();
+  (S.a2.rifl.top||[]).forEach((v,i)=>setVal('a2-rifl-top'+i,v));
+  setVal('a2-rifl-difficolta',S.a2.rifl.difficolta||'');
+  setVal('a2-rifl-cambiamento',S.a2.rifl.cambiamento||'');
+  setVal('a2-rifl-lavoro',S.a2.rifl.lavoro||'');
+}
+
+// ============================================================
+// AGENTE 3 — COSTRUTTORE DOSSIER
+// ============================================================
+let evNextId = 1;
+
+function addEvidenza() {
+  const ev = {
+    id:'ev'+(evNextId++), titolo:'Nuova evidenza', tipo:'', data:'', autore:'volontario',
+    formato:'', descrizione:'', attivita:'',
+    eqval:{validita:'',attualita:'',pertinenza:'',sufficienza:'',autenticita:''},
+    lever:{r1:false,r2:false,r3:false,r4:false}, leverPrinc:'',
+    compCollegate:[], esito:'', posizione:'', note:'', inclusa:true
+  };
+  S.a3.evidenze.push(ev);
+  renderEvidenze();
+  selectEvidenza(ev.id);
+}
+
+function removeEvidenza(id) {
+  if(!confirm('Rimuovere questa evidenza?')) return;
+  S.a3.evidenze = S.a3.evidenze.filter(e=>e.id!==id);
+  selectedEvidenza = null;
+  renderEvidenze();
+  el('ev-placeholder').style.display='block';
+  el('ev-form').style.display='none';
+  updateEvidenzaCount();
+}
+
+function updateEvidenzaCount() {
+  const c=el('ev-count'); if(c) c.textContent=S.a3.evidenze.length;
+  // Alert coverage
+  const accettate = S.a3.evidenze.filter(e=>e.esito==='accettata').length;
+  const alert3 = el('a3-alert');
+  if(alert3) {
+    if(S.a3.evidenze.length===0) alert3.innerHTML='<div class="alert alert-info">Aggiungi almeno un\'evidenza per costruire il dossier. Si raccomandano min. 3-5 evidenze per competenza mappata.</div>';
+    else if(accettate===0) alert3.innerHTML='<div class="alert alert-warn">⚠ Nessuna evidenza ancora accettata. Completa la valutazione eQval.</div>';
+    else alert3.innerHTML='<div class="alert alert-ok">✅ '+accettate+' evidenza/e accettata/e su '+S.a3.evidenze.length+'.</div>';
+  }
+}
+
+function renderEvidenze() {
+  updateEvidenzaCount();
+  const body = el('ev-list-body'); if(!body) return;
+  if(S.a3.evidenze.length===0) {
+    body.innerHTML='<p style="padding:16px;font-size:.8rem;color:var(--sub);text-align:center">Nessuna evidenza.<br>Clicca "+ Aggiungi" per iniziare.</p>';
+    return;
+  }
+  body.innerHTML = S.a3.evidenze.map(ev=>{
+    const esitoCol = ev.esito==='accettata'?'#27ae60':ev.esito==='riserva'?'#f39c12':'#aaa';
+    const esitoTxt = ev.esito==='accettata'?'✅':ev.esito==='riserva'?'⚠':ev.esito==='no'?'✗':'○';
+    return `<div class="ev-item ${selectedEvidenza===ev.id?'selected':''}" onclick="selectEvidenza('${ev.id}')">
+      <div class="ev-title">${ev.titolo||'(senza titolo)'}</div>
+      <div class="ev-meta">${ev.tipo||'—'} · ${ev.data||'—'} <span style="color:${esitoCol};font-weight:700">${esitoTxt}</span></div>
+    </div>`;
+  }).join('');
+  // re-init next id
+  if(S.a3.evidenze.length>0) evNextId = Math.max(...S.a3.evidenze.map(e=>parseInt(e.id.replace('ev',''))||0))+1;
+}
+
+function selectEvidenza(id) {
+  // save current before switching
+  if(selectedEvidenza) saveCurrentEvidenza();
+  selectedEvidenza = id;
+  renderEvidenze();
+  const ev = S.a3.evidenze.find(e=>e.id===id);
+  if(!ev) return;
+  el('ev-placeholder').style.display='none';
+  el('ev-form').style.display='block';
+  const allComps = [
+    ...EU8.filter(x=>!x.skip).map(x=>({id:x.id,nome:x.nome,group:'EU8'})),
+    ...DIGCOMP.map(x=>({id:x.id,nome:x.nome,group:'DigComp'})),
+    ...LIFECOMP.map(x=>({id:x.id,nome:x.nome,group:'LifeComp'})),
+    ...ENTRECOMP.map(x=>({id:x.id,nome:x.nome,group:'EntreComp'}))
+  ];
+  el('ev-form').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>Scheda evidenza</h3>
+      <button class="btn btn-danger btn-sm" onclick="removeEvidenza('${id}')">✕ Rimuovi</button>
+    </div>
+    <div class="frow"><label>Titolo / nome evidenza<span class="required-mark">*</span></label>
+      <input type="text" id="ef-titolo" value="${escHtml(ev.titolo)}"></div>
+    <div class="frow inline">
+      <div><label>Tipologia</label>
+        <select id="ef-tipo">
+          <option value="">—</option>
+          <option ${ev.tipo==='Documento/report'?'selected':''}>Documento/report</option>
+          <option ${ev.tipo==='Prodotto realizzato'?'selected':''}>Prodotto realizzato</option>
+          <option ${ev.tipo==='Feedback di terzi'?'selected':''}>Feedback di terzi</option>
+          <option ${ev.tipo==='Registro presenze'?'selected':''}>Registro presenze</option>
+          <option ${ev.tipo==='Foto/video'?'selected':''}>Foto/video</option>
+          <option ${ev.tipo==='Email/comunicazione'?'selected':''}>Email/comunicazione</option>
+          <option ${ev.tipo==='Autovalutazione'?'selected':''}>Autovalutazione</option>
+          <option ${ev.tipo==='Altro'?'selected':''}>Altro</option>
+        </select>
+      </div>
+      <div><label>Data produzione</label><input type="date" id="ef-data" value="${ev.data||''}"></div>
+    </div>
+    <div class="frow inline">
+      <div><label>Autore/Produttore</label>
+        <select id="ef-autore">
+          <option ${ev.autore==='volontario'?'selected':''} value="volontario">Il volontario</option>
+          <option ${ev.autore==='terzo'?'selected':''} value="terzo">Terzo / Ente</option>
+        </select>
+      </div>
+      <div><label>Formato</label>
+        <select id="ef-formato">
+          <option value="">—</option>
+          <option ${ev.formato==='cartaceo'?'selected':''}>cartaceo</option>
+          <option ${ev.formato==='digitale'?'selected':''}>digitale</option>
+          <option ${ev.formato==='entrambi'?'selected':''}>entrambi</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow"><label>Descrizione del contenuto</label>
+      <textarea id="ef-descrizione" rows="2">${escHtml(ev.descrizione)}</textarea></div>
+    <div class="frow"><label>In quale attività è stata prodotta?</label>
+      <textarea id="ef-attivita" rows="2">${escHtml(ev.attivita)}</textarea></div>
+
+    <div class="card-title mt12">B — Valutazione eQval (Standard 17)</div>
+    <div class="eqval-grid">
+      ${['validita','attualita','pertinenza','sufficienza','autenticita'].map(cr=>`
+      <div class="eqval-item">
+        <label>${{validita:'1. Validità',attualita:'2. Attualità',pertinenza:'3. Pertinenza',sufficienza:'4. Sufficienza',autenticita:'5. Autenticità'}[cr]}</label>
+        <select id="ef-eqval-${cr}">
+          <option value="">—</option>
+          <option value="piena" ${ev.eqval[cr]==='piena'?'selected':''}>Piena</option>
+          <option value="parziale" ${ev.eqval[cr]==='parziale'?'selected':''}>Parziale</option>
+          <option value="insufficiente" ${ev.eqval[cr]==='insufficiente'?'selected':''}>Insufficiente</option>
+        </select>
+      </div>`).join('')}
+    </div>
+    <div class="frow">
+      <label>Esito complessivo</label>
+      <div class="esito-sel">
+        <label><input type="radio" name="ef-esito" value="accettata" ${ev.esito==='accettata'?'checked':''}><span>✅ Accettata</span></label>
+        <label><input type="radio" name="ef-esito" value="riserva" ${ev.esito==='riserva'?'checked':''}><span>⚠ Con riserva</span></label>
+        <label><input type="radio" name="ef-esito" value="no" ${ev.esito==='no'?'checked':''}><span>✗ Non accettata</span></label>
+      </div>
+    </div>
+
+    <div class="card-title mt12">C — Classificazione Lever Up (Matrice 4R)</div>
+    <div class="lever-grid">
+      <label class="lever-item"><input type="checkbox" id="ef-r1" ${ev.lever.r1?'checked':''}>
+        <div><span class="lever-label">R1 — Risultati</span><span class="lever-desc">Prodotti tangibili realizzati</span></div></label>
+      <label class="lever-item"><input type="checkbox" id="ef-r2" ${ev.lever.r2?'checked':''}>
+        <div><span class="lever-label">R2 — Risorse</span><span class="lever-desc">Strumenti e conoscenze usate</span></div></label>
+      <label class="lever-item"><input type="checkbox" id="ef-r3" ${ev.lever.r3?'checked':''}>
+        <div><span class="lever-label">R3 — Reputazione</span><span class="lever-desc">Feedback e riconoscimenti di terzi</span></div></label>
+      <label class="lever-item"><input type="checkbox" id="ef-r4" ${ev.lever.r4?'checked':''}>
+        <div><span class="lever-label">R4 — Richiamo</span><span class="lever-desc">Autovalutazione e narrazione</span></div></label>
+    </div>
+    <div class="frow"><label>Classificazione principale</label>
+      <select id="ef-leverPrinc">
+        <option value="">—</option>
+        <option value="R1" ${ev.leverPrinc==='R1'?'selected':''}>R1 — Risultati</option>
+        <option value="R2" ${ev.leverPrinc==='R2'?'selected':''}>R2 — Risorse</option>
+        <option value="R3" ${ev.leverPrinc==='R3'?'selected':''}>R3 — Reputazione</option>
+        <option value="R4" ${ev.leverPrinc==='R4'?'selected':''}>R4 — Richiamo</option>
+      </select>
+    </div>
+
+    <div class="card-title mt12">D — Competenze collegate</div>
+    <div class="comp-link-grid">
+      ${allComps.map(c=>{
+        const sel = (ev.compCollegate||[]).includes(c.id);
+        const color = c.group==='EU8'?'var(--c-a1)':c.group==='DigComp'?'var(--c-a4)':c.group==='LifeComp'?'var(--c-a2)':'var(--c-a3)';
+        return `<span class="comp-link-tag" id="clt-${id}-${c.id}"
+          style="color:${sel?'#fff':color};background:${sel?color:'#fff'};border-color:${color}"
+          onclick="toggleCompLink('${id}','${c.id}')" title="${c.group}: ${c.nome}">${c.id}</span>`;
+      }).join('')}
+    </div>
+
+    <div class="frow mt12"><label>Note / azioni correttive</label>
+      <textarea id="ef-note" rows="2">${escHtml(ev.note)}</textarea></div>
+    <div class="frow inline">
+      <div class="narrow"><label>Posizione in dossier</label><input type="number" id="ef-posizione" min="1" value="${ev.posizione||''}"></div>
+      <div style="flex:1;display:flex;align-items:flex-end">
+        <button class="btn btn-a3 fw" onclick="saveCurrentEvidenza();renderEvidenze()">💾 Salva evidenza</button>
+      </div>
+    </div>`;
+}
+
+function toggleCompLink(evId, compId) {
+  const ev = S.a3.evidenze.find(e=>e.id===evId); if(!ev) return;
+  if(!ev.compCollegate) ev.compCollegate=[];
+  const idx = ev.compCollegate.indexOf(compId);
+  if(idx>-1) ev.compCollegate.splice(idx,1); else ev.compCollegate.push(compId);
+  // update visual
+  selectEvidenza(evId);
+}
+
+function saveCurrentEvidenza() {
+  if(!selectedEvidenza) return;
+  const ev = S.a3.evidenze.find(e=>e.id===selectedEvidenza); if(!ev) return;
+  ev.titolo=getVal('ef-titolo');
+  ev.tipo=getVal('ef-tipo');
+  ev.data=getVal('ef-data');
+  ev.autore=getVal('ef-autore');
+  ev.formato=getVal('ef-formato');
+  ev.descrizione=getVal('ef-descrizione');
+  ev.attivita=getVal('ef-attivita');
+  ['validita','attualita','pertinenza','sufficienza','autenticita'].forEach(cr=>{
+    ev.eqval[cr]=getVal('ef-eqval-'+cr);
+  });
+  const esitoEl=document.querySelector('input[name="ef-esito"]:checked');
+  ev.esito=esitoEl?esitoEl.value:'';
+  ['r1','r2','r3','r4'].forEach(r=>{ ev.lever[r]=getVal('ef-'+r); });
+  ev.leverPrinc=getVal('ef-leverPrinc');
+  ev.note=getVal('ef-note');
+  ev.posizione=getVal('ef-posizione');
+  updateNavStatus();
+}
+
+function collectA3() {
+  saveCurrentEvidenza();
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// AGENTE 4 — MAPPATORE NORMATIVO
+// ============================================================
+function switchA4Step(n, btn) {
+  document.querySelectorAll('#a4-steps .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#a4-steps .tab-pane').forEach(p=>p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    const btns=document.querySelectorAll('#a4-steps .tab-btn');
+    if(btns[n-1]) btns[n-1].classList.add('active');
+  }
+  el('a4-step-'+n).classList.add('active');
+  a4ActiveStep=n;
+  renderA4Step(n);
+}
+
+function renderA4Step(n) {
+  if(n===1) renderA4Step1();
+  else if(n===2) renderA4Step2();
+  else if(n===3) renderA4Step3();
+  else if(n===4) renderA4Step4();
+}
+
+// Presync from A2 data
+function syncA2toA4() {
+  // pre-select DigComp items that have level>0 in A2
+  DIGCOMP.forEach(dc=>{
+    const a2d = S.a2.dc[dc.id];
+    if(a2d && a2d.livello>0 && !S.a4.selections[dc.id]) {
+      S.a4.selections[dc.id]={livello:a2d.livello,name:dc.nome};
+    }
+  });
+}
+
+function renderA4Step1() {
+  syncA2toA4();
+  const tabs = [
+    {key:'digcomp',label:'DigComp 2.2',color:'var(--c-a4)',items:DIGCOMP,badge:'L1 — Deterministico'},
+    {key:'lifecomp',label:'LifeComp',color:'var(--c-a2)',items:LIFECOMP,badge:'L2 — Inferenziale'},
+    {key:'entrecomp',label:'EntreComp',color:'var(--c-a3)',items:ENTRECOMP,badge:'L2 — Inferenziale'},
+    {key:'eu8',label:'EU8',color:'var(--c-a1)',items:EU8.filter(x=>!x.skip),badge:'L2 — Inferenziale'}
+  ];
+
+  let html=`<div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px" id="a4s1-tabs">`;
+  tabs.forEach((t,i)=>{ html+=`<button id="a4s1-btn-${t.key}" style="padding:8px 14px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:${i===0?t.color:'var(--sub)'};border-bottom:2px solid ${i===0?t.color:'transparent'};margin-bottom:-2px;font-family:inherit" onclick="toggleA4S1Tab('${t.key}')">${t.label} <span style="background:#f0f2f5;color:#6c757d;padding:2px 6px;border-radius:10px;font-size:.65rem;font-weight:700">${t.badge}</span></button>`; });
+  html+=`</div>`;
+
+  tabs.forEach((t,i)=>{
+    html+=`<div id="a4s1-${t.key}" style="display:${i===0?'block':'none'}">`;
+    if(t.key==='digcomp') html+=`<div class="alert alert-info" style="margin-bottom:10px"><strong>L1 Deterministico</strong> — Mapping validato da Decreto GOL/EDO Regione Calabria n. 15242/2025. Ogni area DigComp corrisponde a un'ADA.QE.01.0x definita.</div>`;
+    else html+=`<div class="alert alert-warn" style="margin-bottom:10px"><strong>L2 Inferenziale</strong> — Le competenze ${t.label} vengono suggerite verso ADA del SEP n. 18 (Atlante INAPP). Il tutor deve validare ogni proposta. Metamodello INAPP atteso fine 2026.</div>`;
+
+    let lastArea='';
+    t.items.forEach(item=>{
+      if(item.area && item.area!==lastArea){ html+=`<h3 style="margin:12px 0 8px;color:${t.color};font-size:.85rem">${item.area}</h3>`; lastArea=item.area; }
+      const sel=S.a4.selections[item.id];
+      const adaKeys=COMP_TO_ADA[item.id]||[];
+      html+=`<div class="comp-card" style="margin-bottom:8px">
+        <div class="comp-card-hdr" onclick="toggleA4Comp('${item.id}',this)" style="background:${sel?'#eaf7ff':''};border-left:${sel?'3px solid var(--c-a4)':'3px solid transparent'}">
+          <input type="checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleA4Sel('${item.id}','${escHtml(item.nome)}')" style="margin:0;width:16px;height:16px;flex-shrink:0">
+          <div class="comp-name" style="color:${t.color}">${item.nome}</div>
+          ${item.ada?`<span class="badge badge-info" style="font-size:.65rem">${item.ada}</span>`:''}
+          <span style="font-size:.8rem;color:var(--sub)">${adaKeys.length} ADA</span>
+        </div>
+        <div id="a4c-${item.id}" style="display:none;padding:10px 14px;background:#fff;border-top:1px solid var(--border)">
+          ${adaKeys.length?adaKeys.map(ak=>{const a=ADA_DB[ak];return `<div style="font-size:.8rem;margin-bottom:6px">
+            <strong style="color:var(--c-a4)">${a.code}</strong> — ${a.desc}
+            <span class="badge ${a.lvl==='L1'?'badge-grey':'badge-info'}" style="margin-left:4px">${a.lvl}</span>
+          </div>`;}).join('')
+          :'<p style="font-size:.78rem;color:var(--sub)">Nessuna ADA mappata deterministicamente. Sarà possibile aggiungere ADA manualmente nello step 3.</p>'}
+          ${sel?`<div class="frow mt8"><label style="font-size:.75rem">Livello osservato (1–4)</label>
+            <div class="level-sel lc-a4">${[1,2,3,4].map(n=>`<label><input type="radio" name="a4lvl_${item.id}" value="${n}" ${sel.livello===n?'checked':''} onchange="updateA4Level('${item.id}',${n})"><span>${n}</span></label>`).join('')}</div>
+            <div class="level-desc">1=Base · 2=Autonomia con supervisione · 3=Autonomia piena · 4=Expertise</div>
+          </div>`:''}
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+
+  el('a4-step-1').innerHTML=html;
+}
+
+const A4S1_COLORS = {digcomp:'var(--c-a4)',lifecomp:'var(--c-a2)',entrecomp:'var(--c-a3)',eu8:'var(--c-a1)'};
+function toggleA4S1Tab(key,btn) {
+  ['digcomp','lifecomp','entrecomp','eu8'].forEach(k=>{
+    const p=el('a4s1-'+k); if(p) p.style.display=(k===key?'block':'none');
+    const b=el('a4s1-btn-'+k);
+    if(b){ b.style.color=(k===key?A4S1_COLORS[k]:'var(--sub)'); b.style.borderBottomColor=(k===key?A4S1_COLORS[k]:'transparent'); }
+  });
+}
+
+function toggleA4Comp(id,hdr) {
+  const body=el('a4c-'+id); if(!body) return;
+  body.style.display=body.style.display==='none'?'block':'none';
+}
+
+function toggleA4Sel(id,name) {
+  if(S.a4.selections[id]) delete S.a4.selections[id];
+  else S.a4.selections[id]={livello:1,name:name};
+  updateNavStatus();
+}
+
+function updateA4Level(id,n) {
+  if(S.a4.selections[id]) S.a4.selections[id].livello=n;
+}
+
+function renderA4Step2() {
+  const selKeys=Object.keys(S.a4.selections);
+  if(!selKeys.length){
+    el('a4-step-2').innerHTML='<div class="alert alert-warn">Nessuna competenza selezionata nello step 1. Torna indietro e seleziona le competenze del volontario.</div>';
+    return;
+  }
+  let html=`<div class="alert alert-info">Riepilogo delle <strong>${selKeys.length}</strong> competenze selezionate e le ADA proposte. Procedi allo step 3 per validare la mappatura.</div>`;
+  selKeys.forEach(cid=>{
+    const sel=S.a4.selections[cid];
+    const adaKeys=COMP_TO_ADA[cid]||[];
+    html+=`<div style="border:1px solid var(--border);border-radius:5px;margin-bottom:8px;overflow:hidden">
+      <div style="padding:9px 14px;background:var(--grey);display:flex;gap:10px;align-items:center">
+        <span style="font-weight:700;color:var(--c-a4)">${cid}</span>
+        <span style="flex:1;font-size:.85rem">${sel.name}</span>
+        <span class="badge badge-grey">Livello ${sel.livello}</span>
+      </div>
+      <div style="padding:9px 14px;font-size:.8rem">
+        ${adaKeys.length?adaKeys.map(ak=>{const a=ADA_DB[ak];return `→ <strong>${a.code}</strong> — ${a.desc}`;}).join('<br>'):
+        '<span style="color:var(--sub)">→ Nessuna ADA mappata deterministicamente. Aggiungere manualmente nello step 3.</span>'}
+      </div>
+    </div>`;
+  });
+  el('a4-step-2').innerHTML=html;
+}
+
+function renderA4Step3() {
+  // Build ADA candidates from selections
+  const adaSet = {};
+  Object.keys(S.a4.selections).forEach(cid=>{
+    const sel=S.a4.selections[cid];
+    (COMP_TO_ADA[cid]||[]).forEach(ak=>{
+      if(!adaSet[ak]) adaSet[ak]={adaKey:ak,comps:[],lvl:sel.livello};
+      adaSet[ak].comps.push(cid);
+      adaSet[ak].lvl=Math.max(adaSet[ak].lvl,sel.livello);
+    });
+  });
+  // Merge with existing mappings
+  Object.keys(S.a4.mappings).forEach(ak=>{
+    if(!adaSet[ak]) adaSet[ak]={adaKey:ak,comps:[],lvl:1};
+  });
+
+  if(!Object.keys(adaSet).length && !Object.keys(S.a4.mappings).length){
+    el('a4-step-3').innerHTML='<div class="alert alert-warn">Nessuna ADA da validare. Seleziona competenze nello step 1.</div>';
+    return;
+  }
+
+  let html=`<div class="alert alert-info">Per ogni ADA proposta, indica il livello di realizzazione (1–4) e valida cliccando ✓. Le ADA non validate non saranno incluse nel documento finale.</div>
+  <div class="frow" style="margin-bottom:14px"><label style="font-weight:700">Aggiungi ADA manualmente</label>
+    <div style="display:flex;gap:8px">
+      <select id="a4-manual-ada" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:5px;font-size:.82rem">
+        <option value="">— seleziona ADA —</option>
+        ${Object.values(ADA_DB).map(a=>`<option value="${a.code}">${a.code} — ${a.desc.substring(0,60)}</option>`).join('')}
+      </select>
+      <button class="btn btn-a4 btn-sm" onclick="addManualADA()">Aggiungi</button>
+    </div>
+  </div>`;
+
+  Object.entries(adaSet).forEach(([ak,info])=>{
+    const ada=ADA_DB[ak]; if(!ada) return;
+    const mapping=S.a4.mappings[ak]||{validated:false,livello:info.lvl,attivita:'',raSelected:[],copertura:{}};
+    html+=`<div class="ada-card">
+      <div class="ada-card-hdr">
+        <span class="ada-card-code">${ada.code}</span>
+        <span class="ada-card-desc">${ada.desc}</span>
+        <span class="ada-card-badge ${ada.lvl==='L1'?'ada-l1':'ada-l2'}">${ada.lvl}</span>
+        ${mapping.validated?'<span class="badge badge-ok">✓ Validato</span>':''}
+        ${ada.url?`<a href="${ada.url}" target="_blank" rel="noopener" style="margin-left:auto;font-size:.72rem;padding:3px 9px;border-radius:6px;background:#eaf0fb;color:#2563eb;border:1px solid #bfdbfe;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0" title="Scheda ufficiale INAPP — Atlante del Lavoro">📋 Scheda INAPP ↗</a>`:''}
+      </div>
+      <div class="ada-card-body">
+        <div style="font-size:.75rem;color:var(--sub);margin-bottom:8px">Framework: ${ada.fw} · Competenze collegate: ${(info.comps||[]).join(', ')||'manuale'}</div>
+        <div class="frow"><label style="font-size:.75rem">Attività svolta che ha generato questa competenza</label>
+          <input type="text" id="am-att-${ak}" value="${escHtml(mapping.attivita||S.a1.percorso.attivita||'')}" placeholder="Descrivi l'attività concreta svolta...">
+        </div>
+        <div class="frow"><label style="font-size:.75rem">Livello di realizzazione (1–4)</label>
+          <div class="level-sel lc-a4">
+            ${[1,2,3,4].map(n=>`<label><input type="radio" name="am-lvl-${ak}" value="${n}" ${(mapping.livello||1)===n?'checked':''}><span>${n}</span></label>`).join('')}
+          </div>
+          <div class="level-desc">1=Esecutivo con istruzioni · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise</div>
+        </div>
+        <div style="margin-top:10px"><label style="font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase">Risultati Attesi (RA) — seleziona quelli raggiunti</label>
+          ${ada.ra.map((ra,i)=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-top:6px;font-size:.8rem">
+            <select id="am-cov-${ak}-${i}" style="padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:.72rem;flex-shrink:0">
+              <option value="">—</option>
+              <option value="totale" ${(mapping.copertura||{})[i]==='totale'?'selected':''}>Totale</option>
+              <option value="parziale" ${(mapping.copertura||{})[i]==='parziale'?'selected':''}>Parziale</option>
+            </select>
+            <div><strong style="color:var(--c-a4)">${ra.code}</strong> — ${ra.desc}</div>
+          </div>`).join('')}
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-a4 btn-sm" onclick="validateADA('${ak}')">✓ Valida mappatura</button>
+          <button class="btn btn-outline btn-sm" onclick="removeADA('${ak}')">✕ Rimuovi</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  el('a4-step-3').innerHTML=html;
+}
+
+function addManualADA() {
+  const sel=el('a4-manual-ada'); if(!sel||!sel.value) return;
+  const ak=sel.value;
+  if(!S.a4.mappings[ak]) S.a4.mappings[ak]={validated:false,livello:1,attivita:'',raSelected:[],copertura:{}};
+  renderA4Step3();
+}
+
+function validateADA(ak) {
+  const lvlEl=document.querySelector(`input[name="am-lvl-${ak}"]:checked`);
+  const lvl=lvlEl?parseInt(lvlEl.value):1;
+  const att=getVal('am-att-'+ak);
+  const ada=ADA_DB[ak]; if(!ada) return;
+  const copertura={};
+  ada.ra.forEach((ra,i)=>{ copertura[i]=getVal('am-cov-'+ak+'-'+i)||''; });
+  S.a4.mappings[ak]={validated:true,livello:lvl,attivita:att,copertura,ra:ada.ra};
+  renderA4Step3();
+  updateNavStatus();
+}
+
+function removeADA(ak) {
+  delete S.a4.mappings[ak];
+  renderA4Step3();
+}
+
+function renderA4Step4() {
+  const validated = Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+  if(!validated.length){
+    el('a4-step-4').innerHTML='<div class="alert alert-warn">Nessuna ADA validata. Completa lo step 3.</div>';
+    return;
+  }
+  // Table preview
+  let rows='';
+  validated.forEach(([ak,m],i)=>{
+    const ada=ADA_DB[ak]; if(!ada) return;
+    (ada.ra||[]).forEach((ra,ri)=>{
+      const cov=m.copertura?m.copertura[ri]:'';
+      rows+=`<tr>
+        <td>${i+1}</td>
+        <td>${m.attivita||''}</td>
+        <td><strong>${ada.code}</strong></td>
+        <td>${ada.desc}</td>
+        <td>${ra.code}</td>
+        <td>${ra.desc}</td>
+        <td style="text-align:center">${m.livello}</td>
+        <td>${cov||'—'}</td>
+      </tr>`;
+    });
+  });
+  el('a4-step-4').innerHTML=`
+    <div class="alert alert-ok" style="margin-bottom:14px">✅ ${validated.length} ADA validate — pronti per il Documento di Trasparenza (Sezione 4.1)</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+        <thead><tr style="background:var(--c-a4);color:#fff">
+          <th style="padding:6px 8px">N.</th><th>Attività svolta</th><th>ADA Codice</th><th>ADA Descrizione</th>
+          <th>RA Codice</th><th>RA Descrizione</th><th>Livello</th><th>Copertura</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-a4" onclick="exportA4CSV()">⬇ Export CSV</button>
+      <button class="btn btn-a5" onclick="showScreen('a5')">→ Vai al Documento finale</button>
+    </div>`;
+}
+
+function exportA4CSV() {
+  const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+  let csv='N.,Attività svolta,ADA Codice,ADA Descrizione,RA Codice,RA Descrizione,Livello,Copertura\n';
+  validated.forEach(([ak,m],i)=>{
+    const ada=ADA_DB[ak]; if(!ada) return;
+    (ada.ra||[]).forEach((ra,ri)=>{
+      const cov=m.copertura?m.copertura[ri]:'';
+      csv+=`${i+1},"${(m.attivita||'').replace(/"/g,'""')}","${ada.code}","${ada.desc}","${ra.code}","${ra.desc}",${m.livello},${cov}\n`;
+    });
+  });
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='HubS_Mappatura_ADA.csv'; a.click();
+}
+
+function collectA4() {
+  // selections already synced through toggleA4Sel + updateA4Level
+  // mappings already synced through validateADA
+}
+
+// ============================================================
+// AGENTE 5 — REDATTORE DI TRASPARENZA
+// ============================================================
+function collectA5() {
+  S.a5.notetutor=getVal('a5-notetutor');
+}
+
+function renderDocPreview() {
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+  const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+
+  // Sezione 4.1 rows
+  let s41rows=''; let rowN=0;
+  validated.forEach(([ak,m])=>{
+    const ada=ADA_DB[ak]; if(!ada) return;
+    (ada.ra||[]).forEach((ra,ri)=>{
+      rowN++;
+      const cov=m.copertura?m.copertura[ri]:'';
+      s41rows+=`<tr>
+        <td style="text-align:center">${rowN}</td>
+        <td>${m.attivita||p.attivita||''}</td>
+        <td><strong>${ada.code}</strong></td>
+        <td>${ada.desc}</td>
+        <td>${ra.code}</td>
+        <td>${ra.desc}</td>
+        <td style="text-align:center"><strong>${m.livello||'—'}</strong></td>
+        <td>${cov||'—'}</td>
+      </tr>`;
+    });
+  });
+  if(!s41rows) s41rows='<tr><td colspan="8" style="text-align:center;color:#999">Completare l\'Agente 4 per popolare questa sezione</td></tr>';
+
+  // Sezione 4.2 DigComp
+  let s42rows='';
+  DIGCOMP.forEach(dc=>{
+    const a2d=S.a2.dc[dc.id]||{livello:0,note:''};
+    const m=S.a4.mappings[dc.ada]||{};
+    s42rows+=`<tr>
+      <td>${dc.area}</td>
+      <td>${dc.nome}</td>
+      <td>${dc.ada}</td>
+      <td style="text-align:center">${a2d.livello||m.livello||'—'}</td>
+      <td>${a2d.note||''}</td>
+    </tr>`;
+  });
+
+  // Sezione 4.3 LifeComp
+  let s43rows='';
+  LIFECOMP.forEach(lc=>{
+    const a2l=S.a2.lc[lc.id]||{livello:0,note:''};
+    s43rows+=`<tr>
+      <td>${lc.area}</td>
+      <td>${lc.nome}</td>
+      <td>${a2l.note||''}</td>
+      <td style="text-align:center">${a2l.livello||'—'}</td>
+    </tr>`;
+  });
+
+  // Sezione 4.4 EntreComp
+  let s44rows='';
+  ENTRECOMP.forEach(ec=>{
+    const a2e=S.a2.ec[ec.id]||{livello:0,note:''};
+    s44rows+=`<tr>
+      <td>${ec.area}</td>
+      <td>${ec.nome}</td>
+      <td>${a2e.note||''}</td>
+      <td style="text-align:center">${a2e.livello||'—'}</td>
+    </tr>`;
+  });
+
+  // Sezione 5 evidenze
+  let s5rows='';
+  S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
+    s5rows+=`<tr>
+      <td style="text-align:center">${i+1}</td>
+      <td>${ev.tipo||'—'}</td>
+      <td>${ev.titolo||'—'}</td>
+      <td>${ev.data||'—'}</td>
+      <td style="text-align:center">${ev.esito==='accettata'?'✓':ev.esito==='riserva'?'(±)':'—'}</td>
+    </tr>`;
+  });
+  if(!s5rows) s5rows='<tr><td colspan="5" style="text-align:center;color:#999">Nessuna evidenza registrata nell\'Agente 3</td></tr>';
+
+  // Percentage text
+  const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
+  const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
+
+  const html=`<div id="doc-preview">
+    <h1>DOCUMENTO DI TRASPARENZA</h1>
+    <h2>HubS – Spazi di Innovazione Sociale<br>
+    <small style="font-size:.8rem">Messa in trasparenza delle competenze acquisite in contesti non formali e informali<br>
+    Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021</small></h2>
+
+    <div class="doc-section">
+      <h3>Sezione 1 — Ente di Accoglienza</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Denominazione ente</strong></td><td>${e.denominazione||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Codice fiscale</strong></td><td>${e.cfEnte||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Tipologia ente</strong></td><td>${e.tipo||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Indirizzo sede legale</strong></td><td>${e.indirizzo||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Rappresentante legale</strong></td><td>${e.repLegale||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Tutor / Responsabile accompagnamento</strong></td><td>${e.tutor||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Codice progetto HubS</strong></td><td>${e.codice||'___'}</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 2 — Dati del Volontario</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Cognome</strong></td><td>${v.cognome||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Nome</strong></td><td>${v.nome||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Codice fiscale</strong></td><td>${v.cf||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Cittadinanza</strong></td><td>${v.cittadinanza||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Titolo di studio</strong></td><td>${v.titoloStudio||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Situazione occupazionale</strong></td><td>${v.occupazione||'___'}</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 3 — Dati del Percorso</h3>
+      <table><tbody>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Descrizione del percorso / attività svolta</strong></td><td>${p.attivita||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data fine</strong></td><td>${p.dataFine||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Ore totali previste</strong></td><td>${p.orePreviste||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Ore totali effettivamente svolte</strong></td><td>${p.oreSvolte||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Percentuale di presenza</strong></td><td>${percNum}%</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Soglia minima 75% raggiunta</strong></td><td>${percNum>=75?'✅ Sì':'⚠ No'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Luogo di svolgimento</strong></td><td>${p.luogo||'___'}</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 4.1 — Mappatura verso l'Atlante del Lavoro e delle Qualificazioni INAPP</h3>
+      <p style="font-size:.75rem;color:#666;margin-bottom:8px;font-style:italic">Conforme Allegato A — DI 5 gennaio 2021. Scala livelli: 1=Esecutivo con istruzioni · 2=Autonomia operativa con supervisione · 3=Autonomia realizzativa · 4=Expertise tecnico</p>
+      <table>
+        <thead><tr>
+          <th>N.</th><th>Attività svolta</th><th>ADA Codice</th><th>ADA Descrizione</th>
+          <th>RA Codice</th><th>RA Descrizione</th><th>Livello (1–4)</th><th>Copertura RA</th>
+        </tr></thead>
+        <tbody>${s41rows}</tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 4.2 — Competenza Digitale — DigComp 2.2</h3>
+      <table>
+        <thead><tr><th>Area DigComp</th><th>Competenza specifica</th><th>ADA di riferimento</th><th>Livello (1–4)</th><th>Note / esempio</th></tr></thead>
+        <tbody>${s42rows}</tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 4.3 — Competenza Personale, Sociale e di Imparare ad Imparare — LifeComp</h3>
+      <p style="font-size:.75rem;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
+      <table>
+        <thead><tr><th>Area LifeComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1–4)</th></tr></thead>
+        <tbody>${s43rows}</tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 4.4 — Competenza Imprenditoriale — EntreComp</h3>
+      <p style="font-size:.75rem;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
+      <table>
+        <thead><tr><th>Area EntreComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1–4)</th></tr></thead>
+        <tbody>${s44rows}</tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)</h3>
+      <table>
+        <thead><tr><th>N.</th><th>Tipo di evidenza</th><th>Descrizione</th><th>Data</th><th>Validazione tutor</th></tr></thead>
+        <tbody>${s5rows}</tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 6 — Note del Tutor</h3>
+      <p style="min-height:60px;border:1px solid #eee;padding:8px;font-size:.85rem">${S.a5.notetutor||'___'}</p>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione 7 — Dichiarazioni e Firme</h3>
+      <p style="font-size:.8rem;margin-bottom:12px">Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.</p>
+      <table>
+        <thead><tr><th></th><th>Responsabile accompagnamento (Tutor)</th><th>Volontario/a</th></tr></thead>
+        <tbody>
+          <tr><td style="background:#f9f9f9"><strong>Nome e cognome</strong></td><td>${e.tutor||'___'}</td><td>${v.nome||'___'} ${v.cognome||'___'}</td></tr>
+          <tr><td style="background:#f9f9f9"><strong>Ente</strong></td><td>${e.denominazione||'___'}</td><td></td></tr>
+          <tr><td style="background:#f9f9f9"><strong>Luogo e data</strong></td><td>${e.indirizzo?e.indirizzo.split(',').pop().trim():''}, ${today()}</td><td></td></tr>
+          <tr><td style="background:#f9f9f9"><strong>Firma</strong></td><td style="height:40px"></td><td style="height:40px"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size:.7rem;color:#999;text-align:center;margin-top:20px;border-top:1px solid #eee;padding-top:10px">
+      Documento conforme all'Allegato A del Decreto Interministeriale 5 gennaio 2021, come richiesto dall'Art. 5, comma 1, lett. d) del DI 31 luglio 2025.<br>
+      Trattamento dati personali ai sensi del Regolamento UE 2016/679 (GDPR) — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · ${today()}
+    </p>
+  </div>`;
+
+  el('doc-preview-container').innerHTML=html;
+}
+
+function downloadDocx() {
+  collectA5(); renderDocPreview();
+  const preview=el('doc-preview'); if(!preview) return;
+  const name=((S.a1.vol.cognome||'')+'_'+(S.a1.vol.nome||'volontario')).replace(/\s/g,'_');
+  const htmlContent=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8">
+    <style>
+      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
+      table{border-collapse:collapse;width:100%}
+      td,th{border:1px solid #ccc;padding:4pt 6pt;font-size:9pt}
+      th{background:#eeeeee;font-weight:bold}
+      h1{font-size:14pt;text-align:center}h2{font-size:12pt;text-align:center}
+      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
+    </style></head>
+    <body>${preview.innerHTML}</body></html>`;
+  const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`HubS_DocTrasparenza_${name}_${new Date().toISOString().slice(0,10)}.docx`;
+  a.click();
+}
+
+function downloadPdf() {
+  collectA5(); renderDocPreview();
+  const preview=el('doc-preview'); if(!preview) return;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>Documento di Trasparenza — HubS</title>
+    <style>
+      *{box-sizing:border-box}
+      body{font-family:Arial,sans-serif;font-size:10pt;margin:15mm;color:#000}
+      table{border-collapse:collapse;width:100%;font-size:8.5pt;margin-bottom:10pt}
+      td,th{border:1px solid #ccc;padding:4pt 6pt;vertical-align:top}
+      th{background:#eee;font-weight:bold}
+      h1{font-size:13pt;text-align:center;margin-bottom:4pt}
+      h2{font-size:10pt;text-align:center;color:#555;margin-bottom:12pt}
+      h3{font-size:9pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin:12pt 0 6pt}
+      @page{size:A4;margin:15mm}
+      @media print{@page{size:A4;margin:15mm}}
+    </style></head>
+    <body>${preview.innerHTML}
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// ═══════════════════════════════════════════════════════════════
+// CHAT AI SYSTEM — 5 AGENTI (Claude Haiku via Anthropic API)
+// ═══════════════════════════════════════════════════════════════
+
+const CHAT={
+  history:{a1:[],a2:[],a3:[],a4:[],a5:[]},
+  loading:{a1:false,a2:false,a3:false,a4:false,a5:false}
+};
+
+const AGENT_COLOR={a1:'var(--c-a1)',a2:'var(--c-a2)',a3:'var(--c-a3)',a4:'var(--c-a4)',a5:'var(--c-a5)'};
+const AGENT_NAME={a1:'Orientatore',a2:'Stimolatore Riflessivo',a3:'Costruttore Dossier',a4:'Mappatore Normativo',a5:'Redattore di Trasparenza'};
+const AGENT_MAIN_LBL={a1:'📋 Scheda accoglienza',a2:'📝 Colloquio & autovalutazione',a3:'📁 Dossier evidenze',a4:'🗺 Mappatura ADA',a5:'📄 Documento finale'};
+
+function getApiKey(){return sessionStorage.getItem('hubs_apikey')||'';}
+
+function buildAIContext(agentId){
+  try{collectAll();}catch(e){}
+  const v=S.a1.vol,e=S.a1.ente,p=S.a1.percorso;
+  const nome=(v.nome&&v.cognome)?v.nome+' '+v.cognome:'(non inserito)';
+  let ctx='\n\n=== CONTESTO SESSIONE ===\nVolontario: '+nome+'\nEnte: '+(e.denominazione||'N/D')+' ('+(e.tipo||'')+')'+'\nTutor: '+(e.tutor||'N/D')+'\nAttività: '+(p.attivita||'N/D')+' — settore: '+(p.settore||'N/D')+'\nOre: '+(p.oreSvolte||0)+'/'+(p.orePreviste||60)+'h';
+  if(['a2','a3','a4','a5'].includes(agentId)){
+    const eu=EU8.map(function(x){const d=S.a2.eu[x.id];return d&&d.livello?x.nome+'(L'+d.livello+')':null;}).filter(Boolean);
+    const dc=DIGCOMP.map(function(x){const d=S.a2.dc[x.id];return d&&d.livello?x.nome+'(L'+d.livello+')':null;}).filter(Boolean);
+    const lc=LIFECOMP.map(function(x){const d=S.a2.lc[x.id];return d&&d.livello?x.nome+'(L'+d.livello+')':null;}).filter(Boolean);
+    const ec=ENTRECOMP.map(function(x){const d=S.a2.ec[x.id];return d&&d.livello?x.nome+'(L'+d.livello+')':null;}).filter(Boolean);
+    if(eu.length) ctx+='\nEU8: '+eu.join(', ');
+    if(dc.length) ctx+='\nDigComp: '+dc.join(', ');
+    if(lc.length) ctx+='\nLifeComp: '+lc.join(', ');
+    if(ec.length) ctx+='\nEntreComp: '+ec.join(', ');
+  }
+  if(['a3','a4','a5'].includes(agentId)){
+    var acc=S.a3.evidenze.filter(function(ev){return ev.esito==='accettata';}).length;
+    ctx+='\nEvidenze: '+S.a3.evidenze.length+' totali, '+acc+' accettate';
+  }
+  if(['a4','a5'].includes(agentId)){
+    var sels=Object.keys(S.a4.selections);
+    var adas=Object.entries(S.a4.mappings).filter(function(e){return e[1].validated;}).map(function(e){return e[0];});
+    if(sels.length) ctx+='\nCompetenze sel. ('+sels.length+'): '+sels.join(', ');
+    if(adas.length) ctx+='\nADA validate: '+adas.join(', ');
+  }
+  return ctx;
+}
+
+const CHAT_SYS={
+a1:'Sei l\'Assistente AI dell\'Agente 1 — Orientatore del sistema HubS-TransparentIA.\nSupporti il TUTOR (non il volontario) nella fase di accoglienza iniziale del percorso di messa in trasparenza delle competenze.\n\nPuoi aiutare il tutor a:\n• Formulare domande per esplorare motivazioni, background e aspettative del volontario\n• Verificare i requisiti normativi minimi (min. 60h su 12 mesi, presenza ≥75%, Art. 5 DI 31/07/2025)\n• Redigere o migliorare il testo del Patto di Servizio in modo chiaro e conforme\n• Identificare obiettivi di apprendimento realistici e misurabili per il percorso\n• Gestire situazioni particolari: volontari stranieri, persone fragili, situazioni di disagio\n• Spiegare la normativa: DI 31/07/2025, DM 9 luglio 2024 n.115, requisiti Enti Titolati\n\nRispondi sempre in italiano. Sii concreto e operativo. Cita la normativa quando pertinente.',
+
+a2:'Sei l\'Assistente AI dell\'Agente 2 — Stimolatore Riflessivo del sistema HubS-TransparentIA.\nSupporti il TUTOR nella conduzione dei colloqui di emersione delle competenze (metodologia Youthpass Learning Interview).\n\nPuoi aiutare il tutor a:\n• Riformulare domande Youthpass quando il volontario non comprende o risponde in modo vago\n• Approfondire con domande di follow-up (es. "Puoi fare un esempio concreto?", "Come hai affrontato la difficoltà?")\n• Riconoscere nelle narrazioni del volontario pattern riconducibili a EU8, DigComp 2.2, LifeComp, EntreComp\n• Valutare a quale livello (1-4) corrisponde un comportamento descritto:\n  1=Base con guida costante · 2=Autonomia con supervisione · 3=Autonomia piena · 4=Trasferisce la competenza ad altri\n• Gestire volontari reticenti o che tendono a sminuire le proprie competenze\n\nMetodologia: Youthpass Learning Interview, Factory of Learning, approccio narrativo/riflessivo.\nRispondi sempre in italiano. Proponi riformulazioni e domande pronte all\'uso.',
+
+a3:'Sei l\'Assistente AI dell\'Agente 3 — Costruttore del Dossier del sistema HubS-TransparentIA.\nSupporti il TUTOR nell\'analisi e validazione delle evidenze per la costruzione del dossier competenze.\n\nPuoi aiutare il tutor a:\n• Valutare un\'evidenza secondo i 5 criteri eQval Standard 17:\n  - Validità: dimostra davvero la competenza dichiarata?\n  - Attualità: prodotta durante/subito dopo l\'esperienza rilevante?\n  - Pertinenza: coerente con le attività svolte e gli obiettivi del progetto?\n  - Sufficienza: da sola o con altre è abbastanza per provare la competenza al livello dichiarato?\n  - Autenticità: è certa la paternità del volontario?\n• Classificare le evidenze nella Matrice Lever Up 4R:\n  R1=Risultati (output dimostrabili) · R2=Risorse (capacità mobilitate) · R3=Reputazione (riconoscimento esterno) · R4=Richiamo (attrattività)\n• Identificare gap di copertura e suggerire tipologie di evidenze complementari\n• Formulare motivazioni per i tre esiti: Accettata / Con riserva / Non accettata\n• Gestire situazioni con evidenze deboli, poche o ambigue\n\nRispondi sempre in italiano. Sii pratico, usa esempi concreti, aiuta il tutor a prendere decisioni motivate.',
+
+a4:'Sei l\'Assistente AI dell\'Agente 4 — Mappatore Normativo del sistema HubS-TransparentIA.\nSupporti il TUTOR nella mappatura delle competenze emerse verso le Aree di Attività (ADA) dell\'Atlante del Lavoro INAPP.\n\nPuoi aiutare il tutor a:\n• Scegliere l\'ADA più appropriata tra più opzioni disponibili\n• Spiegare la differenza tra:\n  - Mapping L1 deterministico: DigComp 2.2 → ADA.QE.01.0x (fonte: GOL/EDO Regione Calabria n.15242/2025)\n  - Mapping L2 inferenziale: LifeComp/EntreComp/EU8 → ADA del SEP n.18 (INAPP)\n• Determinare il livello di realizzazione dell\'ADA più appropriato:\n  1=Esecutivo con istruzioni · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise tecnico\n• Interpretare i Risultati Attesi (RA) dell\'Atlante INAPP nel contesto del volontariato\n• Giustificare scelte di mappatura non ovvie per la documentazione\n• Navigare e spiegare le ADA del SEP n.18 (Servizi di educazione, formazione e lavoro)\n\nFonti: Atlante del Lavoro INAPP, Decreto GOL/EDO Regione Calabria n.15242/2025, SEP n.18.\nUsa sempre i codici ADA completi (es. ADA.QE.01.01, ADA.18.01.09).\nRispondi sempre in italiano. Usa la terminologia INAPP corretta.',
+
+a5:'Sei l\'Assistente AI dell\'Agente 5 — Redattore di Trasparenza del sistema HubS-TransparentIA.\nSupporti il TUTOR nella redazione, revisione e finalizzazione del Documento di Trasparenza delle competenze.\n\nPuoi aiutare il tutor a:\n• Formulare le note finali del tutor in modo professionale, normativo e contestualizzato\n• Verificare la coerenza interna: competenze dichiarate ↔ ADA mappate ↔ RA coperti ↔ evidenze validate\n• Identificare gap o incongruenze prima della firma\n• Verificare la completezza secondo la struttura dell\'Allegato A del DI 5 gennaio 2021 (7 sezioni)\n• Formulare dichiarazioni conformi al GDPR 2016/679 (minimizzazione dati, finalità chiara)\n• Gestire situazioni particolari: requisiti non completamente soddisfatti, evidenze con riserva, percorso interrotto\n• Spiegare il documento al volontario in linguaggio semplice e accessibile\n• Organizzare la procedura di firma: chi firma, dove, come e dove archiviare\n\nNormativa: Allegato A DI 5 gennaio 2021, Art. 5 DI 31/07/2025, GDPR 2016/679/UE.\nRispondi sempre in italiano. Sii preciso, normativo e orientato all\'azione.'
+};
+
+function getAISystemPrompt(agentId){
+  return (CHAT_SYS[agentId]||'Sei un assistente per il sistema HubS-TransparentIA.')+buildAIContext(agentId);
+}
+
+function renderChatPanel(agentId){
+  var key=getApiKey();
+  var color=AGENT_COLOR[agentId];
+  return '<div class="chat-panel">'
+    +'<div class="chat-toolbar">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="font-weight:700;color:'+color+';font-size:.88rem">🤖 '+AGENT_NAME[agentId]+'</span>'
+        +'<span class="badge badge-grey" style="font-size:.68rem">claude-haiku-4-5</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px">'
+        +'<input type="password" id="chat-key-'+agentId+'" value="'+escHtml(key)+'"'
+        +' placeholder="Anthropic API Key — sk-ant-..."'
+        +' style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:.76rem;font-family:monospace;background:#fff">'
+        +'<button class="btn btn-outline btn-sm" onclick="saveApiKeyFor(\''+agentId+'\')">💾 Salva</button>'
+        +'<button class="btn btn-outline btn-sm" onclick="clearAIChat(\''+agentId+'\')">🗑 Reset</button>'
+      +'</div>'
+      +'<div style="font-size:.7rem;color:var(--sub);margin-top:4px">Chiave in sessionStorage (solo questa sessione). → <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--sub)">console.anthropic.com/keys</a></div>'
+    +'</div>'
+    +'<div class="chat-messages" id="chatmsgs-'+agentId+'">'
+      +'<div style="text-align:center;padding:28px 16px;color:var(--sub)">'
+        +'<div style="font-size:2.2rem;margin-bottom:8px">🤖</div>'
+        +'<div style="font-size:.84rem;line-height:1.55">Assistente per <strong style="color:'+color+'">'+AGENT_NAME[agentId]+'</strong>.<br>'
+        +'Inserisci la tua API key Anthropic e inizia a fare domande.<br>'
+        +'<span style="font-size:.74rem">Ho accesso al contesto completo della sessione corrente.</span></div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="chat-footer">'
+      +'<textarea id="chatinp-'+agentId+'" rows="2"'
+        +' style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:.84rem;font-family:inherit;resize:none;min-width:0"'
+        +' placeholder="Scrivi la tua domanda… (Invio per inviare · Shift+Invio a capo)"'
+        +' onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendAIChat(\''+agentId+'\')}"></textarea>'
+      +'<button onclick="sendAIChat(\''+agentId+'\')"'
+        +' style="background:'+color+';color:#fff;border:none;border-radius:5px;padding:8px 16px;cursor:pointer;font-weight:700;font-family:inherit;font-size:.84rem;align-self:flex-end;flex-shrink:0;white-space:nowrap">'
+        +'Invia ↑'
+      +'</button>'
+    +'</div>'
+  +'</div>';
+}
+
+function chatMsgHtml(role,content){
+  var isUser=role==='user';
+  return '<div class="chat-msg'+(isUser?' user':'')+'">'
+    +'<div class="msg-avatar">'+(isUser?'👤':'🤖')+'</div>'
+    +'<div class="msg-bubble">'+escHtml(content)+'</div>'
+    +'</div>';
+}
+
+function saveApiKeyFor(agentId){
+  var inp=el('chat-key-'+agentId);
+  var key=inp&&inp.value.trim();
+  if(!key){alert('Inserisci una chiave valida (inizia con sk-ant-...)');return;}
+  sessionStorage.setItem('hubs_apikey',key);
+  ['a1','a2','a3','a4','a5'].forEach(function(id){var e=el('chat-key-'+id);if(e)e.value=key;});
+  alert('Chiave API Anthropic salvata per questa sessione browser.');
+}
+
+function clearAIChat(agentId){
+  CHAT.history[agentId]=[];
+  var msgs=el('chatmsgs-'+agentId);
+  if(msgs) msgs.innerHTML='<div class="chat-thinking">Conversazione azzerata.</div>';
+}
+
+async function sendAIChat(agentId){
+  var apiKey=getApiKey()||(el('chat-key-'+agentId)||{}).value||'';
+  if(!apiKey){alert('Inserisci la tua Anthropic API key prima di inviare.');return;}
+  if(apiKey!==getApiKey()) sessionStorage.setItem('hubs_apikey',apiKey);
+  var inpEl=el('chatinp-'+agentId);
+  var text=(inpEl&&inpEl.value||'').trim();
+  if(!text||CHAT.loading[agentId]) return;
+  CHAT.loading[agentId]=true;
+  if(inpEl) inpEl.value='';
+  if(!CHAT.history[agentId]) CHAT.history[agentId]=[];
+  CHAT.history[agentId].push({role:'user',content:text});
+  var msgs=el('chatmsgs-'+agentId);
+  if(msgs){
+    msgs.innerHTML=CHAT.history[agentId].map(function(m){return chatMsgHtml(m.role,m.content);}).join('')
+      +'<div class="chat-thinking">🤖 elaboro…</div>';
+    msgs.scrollTop=msgs.scrollHeight;
+  }
+  try{
+    var reply=await callClaudeAPI(CHAT.history[agentId],getAISystemPrompt(agentId),apiKey);
+    CHAT.history[agentId].push({role:'assistant',content:reply});
+  }catch(err){
+    CHAT.history[agentId].push({role:'assistant',content:'⚠ Errore: '+err.message+'\n\nVerifica API key e credito Anthropic.'});
+  }
+  CHAT.loading[agentId]=false;
+  if(msgs){
+    msgs.innerHTML=CHAT.history[agentId].map(function(m){return chatMsgHtml(m.role,m.content);}).join('');
+    msgs.scrollTop=msgs.scrollHeight;
+  }
+}
+
+async function callClaudeAPI(messages,systemPrompt,apiKey){
+  var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-allow-browser':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:1500,
+      system:systemPrompt,
+      messages:messages.map(function(m){return {role:m.role,content:m.content};})
+    })
+  });
+  if(!resp.ok){
+    var msg='HTTP '+resp.status;
+    try{var e=await resp.json();msg=e.error&&e.error.message?e.error.message:msg;}catch(x){}
+    throw new Error(msg);
+  }
+  var data=await resp.json();
+  return data.content[0].text;
+}
+
+function initChatSystem(){
+  ['a1','a2','a3','a4','a5'].forEach(function(agentId){
+    var screen=el('screen-'+agentId);
+    if(!screen||el(agentId+'-mpane')) return;
+    var hdr=screen.querySelector('.agent-hdr');
+    var footer=screen.querySelector('.agent-nav-footer');
+    if(!hdr) return;
+    var all=Array.from(screen.childNodes);
+    var hi=all.indexOf(hdr);
+    var fi=footer?all.indexOf(footer):all.length;
+    var between=all.slice(hi+1,fi);
+    var mp=document.createElement('div');
+    mp.id=agentId+'-mpane';
+    between.forEach(function(n){mp.appendChild(n);});
+    var cp=document.createElement('div');
+    cp.id=agentId+'-cpane';
+    cp.style.display='none';
+    var tb=document.createElement('div');
+    tb.className='agent-tab-bar';
+    tb.id=agentId+'-atbar';
+    var ac=AGENT_COLOR[agentId];
+    tb.innerHTML='<button class="atabtn atabtn-act" id="'+agentId+'-atn-m" style="--atc:'+ac+'" onclick="showAgentTab(\''+agentId+'\',\'main\')">'+AGENT_MAIN_LBL[agentId]+'</button>'
+      +'<button class="atabtn" id="'+agentId+'-atn-c" style="--atc:'+ac+'" onclick="showAgentTab(\''+agentId+'\',\'ai\')">🤖 Assistente AI</button>';
+    if(footer){
+      screen.insertBefore(tb,footer);
+      screen.insertBefore(mp,footer);
+      screen.insertBefore(cp,footer);
+    }else{
+      screen.appendChild(tb);
+      screen.appendChild(mp);
+      screen.appendChild(cp);
+    }
+  });
+}
+
+function showAgentTab(agentId,which){
+  var mp=el(agentId+'-mpane'),cp=el(agentId+'-cpane');
+  var bm=el(agentId+'-atn-m'),bc=el(agentId+'-atn-c');
+  if(!mp||!cp) return;
+  if(which==='ai'){
+    mp.style.display='none';cp.style.display='block';
+    bm&&bm.classList.remove('atabtn-act');bc&&bc.classList.add('atabtn-act');
+    if(!cp.innerHTML.trim()) cp.innerHTML=renderChatPanel(agentId);
+    var k=el('chat-key-'+agentId);if(k&&!k.value) k.value=getApiKey();
+  }else{
+    mp.style.display='block';cp.style.display='none';
+    bc&&bc.classList.remove('atabtn-act');bm&&bm.classList.add('atabtn-act');
+  }
+}
+
+// ── End Chat AI System ──────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  initA2();
+  renderEvidenze();
+  renderA4Step(1);
+  updateSidebar();
+  // restore session name input if set
+  const wsn=el('ws-name'); if(wsn) wsn.value=S.meta.name||'';
+  // bind presence recalc to checkboxes
+  ['a1-req-primaInfo','a1-req-progetto','a1-req-tutoraggio','a1-req-doc'].forEach(id=>{
+    const e=el(id); if(e) e.addEventListener('change',calcPresenza);
+  });
+  // inject AI chat tabs into all agent screens
+  initChatSystem();
+});
+</script>
+</body>
+</html>
+
+
