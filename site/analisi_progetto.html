@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analisi 5.3 — HubS-TransparentIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --text:#111827;--sub:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;
+  --shadow:0 1px 4px rgba(0,0,0,.06);--radius:10px;
+  --accent:#EA580C;--accent-dark:#C2410C;--accent-light:#FFF7ED;--accent-border:#FED7AA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
+
+/* ── Header ── */
+header{background:var(--text);color:#fff;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff;font-weight:800;font-size:1.05rem}
+.logo span{color:#9CA3AF;font-weight:500}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:.82rem;color:#9CA3AF}
+.breadcrumb a{color:#9CA3AF;text-decoration:none;transition:.1s}
+.breadcrumb a:hover{color:#fff}
+.btn-back{display:flex;align-items:center;gap:6px;color:#9CA3AF;text-decoration:none;font-size:.82rem;padding:6px 12px;border:1px solid #374151;border-radius:6px;transition:.12s}
+.btn-back:hover{color:#fff;border-color:#6B7280}
+
+/* ── Layout ── */
+.wrapper{display:flex;flex:1;overflow:hidden}
+
+/* ── Sidebar ── */
+aside{width:220px;background:var(--white);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;overflow-y:auto}
+.aside-section{padding:10px 16px 4px;font-size:.68rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+aside a{display:flex;align-items:center;gap:10px;padding:8px 16px;color:#374151;text-decoration:none;font-size:.85rem;transition:.1s;border-left:3px solid transparent}
+aside a:hover{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent-border)}
+aside a.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:700}
+aside a i{width:16px;text-align:center;flex-shrink:0}
+
+/* ── Main ── */
+main{flex:1;overflow-y:auto;padding:28px;max-width:980px;margin:0 auto;width:100%}
+
+/* ── Page head ── */
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.45rem;font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.page-head h1 i{color:var(--accent)}
+.page-head p{color:var(--sub);font-size:.88rem;max-width:700px;line-height:1.65}
+
+/* ── Step indicator ── */
+.steps-ind{display:flex;align-items:center;gap:0;margin-bottom:28px}
+.si{display:flex;align-items:center;gap:8px}
+.si-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--white);color:var(--sub);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.si-label{font-size:.8rem;color:var(--sub);font-weight:500;white-space:nowrap}
+.si.active .si-num{border-color:var(--accent);background:var(--accent);color:#fff}
+.si.active .si-label{color:var(--accent);font-weight:700}
+.si.done .si-num{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.si-conn{flex:1;height:2px;background:var(--border);margin:0 10px;min-width:16px;max-width:56px;transition:background .3s}
+.si-conn.done{background:var(--accent)}
+
+/* ── Card ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--accent)}
+
+/* ── Form ── */
+.form-group{margin-bottom:16px}
+label{display:block;font-size:.83rem;font-weight:600;margin-bottom:5px;color:var(--text)}
+input[type=text],select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;color:var(--text);background:var(--white);transition:border-color .15s}
+input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(234,88,12,.1)}
+textarea{min-height:210px;resize:vertical;line-height:1.65}
+.form-hint{font-size:.77rem;color:var(--sub);margin-top:5px;display:flex;align-items:flex-start;gap:5px}
+.form-hint i{margin-top:1px;flex-shrink:0}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.lbl-opt{color:var(--sub);font-weight:400;font-size:.78rem}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 17px;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:.15s;font-family:'Inter',sans-serif;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:disabled{background:#D1D5DB;cursor:not-allowed}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn-outline:hover{background:var(--accent-light)}
+.btn-ghost{background:transparent;color:var(--sub);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-lg{padding:12px 22px;font-size:.95rem}
+
+/* ── Loading ── */
+.loading-wrap{text-align:center;padding:56px 20px}
+.spinner{width:46px;height:46px;border:4px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:.92rem;color:var(--sub);font-style:italic;margin-top:10px}
+.loading-title{font-weight:700;font-size:1rem;margin-bottom:6px}
+
+/* ── Quality badge ── */
+.qbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;font-size:.8rem;font-weight:700}
+.q-ottima{background:#DCFCE7;color:#166534}
+.q-buona{background:#FEF9C3;color:#854D0E}
+.q-scarsa{background:#FEE2E2;color:#991B1B}
+
+/* ── Activity pills ── */
+.activities-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.activity-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:20px;font-size:.81rem;color:var(--accent-dark);font-weight:500}
+
+/* ── Mapping cards ── */
+.mapping-grid{display:flex;flex-direction:column;gap:14px}
+.mc{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.mc-head{padding:13px 16px;background:var(--accent-light);border-bottom:1px solid var(--accent-border);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;user-select:none}
+.mc-head:hover{background:#FEE9D4}
+.mc-title{font-weight:700;font-size:.9rem;color:var(--accent-dark);display:flex;align-items:center;gap:8px;min-width:0}
+.mc-title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-meta{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.badge-ada{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.badge-lv{background:#fff;border:1px solid var(--accent-border);color:var(--accent-dark);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.mc-body{padding:16px;display:none}
+.mc-body.open{display:block}
+.dr{display:grid;grid-template-columns:120px 1fr;gap:8px;margin-bottom:10px;align-items:start}
+.dl{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;padding-top:3px}
+.dv{font-size:.84rem;color:var(--text);line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:3px 9px;border-radius:10px;font-size:.74rem;font-weight:600}
+.chip-dc{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.chip-lc{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+.chip-ec{background:#FDF4FF;color:#7C3AED;border:1px solid #E9D5FF}
+.chip-ra{background:#F9FAFB;color:#374151;border:1px solid #E5E7EB;font-family:monospace;font-size:.7rem}
+.chip-ck{background:#F0F9FF;color:#0369A1;border:1px solid #BAE6FD}
+.motiv{background:#FAFAFA;border-left:3px solid var(--accent);padding:9px 13px;border-radius:0 8px 8px 0;font-size:.82rem;color:#374151;line-height:1.6;margin-top:8px;font-style:italic}
+
+/* ── 6D Table ── */
+.table-wrap{overflow-x:auto}
+table.t6d{width:100%;border-collapse:collapse;font-size:.81rem}
+table.t6d th{background:var(--accent);color:#fff;padding:10px 11px;text-align:left;font-weight:700;white-space:nowrap}
+table.t6d td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+table.t6d tr:hover td{background:#FFF7ED}
+.ada-cell-code{font-weight:700;color:var(--accent);font-size:.82rem}
+.ada-cell-name{font-size:.76rem;color:var(--sub);margin-top:2px}
+
+/* ── Note box ── */
+.note-box{background:var(--accent-light);border:1px solid var(--accent-border);border-radius:8px;padding:13px 15px;margin-top:16px}
+.note-box-title{font-size:.8rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.note-box p{font-size:.83rem;color:#374151;line-height:1.6}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab-btn{padding:9px 16px;font-size:.85rem;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.12s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── Quality bar ── */
+.quality-bar{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--shadow)}
+.qb-left{}
+.qb-label{font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.qb-right{font-size:.83rem;color:var(--sub);max-width:480px;line-height:1.5;font-style:italic}
+
+/* ── Actions bar ── */
+.actions-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 0 0;border-top:1px solid var(--border);margin-top:22px}
+.ab-left{display:flex;gap:9px;flex-wrap:wrap}
+.ab-right{font-size:.76rem;color:var(--sub);max-width:280px;text-align:right;line-height:1.5}
+
+/* ── Helpers ── */
+.hidden{display:none!important}
+.section-label{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;margin-top:20px}
+.empty-state{text-align:center;padding:32px;color:var(--sub);font-size:.88rem}
+
+/* ── Chev ── */
+.chev{flex-shrink:0;font-size:.72rem;transition:transform .18s;color:var(--accent)}
+
+@media(max-width:660px){
+  .form-row{grid-template-columns:1fr}
+  main{padding:14px}
+  aside{display:none}
+  .breadcrumb{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header>
+  <a class="logo" href="/"><i class="fa-solid fa-network-wired"></i>HubS<span>-TransparentIA</span></a>
+  <div class="breadcrumb">
+    <a href="/"><i class="fa-solid fa-house" style="font-size:.7rem"></i></a>
+    <span style="color:#4B5563;margin:0 4px">›</span>
+    <span>Analisi Voce 5.3</span>
+  </div>
+  <a class="btn-back" href="/guida"><i class="fa-solid fa-book-open"></i> Guida</a>
+</header>
+
+<div class="wrapper">
+
+<!-- ════ SIDEBAR ════ -->
+<aside>
+  <div class="aside-section">Strumenti</div>
+  <a href="/analisi-progetto" class="active"><i class="fa-solid fa-magnifying-glass-chart"></i> Analisi 5.3</a>
+  <a href="/"><i class="fa-solid fa-network-wired"></i> Sistema HubS</a>
+  <a href="/mappatore"><i class="fa-solid fa-map-location-dot"></i> Mappatore ADA</a>
+  <div class="aside-section">Guide</div>
+  <a href="/guida"><i class="fa-solid fa-book-open"></i> Guida completa</a>
+  <a href="https://atlantelavoro.inapp.org" target="_blank" rel="noopener"><i class="fa-solid fa-map"></i> Atlante INAPP</a>
+  <a href="https://www.inapp.gov.it/it/documenti-e-pubblicazioni/repertorio-nazionale-dei-titoli-di-istruzione-e-formazione-e-delle-qualificazioni-professionali" target="_blank" rel="noopener"><i class="fa-solid fa-scale-balanced"></i> Repertorio INAPP</a>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main>
+
+  <!-- Page head -->
+  <div class="page-head">
+    <h1><i class="fa-solid fa-magnifying-glass-chart"></i> Analisi Voce 5.3 del Progetto</h1>
+    <p>Incolla la voce 5.3 del progetto SCU: l'AI identifica le attività operative, le mappa sulle ADA dell'Atlante INAPP e genera la sezione 6D del documento di trasparenza.</p>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps-ind">
+    <div class="si active" id="si1"><div class="si-num">1</div><div class="si-label">Input 5.3</div></div>
+    <div class="si-conn" id="sc1"></div>
+    <div class="si" id="si2"><div class="si-num">2</div><div class="si-label">Analisi AI</div></div>
+    <div class="si-conn" id="sc2"></div>
+    <div class="si" id="si3"><div class="si-num">3</div><div class="si-label">Risultati</div></div>
+  </div>
+
+  <!-- ─── STEP 1: INPUT ─── -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-file-lines"></i> Dati del Progetto</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome progetto <span class="lbl-opt">(opzionale)</span></label>
+          <input type="text" id="f-progetto" placeholder="Es. Giovani in Rete — SCU 2025">
+        </div>
+        <div class="form-group">
+          <label>Operatore Volontario <span class="lbl-opt">(opzionale)</span></label>
+          <input type="text" id="f-ov" placeholder="Es. Mario Rossi">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Settore di intervento</label>
+          <select id="f-settore">
+            <option value="">— Seleziona —</option>
+            <option value="assistenza">Assistenza</option>
+            <option value="educazione">Educazione e promozione culturale</option>
+            <option value="tutoraggio">Tutoraggio e formazione</option>
+            <option value="ambiente">Ambiente</option>
+            <option value="patrimonio">Patrimonio artistico e culturale</option>
+            <option value="sport">Sport e benessere</option>
+            <option value="protezione_civile">Protezione civile</option>
+            <option value="immigrazione">Immigrazione e integrazione</option>
+            <option value="sanita">Sanità e promozione salute</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Profilo OV nel progetto <span class="lbl-opt">(opzionale)</span></label>
+          <input type="text" id="f-ruolo" placeholder="Es. supporto tutoraggio scolastico">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Voce 5.3 — Descrizione attività del progetto *</label>
+        <textarea id="f-testo" placeholder="Incolla qui il testo della voce 5.3 del progetto...
+
+Esempio:
+Gli operatori volontari saranno impegnati nelle seguenti attività:
+- Accoglienza e prima informazione agli utenti del servizio
+- Supporto alla gestione degli appuntamenti e aggiornamento del database dei beneficiari
+- Accompagnamento degli utenti fragili ai servizi territoriali
+- Affiancamento ai colloqui di orientamento per la costruzione del CV
+- Gestione dei materiali informativi e delle bacheche di servizio"></textarea>
+        <div class="form-hint">
+          <i class="fa-solid fa-circle-info" style="font-size:.72rem;color:var(--accent)"></i>
+          <span>Testi operativi e concreti (verbi d'azione, attività specifiche) producono mappature più precise. Descrizioni vaghe come "supporto alle attività" non sono mappabili su ADA specifiche.</span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+        <button class="btn btn-primary btn-lg" onclick="avviaAnalisi()">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Analizza con AI
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 2: LOADING ─── -->
+  <div id="step2" class="hidden">
+    <div class="card">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <div class="loading-title">Analisi in corso…</div>
+        <div class="loading-msg" id="loading-msg">Lettura della voce 5.3 in corso…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 3: RISULTATI ─── -->
+  <div id="step3" class="hidden">
+
+    <!-- Quality bar -->
+    <div class="quality-bar">
+      <div class="qb-left">
+        <div class="qb-label">Qualità input voce 5.3</div>
+        <span class="qbadge" id="qbadge">—</span>
+      </div>
+      <div class="qb-right" id="qnota"></div>
+      <button class="btn btn-ghost" onclick="resetTool()"><i class="fa-solid fa-arrow-left"></i> Modifica input</button>
+    </div>
+
+    <!-- Results card -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('attivita')"><i class="fa-solid fa-list-check"></i> Attività</button>
+        <button class="tab-btn" onclick="switchTab('mappatura')"><i class="fa-solid fa-folder-tree"></i> Mappatura ADA/RA</button>
+        <button class="tab-btn" onclick="switchTab('tabella')"><i class="fa-solid fa-table"></i> Sezione 6D</button>
+      </div>
+
+      <!-- Tab: Attività -->
+      <div class="tab-pane active" id="tab-attivita">
+        <div class="section-label" style="margin-top:0">Attività operative identificate</div>
+        <div class="activities-list" id="act-list"></div>
+
+        <div id="ck-wrap" style="margin-top:20px">
+          <div class="section-label">Competenze chiave di cittadinanza</div>
+          <div class="chips" id="ck-list"></div>
+        </div>
+
+        <div class="note-box" id="note-wrap" style="margin-top:16px">
+          <div class="note-box-title"><i class="fa-solid fa-comment-dots"></i> Note per il Validatore</div>
+          <p id="note-text"></p>
+        </div>
+      </div>
+
+      <!-- Tab: Mappatura -->
+      <div class="tab-pane" id="tab-mappatura">
+        <div class="mapping-grid" id="mapping-grid">
+          <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Tab: 6D -->
+      <div class="tab-pane" id="tab-tabella">
+        <div class="table-wrap">
+          <table class="t6d">
+            <thead>
+              <tr>
+                <th>Attività OV</th>
+                <th>ADA</th>
+                <th>Risultati Attesi (RA)</th>
+                <th>Livello</th>
+                <th>DigComp 2.2</th>
+                <th>LifeComp</th>
+                <th>EntreComp</th>
+              </tr>
+            </thead>
+            <tbody id="tbody6d"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-bar">
+        <div class="ab-left">
+          <button class="btn btn-primary" onclick="downloadDoc()"><i class="fa-regular fa-file-word"></i> Scarica Sezione 6D (.doc)</button>
+          <button class="btn btn-outline" onclick="switchTab('tabella');setTimeout(copyTable,50)"><i class="fa-solid fa-copy"></i> Copia tabella</button>
+        </div>
+        <div class="ab-right">Verifica la mappatura con un esperto certificatore prima di usarla in documenti ufficiali.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// SYSTEM PROMPT
+// ══════════════════════════════════════════════════════════
+const SYS = `Sei un esperto certificatore di competenze del servizio civile universale italiano, specializzato nell'Atlante del Lavoro e delle Qualificazioni INAPP, nel Quadro EQF e nei framework DigComp 2.2, LifeComp, EntreComp.
+
+## IL TUO COMPITO
+Analizzare la voce 5.3 di un progetto SCU → estrarre le attività operative concrete → mapparle su ADA e RA dell'Atlante INAPP → assegnare livelli e competenze trasversali.
+
+## DATABASE ADA — SETTORE 18.01 (Orientamento, consulenza, tutoraggio) — PRIORITÀ MASSIMA in progetti SCU
+
+ADA.18.01.06 — Accoglienza e guida ai servizi per l'occupabilità e l'apprendimento permanente
+  RA.18.01.06.1: Realizzare la prima accoglienza nei servizi, espletando pratiche amministrative di inserimento/aggiornamento dati utenti e fornendo informazioni sulle finalità del servizio
+
+ADA.18.01.07 — Orientamento informativo
+  RA.18.01.07.1: Realizzare incontri individuali/gruppo per divulgazione informazioni su mercato del lavoro e offerta formativa
+  RA.18.01.07.2: Realizzare iniziative per l'orientamento in centri dedicati e stand fieristici
+  RA.18.01.07.3: Gestire sistemi integrati di informazione (bacheche fisiche e virtuali), ricercando e catalogando fonti informative
+
+ADA.18.01.08 — Analisi della domanda e definizione del patto di servizio
+  RA.18.01.08.1: Approfondire l'analisi della situazione della persona, dei bisogni e motivazioni, indirizzandola ai servizi appropriati
+  RA.18.01.08.2: Offrire informazioni su opportunità formative e professionali, supportare nella stesura del CV
+  RA.18.01.08.3: Predisporre il patto di servizio e il relativo piano di azione
+
+ADA.18.01.09 — Consulenza orientativa e bilancio di competenze
+  RA.18.01.09.1: Progettare interventi consulenziali individuali e di gruppo con analisi dei fabbisogni
+  RA.18.01.09.2: Ricostruire il patrimonio di competenze della persona tramite colloqui integrati
+  RA.18.01.09.3: Accompagnare le persone nella costruzione del progetto professionale
+  RA.18.01.09.4: Elaborare documentazione per monitoraggio e valutazione del servizio
+
+ADA.18.01.10 — Supporto e accompagnamento alle transizioni e all'inserimento lavorativo
+  RA.18.01.10.1: Monitorare le fasi di passaggio tra cicli di studio e canali formativi
+  RA.18.01.10.2: Realizzare azioni di prevenzione del disagio nelle fasi di transizione
+  RA.18.01.10.3: Progettare percorsi personalizzati per soggetti in difficoltà nel percorso formativo/lavorativo
+  RA.18.01.10.4: Attivare interventi di accompagnamento all'inserimento lavorativo e piani individualizzati
+
+ADA.18.01.11 — Personalizzazione degli interventi formativi
+  RA.18.01.11.1: Valutare la coerenza dell'intervento formativo con le competenze degli utenti
+  RA.18.01.11.2: Progettare e adattare percorsi formativi personalizzati
+  RA.18.01.11.3: Monitorare l'avanzamento degli apprendimenti e proporre adattamenti
+
+ADA.18.01.13 — Erogazione delle attività didattiche
+  RA.18.01.13.1: Condurre sessioni formative individuali e di gruppo
+  RA.18.01.13.2: Gestire materiali didattici e risorse formative
+  RA.18.01.13.3: Valutare gli apprendimenti e fornire feedback ai partecipanti
+
+ADA.18.01.14 — Tutoraggio in apprendimento
+  RA.18.01.14.1: Supportare gli apprendenti nel percorso di acquisizione delle competenze
+  RA.18.01.14.2: Monitorare il processo di apprendimento e proporre adattamenti
+  RA.18.01.14.3: Favorire la motivazione e la partecipazione attiva degli apprendenti
+
+ADA.18.01.17 — Supporto all'individuazione e alla messa in trasparenza delle competenze
+  RA.18.01.17.1: Supportare la persona nella ricostruzione del proprio percorso formativo/lavorativo
+  RA.18.01.17.2: Assistere nella compilazione del portfolio delle competenze
+  RA.18.01.17.3: Supportare la formalizzazione delle competenze in documenti riconoscibili
+
+## ALTRI SETTORI ADA — usa quando le attività esulano dal 18.01
+
+ADA.07.03 — Assistenza tutelare e cura della persona
+  RA.07.03.1: Assistere le persone nelle attività quotidiane di cura della persona
+  RA.07.03.2: Supportare le attività di animazione e socializzazione
+  RA.07.03.3: Monitorare le condizioni di salute e benessere degli assistiti
+
+ADA.07.04 — Supporto socio-educativo a minori e famiglie
+  RA.07.04.1: Supportare i minori nelle attività educative e di crescita
+  RA.07.04.2: Realizzare attività di animazione educativa e laboratoriale
+  RA.07.04.3: Supportare le famiglie in situazioni di difficoltà
+
+ADA.02.04 — Supporto ai percorsi di apprendimento scolastico
+  RA.02.04.1: Supportare gli studenti nelle attività di studio e apprendimento (doposcuola, tutoraggio)
+  RA.02.04.2: Assistere nell'uso di strumenti e metodologie didattiche
+  RA.02.04.3: Monitorare i progressi degli studenti e segnalare difficoltà
+
+ADA.14.04 — Gestione della comunicazione istituzionale
+  RA.14.04.1: Gestire i canali di comunicazione (social, sito web, newsletter)
+  RA.14.04.2: Realizzare materiali informativi, grafici e di comunicazione
+  RA.14.04.3: Gestire le relazioni con il pubblico e rispondere alle richieste di informazioni
+
+ADA.10.01 — Attività di segreteria e supporto amministrativo
+  RA.10.01.1: Gestire la corrispondenza, l'archiviazione e il protocollo documentale
+  RA.10.01.2: Gestire agende, appuntamenti e prenotazioni
+  RA.10.01.3: Supportare nella gestione di banche dati e sistemi informativi
+
+ADA.13.03 — Organizzazione di eventi culturali e ricreativi
+  RA.13.03.1: Pianificare e organizzare eventi culturali, ricreativi e sportivi
+  RA.13.03.2: Gestire la logistica e l'allestimento degli eventi
+  RA.13.03.3: Supportare la realizzazione di attività creative e culturali
+
+ADA.06.01 — Tutela e valorizzazione ambientale
+  RA.06.01.1: Condurre attività di monitoraggio ambientale del territorio
+  RA.06.01.2: Realizzare interventi di tutela e valorizzazione del patrimonio naturale
+  RA.06.01.3: Supportare campagne di sensibilizzazione e educazione ambientale
+
+ADA.09.02 — Promozione della salute e prevenzione
+  RA.09.02.1: Realizzare campagne di promozione della salute e prevenzione
+  RA.09.02.2: Supportare attività di educazione alla salute in contesti comunitari
+  RA.09.02.3: Assistere in servizi di ascolto, supporto e accompagnamento alla persona
+
+## FRAMEWORK COMPETENZE TRASVERSALI
+
+### DigComp 2.2 (usa formato "N.N Nome"):
+1.1 Navigare, ricercare e filtrare | 1.2 Valutare dati e contenuti | 1.3 Gestire dati e contenuti
+2.1 Interagire con tecnologie digitali | 2.2 Condividere informazioni digitali | 2.3 Impegnarsi nella cittadinanza digitale | 2.4 Collaborare con strumenti digitali | 2.5 Netiquette | 2.6 Gestire l'identità digitale
+3.1 Creare contenuti digitali | 3.2 Integrare e rielaborare contenuti | 3.3 Copyright e licenze | 3.4 Programmazione
+4.1 Proteggere i dispositivi | 4.2 Privacy e dati personali | 4.3 Proteggere la salute digitale | 4.4 Proteggere l'ambiente
+5.1 Risolvere problemi tecnici | 5.2 Personalizzare ambienti digitali | 5.3 Innovare creativamente | 5.4 Identificare gap digitali
+
+### LifeComp (usa il nome):
+Area Personale: Regolazione emotiva, Flessibilità e adattabilità, Benessere personale
+Area Sociale: Empatia, Comunicazione efficace, Cooperazione
+Area Apprendimento: Mentalità di crescita, Pensiero critico e riflessivo, Gestione dell'apprendimento
+
+### EntreComp (usa il nome):
+Idee e Opportunità: Creatività, Problem solving, Visione prospettica, Valorizzazione delle idee, Pensiero etico e sostenibile
+Risorse: Motivazione e perseveranza, Risorse economiche, Risorse cognitive e pratiche, Mobilitare e coinvolgere gli altri
+In Azione: Progettare e pianificare, Imparare dall'esperienza, Cooperare e lavorare in team, Gestire incertezza e rischio
+
+### Competenze chiave di cittadinanza (DI 31/07/2025):
+1.Comunicazione nella madrelingua, 2.Comunicazione in lingue straniere, 3.Competenza matematica e in scienze/tecnologia, 4.Competenza digitale, 5.Imparare a imparare, 6.Competenze sociali e civiche, 7.Spirito di iniziativa e imprenditorialità, 8.Consapevolezza ed espressione culturale
+
+## REGOLE CRITICHE
+
+ESTRAZIONE ATTIVITÀ: identifica solo attività OPERATIVE con verbi d'azione concreti (gestire, condurre, supportare, monitorare, elaborare, accompagnare, realizzare…). Ignora descrizioni vaghe: "collaborare con l'OLP", "supportare le attività dell'ente", "affiancamento", "partecipazione".
+
+SELEZIONE ADA: scegli l'ADA che meglio rispecchia l'attività. Non forzare tutto nel 18.01. Se un'attività è chiaramente di assistenza alla persona → 07.03; se è amministrativa → 10.01; ecc.
+
+SELEZIONE RA: includi solo i RA coperti dall'attività specifica. Non mappare RA non pertinenti.
+
+LIVELLI (nel SCU quasi sempre 1 o 2):
+  1 = Esecuzione con supervisione diretta (istruzioni definite, attività routinarie)
+  2 = Autonomia parziale (esegue in autonomia con supervisione periodica)
+  3 = Autonomia avanzata (gestisce situazioni complesse, ampia autonomia decisionale)
+
+FRAMEWORK: scegli solo le competenze effettivamente attivate. Massimo 3 per framework. Non mapparle meccanicamente.
+
+QUALITÀ INPUT:
+  "ottima" = attività specifiche, verbi d'azione, descrivono cosa fa concretamente l'OV
+  "buona" = mix di attività concrete e descrizioni generiche
+  "scarsa" = prevalentemente vago, difficile mappare su ADA specifiche
+
+## OUTPUT — RESTITUISCI ESCLUSIVAMENTE JSON, nessun testo prima o dopo
+
+{
+  "qualità_input": "ottima|buona|scarsa",
+  "nota_qualità": "1-2 frasi sulla qualità del testo voce 5.3",
+  "attività_estratte": ["attività operativa 1", "attività operativa 2"],
+  "mappatura": [
+    {
+      "attività": "nome breve dell'attività (max 65 caratteri)",
+      "ada_code": "ADA.XX.XX.XX",
+      "ada_nome": "nome esteso ADA",
+      "ra": ["RA.XX.XX.XX.X"],
+      "livello": 2,
+      "digcomp": ["2.1 Interagire con tecnologie digitali"],
+      "lifecomp": ["Comunicazione efficace"],
+      "entrecomp": ["Cooperare e lavorare in team"],
+      "motivazione": "Perché questa ADA e questi RA (max 2 frasi)."
+    }
+  ],
+  "competenze_chiave_cittadinanza": ["Competenze sociali e civiche"],
+  "note_validatore": "2-3 frasi: cosa chiedere all'OV nel colloquio di verifica per confermare le competenze dichiarate."
+}`;
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let result = null;
+
+// ══════════════════════════════════════════════════════════
+// STEP MANAGEMENT
+// ══════════════════════════════════════════════════════════
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('step'+i).classList.toggle('hidden', i!==n);
+    const si = document.getElementById('si'+i);
+    si.className = 'si' + (i===n ? ' active' : i<n ? ' done' : '');
+  });
+  [1,2].forEach(i => {
+    document.getElementById('sc'+i).classList.toggle('done', n>i);
+  });
+  if(n===1) window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB MANAGEMENT
+// ══════════════════════════════════════════════════════════
+function switchTab(id) {
+  const tabs = ['attivita','mappatura','tabella'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i]===id));
+  tabs.forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===id));
+}
+
+// ══════════════════════════════════════════════════════════
+// ANALYSIS
+// ══════════════════════════════════════════════════════════
+const MSGS = [
+  'Lettura della voce 5.3 in corso…',
+  'Identificazione delle attività operative…',
+  'Ricerca delle ADA nell\'Atlante INAPP…',
+  'Mappatura su RA, DigComp, LifeComp, EntreComp…',
+  'Generazione della sezione 6D…',
+  'Verifica della coerenza dei risultati…'
+];
+
+async function avviaAnalisi() {
+  const testo = document.getElementById('f-testo').value.trim();
+  if (!testo || testo.length < 40) {
+    alert('Inserisci la voce 5.3 del progetto (almeno qualche riga di testo).');
+    return;
+  }
+
+  const meta = {
+    progetto: document.getElementById('f-progetto').value.trim(),
+    ov: document.getElementById('f-ov').value.trim(),
+    settore: document.getElementById('f-settore').options[document.getElementById('f-settore').selectedIndex].text,
+    ruolo: document.getElementById('f-ruolo').value.trim()
+  };
+
+  setStep(2);
+  const msgEl = document.getElementById('loading-msg');
+  let mi = 0;
+  const iv = setInterval(() => { mi = (mi+1)%MSGS.length; msgEl.textContent = MSGS[mi]; }, 2200);
+
+  try {
+    const userMsg = [
+      meta.progetto && `Progetto: ${meta.progetto}`,
+      meta.settore !== '— Seleziona —' && `Settore: ${meta.settore}`,
+      meta.ov && `OV: ${meta.ov}`,
+      meta.ruolo && `Profilo OV: ${meta.ruolo}`,
+      '',
+      'TESTO VOCE 5.3:',
+      testo,
+      '',
+      'Restituisci SOLO il JSON.'
+    ].filter(Boolean).join('\n');
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: SYS,
+        messages: [{role:'user', content: userMsg}]
+      })
+    });
+
+    clearInterval(iv);
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error || 'Errore API '+res.status);
+    }
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+
+    const m = text.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Risposta non JSON valida dall\'AI');
+
+    result = JSON.parse(m[0]);
+    result._meta = meta;
+
+    renderResults(result);
+    setStep(3);
+
+  } catch(e) {
+    clearInterval(iv);
+    console.error(e);
+    alert('Errore durante l\'analisi:\n' + e.message + '\n\nVerifica la connessione e riprova.');
+    setStep(1);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════
+function renderResults(d) {
+  // Quality badge
+  const qb = document.getElementById('qbadge');
+  const qmap = {ottima:['q-ottima','✓ Ottima'], buona:['q-buona','~ Buona'], scarsa:['q-scarsa','⚠ Scarsa']};
+  const [cls, lbl] = qmap[d.qualità_input] || ['','?'];
+  qb.className = 'qbadge '+cls;
+  qb.textContent = lbl;
+  document.getElementById('qnota').textContent = d.nota_qualità || '';
+
+  // Activities
+  document.getElementById('act-list').innerHTML =
+    (d.attività_estratte||[]).map(a =>
+      `<span class="activity-pill"><i class="fa-solid fa-check" style="font-size:.7rem"></i>${escHtml(a)}</span>`
+    ).join('');
+
+  // Competenze chiave
+  document.getElementById('ck-list').innerHTML =
+    (d.competenze_chiave_cittadinanza||[]).map(c =>
+      `<span class="chip chip-ck">${escHtml(c)}</span>`
+    ).join('');
+
+  // Note validatore
+  document.getElementById('note-text').textContent = d.note_validatore || '—';
+
+  // Mapping cards
+  const mg = document.getElementById('mapping-grid');
+  mg.innerHTML = (d.mappatura||[]).map((m,i) => `
+    <div class="mc">
+      <div class="mc-head" onclick="toggleCard(${i})">
+        <div class="mc-title">
+          <i class="fa-solid fa-chevron-right chev" id="chev${i}"></i>
+          <span title="${escHtml(m.attività)}">${escHtml(m.attività)}</span>
+        </div>
+        <div class="mc-meta">
+          <span class="badge-lv">Lv. ${m.livello}/3</span>
+          <span class="badge-ada">${escHtml(m.ada_code)}</span>
+        </div>
+      </div>
+      <div class="mc-body" id="mcb${i}">
+        <div class="dr">
+          <div class="dl">ADA</div>
+          <div class="dv"><strong>${escHtml(m.ada_code)}</strong> — ${escHtml(m.ada_nome)}</div>
+        </div>
+        <div class="dr">
+          <div class="dl">Risultati Attesi</div>
+          <div class="dv chips">${(m.ra||[]).map(r=>`<span class="chip chip-ra">${escHtml(r)}</span>`).join('')}</div>
+        </div>
+        <div class="dr">
+          <div class="dl">Livello</div>
+          <div class="dv">${getLvLabel(m.livello)}</div>
+        </div>
+        ${m.digcomp?.length ? `<div class="dr"><div class="dl">DigComp 2.2</div><div class="dv chips">${m.digcomp.map(x=>`<span class="chip chip-dc">${escHtml(x)}</span>`).join('')}</div></div>` : ''}
+        ${m.lifecomp?.length ? `<div class="dr"><div class="dl">LifeComp</div><div class="dv chips">${m.lifecomp.map(x=>`<span class="chip chip-lc">${escHtml(x)}</span>`).join('')}</div></div>` : ''}
+        ${m.entrecomp?.length ? `<div class="dr"><div class="dl">EntreComp</div><div class="dv chips">${m.entrecomp.map(x=>`<span class="chip chip-ec">${escHtml(x)}</span>`).join('')}</div></div>` : ''}
+        <div class="motiv">${escHtml(m.motivazione||'')}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // 6D table
+  document.getElementById('tbody6d').innerHTML =
+    (d.mappatura||[]).map(m => `
+      <tr>
+        <td><strong>${escHtml(m.attività)}</strong></td>
+        <td><div class="ada-cell-code">${escHtml(m.ada_code)}</div><div class="ada-cell-name">${escHtml(m.ada_nome)}</div></td>
+        <td style="font-size:.76rem">${(m.ra||[]).map(r=>`<div style="font-family:monospace;margin-bottom:3px">${escHtml(r)}</div>`).join('')}</td>
+        <td style="text-align:center;font-weight:700">${m.livello}<span style="font-weight:400;color:var(--sub)">/3</span></td>
+        <td style="font-size:.76rem">${(m.digcomp||[]).join('<br>')}</td>
+        <td style="font-size:.76rem">${(m.lifecomp||[]).join('<br>')}</td>
+        <td style="font-size:.76rem">${(m.entrecomp||[]).join('<br>')}</td>
+      </tr>
+    `).join('');
+}
+
+function toggleCard(i) {
+  const b = document.getElementById('mcb'+i);
+  const c = document.getElementById('chev'+i);
+  const open = b.classList.toggle('open');
+  c.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function getLvLabel(n) {
+  return ['','Livello 1 — Esecuzione con supervisione','Livello 2 — Autonomia parziale','Livello 3 — Autonomia avanzata'][n] || 'Livello '+n;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════
+function downloadDoc() {
+  if (!result) return;
+  const d = result;
+  const m = d._meta || {};
+
+  const rows = (d.mappatura||[]).map(r => `
+    <tr>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top">${r.attività}</td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top"><b>${r.ada_code}</b><br><span style="font-size:9pt;color:#555">${r.ada_nome}</span></td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top;font-size:9pt">${(r.ra||[]).join('<br>')}</td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;text-align:center;font-weight:bold;vertical-align:top">${r.livello}/3</td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top;font-size:9pt">${(r.digcomp||[]).join('; ')}</td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top;font-size:9pt">${(r.lifecomp||[]).join('; ')}</td>
+      <td style="padding:7pt 9pt;border:1pt solid #ccc;vertical-align:top;font-size:9pt">${(r.entrecomp||[]).join('; ')}</td>
+    </tr>`).join('');
+
+  const ckHtml = (d.competenze_chiave_cittadinanza||[]).map(c=>`<li>${c}</li>`).join('');
+  const today = new Date().toLocaleDateString('it-IT');
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>
+  body{font-family:Calibri,sans-serif;font-size:11pt;margin:2cm}
+  h1{font-size:16pt;color:#C2410C;margin-bottom:6pt}
+  h2{font-size:12pt;color:#EA580C;margin-top:16pt;margin-bottom:6pt;border-bottom:1pt solid #FED7AA;padding-bottom:3pt}
+  table{border-collapse:collapse;width:100%;margin-top:8pt}
+  th{background:#EA580C;color:white;padding:7pt 9pt;border:1pt solid #ccc;font-size:9.5pt;text-align:left}
+  p,li{font-size:10.5pt;line-height:1.5;margin:3pt 0}
+  .meta{color:#666;font-size:9.5pt}
+  .nota{background:#FFF7ED;border-left:3pt solid #EA580C;padding:8pt 12pt;margin-top:12pt;font-style:italic;font-size:10pt}
+  .footer{color:#999;font-size:8pt;margin-top:24pt;border-top:1pt solid #eee;padding-top:6pt}
+</style>
+</head>
+<body>
+<h1>Documento di Trasparenza — Sezione 6D</h1>
+<div class="meta">
+  ${m.progetto ? `<p><b>Progetto:</b> ${m.progetto}</p>` : ''}
+  ${m.ov ? `<p><b>Operatore Volontario:</b> ${m.ov}</p>` : ''}
+  ${m.settore && m.settore !== '— Seleziona —' ? `<p><b>Settore:</b> ${m.settore}</p>` : ''}
+  <p><b>Data generazione:</b> ${today}</p>
+  <p><b>Qualità input 5.3:</b> ${d.qualità_input} — ${d.nota_qualità}</p>
+</div>
+
+<h2>6D — Mappatura ADA / Risultati Attesi / Competenze Trasversali</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Attività OV</th><th>ADA</th><th>Risultati Attesi (RA)</th>
+      <th>Livello</th><th>DigComp 2.2</th><th>LifeComp</th><th>EntreComp</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+
+${ckHtml ? `<h2>Competenze Chiave di Cittadinanza</h2><ul>${ckHtml}</ul>` : ''}
+
+${d.note_validatore ? `<h2>Note per il Validatore</h2><div class="nota">${d.note_validatore}</div>` : ''}
+
+<div class="footer">Generato da HubS-TransparentIA — Documento preliminare da verificare con esperto certificatore prima dell'uso ufficiale.</div>
+</body></html>`;
+
+  const blob = new Blob(['﻿'+html], {type:'application/vnd.ms-word;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const fname = m.progetto ? m.progetto.replace(/[^a-zA-Z0-9_\-À-ú ]/g,'').trim().replace(/\s+/g,'_').slice(0,32) : 'progetto';
+  a.download = `sezione_6D_${fname}_${today.replace(/\//g,'-')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 12000);
+}
+
+function copyTable() {
+  const table = document.querySelector('.t6d');
+  if (!table) return;
+  try {
+    const range = document.createRange();
+    range.selectNode(table);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    // brief feedback
+    const btn = document.querySelector('.btn-outline');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiata!';
+    setTimeout(() => btn.innerHTML = orig, 1800);
+  } catch(e) {
+    alert('Copia non riuscita. Seleziona la tabella manualmente.');
+  }
+}
+
+function resetTool() {
+  result = null;
+  setStep(1);
+}
+</script>
+</body>
+</html>
