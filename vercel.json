@@ -10,6 +10,10 @@
       "destination": "/site/analisi_progetto.html"
     },
     {
+      "source": "/mappatore",
+      "destination": "/site/mappatore_competenze_ada.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/site/$1"
     }
