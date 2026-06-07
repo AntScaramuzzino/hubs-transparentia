@@ -2065,7 +2065,21 @@ async function sendAIChat(agentId){
     var reply=await callClaudeAPI(CHAT.history[agentId],getAISystemPrompt(agentId),apiKey);
     CHAT.history[agentId].push({role:'assistant',content:reply});
   }catch(err){
-    CHAT.history[agentId].push({role:'assistant',content:'⚠ Errore: '+err.message+'\n\nVerifica API key e credito Anthropic.'});
+    var hint='';
+    var m=err.message||'';
+    if(m==='Failed to fetch'||m.includes('NetworkError')||m.includes('network')){
+      if(location.protocol==='file:')
+        hint='\n\n🔗 Stai aprendo l\'app come file locale. Apri invece l\'URL online:\nhttps://antscaramuzzino.github.io/hubs-transparentia/HubS_Sistema.html';
+      else
+        hint='\n\n💡 Errore di rete: verifica la connessione o che un\'estensione browser non stia bloccando le richieste a api.anthropic.com.';
+    } else if(m.includes('401')||m.includes('invalid_api_key')){
+      hint='\n\n🔑 API key non valida. Genera una nuova chiave su console.anthropic.com/keys';
+    } else if(m.includes('402')||m.includes('credit')||m.includes('billing')){
+      hint='\n\n💳 Credito Anthropic esaurito. Ricarica su console.anthropic.com/settings/billing';
+    } else if(m.includes('429')){
+      hint='\n\n⏳ Limite di velocità raggiunto. Attendi qualche secondo e riprova.';
+    }
+    CHAT.history[agentId].push({role:'assistant',content:'⚠ '+m+hint});
   }
   CHAT.loading[agentId]=false;
   if(msgs){
