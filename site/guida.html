@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guida — HubS-TransparentIA</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blu:#1D4ED8;--blu-dark:#1e3a8a;--blu-mid:#2563EB;--blu-light:#EFF6FF;--blu-border:#BFDBFE;
+  --verde:#065F46;--verde-light:#ECFDF5;--verde-border:#6EE7B7;
+  --arancio:#92400E;--arancio-light:#FFFBEB;--arancio-border:#FCD34D;
+  --viola:#5B21B6;--viola-light:#F5F3FF;--viola-border:#C4B5FD;
+  --rosso:#991B1B;--rosso-light:#FEF2F2;--rosso-border:#FECACA;
+  --text:#111827;--sub:#6B7280;--border:#E5E7EB;--bg:#F1F5F9;
+  --white:#fff;--sidebar:272px;--radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.06)
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;font-size:15px}
+
+/* NAV */
+nav{background:var(--text);color:#fff;padding:0 28px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.35)}
+nav .logo{font-weight:800;font-size:1.1rem;color:#fff;text-decoration:none;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+nav .logo i{color:#60A5FA;font-size:.9rem}
+nav .logo span{color:#60A5FA}
+nav .sep{color:#4B5563;font-size:.9rem}
+nav .crumb{color:#9CA3AF;font-size:.88rem}
+nav .spacer{flex:1}
+nav a.btn-app{background:var(--blu);color:#fff;padding:7px 18px;border-radius:7px;text-decoration:none;font-size:.85rem;font-weight:700;transition:.15s;display:flex;align-items:center;gap:7px}
+nav a.btn-app:hover{background:#1e40af;transform:translateY(-1px)}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+aside{background:#fff;border-right:1px solid var(--border);padding:24px 0 40px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+aside .section-label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);padding:18px 20px 6px;display:flex;align-items:center;gap:6px}
+aside a{display:flex;align-items:center;gap:11px;padding:9px 20px;color:#374151;text-decoration:none;font-size:.9rem;transition:.12s;border-left:3px solid transparent;position:relative}
+aside a i{width:16px;text-align:center;flex-shrink:0;font-size:.88rem;color:var(--sub);transition:.12s}
+aside a:hover{background:var(--blu-light);border-left-color:var(--blu-border);color:var(--blu)}
+aside a:hover i{color:var(--blu)}
+aside a.active{background:var(--blu-light);border-left-color:var(--blu);color:var(--blu);font-weight:700}
+aside a.active i{color:var(--blu)}
+aside .nav-badge{margin-left:auto;background:var(--blu);color:#fff;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px}
+
+/* MAIN */
+main{padding:44px 52px 60px;max-width:980px}
+@media(max-width:960px){
+  .layout{grid-template-columns:1fr}
+  aside{display:none}
+  main{padding:28px 20px 48px}
+}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--blu-dark) 0%,var(--blu) 55%,var(--blu-mid) 100%);color:#fff;border-radius:18px;padding:44px 52px;margin-bottom:52px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.05)}
+.hero::after{content:'';position:absolute;right:40px;bottom:-80px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero h1{font-size:2.1rem;font-weight:800;margin-bottom:10px;line-height:1.2;position:relative}
+.hero h1 i{font-size:1.7rem;opacity:.9;margin-right:10px}
+.hero p{color:#BFDBFE;font-size:1.02rem;max-width:580px;line-height:1.7;position:relative}
+.hero .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;position:relative}
+.hero .badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 13px;border-radius:20px;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px)}
+.hero .badge i{font-size:.72rem;opacity:.85}
+
+/* SECTION */
+section{margin-bottom:60px;scroll-margin-top:76px}
+.section-header{margin-bottom:28px}
+.section-title{font-size:1.55rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:2px solid var(--blu-border)}
+.section-title .num{background:linear-gradient(135deg,var(--blu-dark),var(--blu));color:#fff;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;flex-shrink:0;box-shadow:0 2px 8px rgba(29,78,216,.3)}
+.section-title .stitle-icon{font-size:1.3rem;color:var(--blu);opacity:.75}
+.section-desc{color:var(--sub);font-size:.97rem;margin-top:10px;line-height:1.7}
+
+/* CARDS SISTEMA */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:.2s;box-shadow:var(--shadow)}
+.card:hover{border-color:var(--blu-border);box-shadow:0 6px 20px rgba(29,78,216,.1);transform:translateY(-2px)}
+.card-icon-wrap{width:44px;height:44px;border-radius:10px;background:var(--blu-light);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.card-icon-wrap i{font-size:1.2rem;color:var(--blu)}
+.card .card-title{font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:6px}
+.card .card-desc{font-size:.84rem;color:var(--sub);line-height:1.6}
+
+/* AGENTI GRID */
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.agent-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;border-top:4px solid var(--blu);box-shadow:var(--shadow);transition:.2s}
+.agent-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.agent-card.a1{border-top-color:#2563EB}
+.agent-card.a2{border-top-color:#7C3AED}
+.agent-card.a3{border-top-color:#059669}
+.agent-card.a4{border-top-color:#D97706}
+.agent-card.a5{border-top-color:#DC2626}
+.agent-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:1.1rem;color:#fff}
+.a1 .agent-icon{background:#2563EB}
+.a2 .agent-icon{background:#7C3AED}
+.a3 .agent-icon{background:#059669}
+.a4 .agent-icon{background:#D97706}
+.a5 .agent-icon{background:#DC2626}
+.agent-num{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:4px}
+.agent-name{font-size:1rem;font-weight:800;margin-bottom:8px;color:var(--text)}
+.agent-desc{font-size:.85rem;color:var(--sub);line-height:1.6;margin-bottom:12px}
+.agent-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:10px;background:var(--blu-light);color:var(--blu)}
+
+/* STEPS */
+.steps{position:relative;padding-left:26px}
+.steps::before{content:'';position:absolute;left:17px;top:18px;bottom:18px;width:2px;background:linear-gradient(to bottom,var(--blu),var(--blu-border));border-radius:2px}
+.step{display:flex;gap:24px;margin-bottom:32px;position:relative}
+.step:last-child{margin-bottom:0}
+.step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blu-dark),var(--blu));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;position:relative;z-index:1;box-shadow:0 2px 8px rgba(29,78,216,.35);margin-left:-8px}
+.step-body{flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.step-body h3{font-size:1rem;font-weight:700;margin-bottom:6px;color:var(--text);display:flex;align-items:center;gap:8px}
+.step-body h3 i{color:var(--blu);font-size:.9rem}
+.step-body p{font-size:.88rem;color:#374151;line-height:1.65}
+.step-body .step-note{margin-top:10px;background:var(--blu-light);border:1px solid var(--blu-border);border-radius:8px;padding:9px 13px;font-size:.81rem;color:#1e40af;display:flex;align-items:center;gap:8px}
+.step-body .step-note i{flex-shrink:0}
+
+/* DOWNLOAD CARDS */
+.downloads{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.dl-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:12px;transition:.2s;box-shadow:var(--shadow)}
+.dl-card:hover{border-color:var(--blu-border);box-shadow:0 6px 20px rgba(29,78,216,.1);transform:translateY(-2px)}
+.dl-icon-wrap{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--blu-dark),var(--blu));display:flex;align-items:center;justify-content:center}
+.dl-icon-wrap i{font-size:1.5rem;color:#fff}
+.dl-title{font-weight:700;font-size:1rem;color:var(--text)}
+.dl-desc{font-size:.85rem;color:var(--sub);line-height:1.6;flex:1}
+.dl-btn{display:inline-flex;align-items:center;gap:9px;background:var(--blu);color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:700;transition:.15s;width:fit-content}
+.dl-btn:hover{background:var(--blu-dark);transform:translateY(-1px)}
+.dl-meta{font-size:.75rem;color:#9CA3AF;display:flex;align-items:center;gap:6px}
+.dl-meta i{color:var(--blu-border)}
+
+/* TABLES */
+.norm-table{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
+.norm-table thead{background:linear-gradient(135deg,var(--blu-dark),var(--blu))}
+.norm-table th{color:#fff;text-align:left;padding:13px 16px;font-size:.84rem;font-weight:700;letter-spacing:.02em}
+.norm-table td{padding:13px 16px;font-size:.88rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+.norm-table tr:last-child td{border-bottom:none}
+.norm-table tr:hover td{background:var(--blu-light)}
+.norm-table .norm-code{font-weight:700;color:var(--blu);white-space:nowrap;font-size:.84rem}
+.norm-table .norm-sub{font-weight:400;font-size:.76rem;color:var(--sub);display:block;margin-top:2px}
+.norm-table a{color:var(--blu);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:5px;font-size:.82rem}
+.norm-table a:hover{text-decoration:underline}
+.norm-table a i{font-size:.72rem}
+
+/* INFO BOX */
+.info-box{border-radius:10px;padding:16px 20px;margin-bottom:18px;font-size:.9rem;line-height:1.65;display:flex;gap:12px;align-items:flex-start}
+.info-box i.box-icon{font-size:1rem;margin-top:2px;flex-shrink:0}
+.info-box.blue{background:var(--blu-light);border:1px solid var(--blu-border);color:#1e40af}
+.info-box.blue i.box-icon{color:var(--blu)}
+.info-box.green{background:var(--verde-light);border:1px solid var(--verde-border);color:var(--verde)}
+.info-box.green i.box-icon{color:var(--verde)}
+.info-box.orange{background:var(--arancio-light);border:1px solid var(--arancio-border);color:var(--arancio)}
+.info-box.orange i.box-icon{color:#B45309}
+.info-box.red{background:var(--rosso-light);border:1px solid var(--rosso-border);color:var(--rosso)}
+.info-box.red i.box-icon{color:var(--rosso)}
+.info-box strong{font-weight:700}
+.info-box-content{flex:1}
+
+/* LIVELLI */
+.livelli{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:700px){.livelli{grid-template-columns:1fr 1fr}}
+.livello{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;text-align:center;transition:.2s;box-shadow:var(--shadow)}
+.livello:hover{border-color:var(--blu-border);transform:translateY(-2px)}
+.livello .lv-num{font-size:1.8rem;font-weight:800;color:var(--blu);margin-bottom:6px;line-height:1}
+.livello .lv-name{font-size:.82rem;font-weight:700;margin-bottom:6px;color:var(--text);text-transform:uppercase;letter-spacing:.04em}
+.livello .lv-desc{font-size:.8rem;color:var(--sub);line-height:1.5}
+.livello .lv-icon{font-size:1.2rem;margin-bottom:8px;color:var(--blu);opacity:.7}
+
+/* FAQ */
+details{background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);transition:.2s}
+details:hover{border-color:var(--blu-border)}
+details summary{padding:16px 22px;cursor:pointer;font-weight:700;font-size:.95rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--text)}
+details summary::-webkit-details-marker{display:none}
+details summary .faq-q{display:flex;align-items:center;gap:11px;flex:1}
+details summary .faq-q i{color:var(--blu);font-size:.9rem;flex-shrink:0}
+details summary .faq-chevron{width:24px;height:24px;border-radius:50%;background:var(--blu-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+details summary .faq-chevron i{font-size:.7rem;color:var(--blu);transition:.2s}
+details[open] summary .faq-chevron{background:var(--blu)}
+details[open] summary .faq-chevron i{color:#fff;transform:rotate(180deg)}
+details[open] summary{border-bottom:1px solid var(--border);color:var(--blu);background:var(--blu-light)}
+.faq-body{padding:18px 22px;font-size:.9rem;color:#374151;line-height:1.7}
+.faq-body strong{color:var(--text)}
+
+/* FOOTER */
+footer{background:var(--text);color:#9CA3AF;text-align:center;padding:32px 24px;font-size:.86rem;margin-top:0}
+footer .footer-logo{font-weight:800;color:#fff;font-size:1rem;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+footer .footer-logo i{color:#60A5FA}
+footer p{margin-top:8px}
+footer a{color:#60A5FA;text-decoration:none;font-weight:600}
+footer a:hover{text-decoration:underline}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-top:14px;flex-wrap:wrap}
+footer .footer-links a{display:flex;align-items:center;gap:6px;font-size:.83rem}
+
+/* UTILS */
+.mt16{margin-top:16px}
+.mt20{margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="/"><i class="fa-solid fa-network-wired"></i>HubS<span>-TransparentIA</span></a>
+  <span class="sep"><i class="fa-solid fa-chevron-right" style="font-size:.7rem"></i></span>
+  <span class="crumb">Guida &amp; Documenti</span>
+  <span class="spacer"></span>
+  <a class="btn-app" href="/"><i class="fa-solid fa-play"></i> Apri il Sistema</a>
+</nav>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="section-label"><i class="fa-solid fa-book-open"></i> Guida</div>
+  <a href="#sistema" class="active"><i class="fa-solid fa-building-columns"></i> Il Sistema</a>
+  <a href="#agenti"><i class="fa-solid fa-robot"></i> I 5 Agenti <span class="nav-badge">5</span></a>
+  <a href="#procedura"><i class="fa-solid fa-list-check"></i> Procedura operativa</a>
+  <a href="#livelli"><i class="fa-solid fa-chart-simple"></i> Livelli di competenza</a>
+  <div class="section-label"><i class="fa-solid fa-download"></i> Download</div>
+  <a href="#documenti"><i class="fa-regular fa-file-word"></i> Documenti DOCX <span class="nav-badge">4</span></a>
+  <div class="section-label"><i class="fa-solid fa-landmark"></i> Riferimenti</div>
+  <a href="#normativa"><i class="fa-solid fa-scale-balanced"></i> Normativa italiana</a>
+  <a href="#framework"><i class="fa-solid fa-globe"></i> Framework europei</a>
+  <a href="#faq"><i class="fa-regular fa-circle-question"></i> FAQ</a>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1><i class="fa-solid fa-shield-halved"></i> Guida HubS-TransparentIA</h1>
+    <p>Sistema multi-agente AI per la messa in trasparenza delle competenze dei volontari. Conforme al DI 31 luglio 2025 e all'Allegato A del DI 5 gennaio 2021.</p>
+    <div class="badges">
+      <span class="badge"><i class="fa-solid fa-gavel"></i> DI 31/07/2025</span>
+      <span class="badge"><i class="fa-solid fa-file-contract"></i> Allegato A — DI 5/01/2021</span>
+      <span class="badge"><i class="fa-solid fa-laptop-code"></i> DigComp 2.2</span>
+      <span class="badge"><i class="fa-solid fa-star"></i> EU8 Competenze Chiave</span>
+      <span class="badge"><i class="fa-solid fa-map"></i> INAPP Atlante del Lavoro</span>
+      <span class="badge"><i class="fa-solid fa-lock"></i> GDPR 2016/679</span>
+    </div>
+  </div>
+
+  <!-- 1. IL SISTEMA -->
+  <section id="sistema">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">1</span>
+        <i class="fa-solid fa-building-columns stitle-icon"></i>
+        Il Sistema
+      </h2>
+      <p class="section-desc">HubS-TransparentIA è un sistema digitale integrato che guida il tutor attraverso l'intero processo di messa in trasparenza delle competenze acquisite dal volontario in contesti non formali e informali.</p>
+    </div>
+
+    <div class="info-box blue">
+      <i class="fa-solid fa-bullseye box-icon"></i>
+      <div class="info-box-content"><strong>Obiettivo:</strong> Accompagnare il tutor e il volontario nella produzione del Documento di Trasparenza conforme all'Allegato A del DI 5 gennaio 2021, attraverso un percorso strutturato in 5 fasi supportate da intelligenza artificiale.</div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-solid fa-robot"></i></div>
+        <div class="card-title">5 Agenti AI integrati</div>
+        <div class="card-desc">Un assistente AI dedicato per ogni fase del percorso, con sistema prompt specializzato e accesso al contesto della sessione.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-solid fa-floppy-disk"></i></div>
+        <div class="card-title">Sessioni salvabili</div>
+        <div class="card-desc">Ogni sessione è salvata in formato JSON e può essere ripresa in qualsiasi momento su qualsiasi dispositivo.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-regular fa-file-word"></i></div>
+        <div class="card-title">Export DOCX e PDF</div>
+        <div class="card-desc">Il Documento di Trasparenza finale è esportabile in formato Word (DOCX) e PDF, pronto per la firma.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-solid fa-map-location-dot"></i></div>
+        <div class="card-title">Mappatura INAPP</div>
+        <div class="card-desc">Collegamento automatico alle 962 ADA dell'Atlante del Lavoro INAPP con link alle schede ufficiali.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="card-title">100% normativo</div>
+        <div class="card-desc">Struttura conforme all'Allegato A DI 5/01/2021. Verifiche automatiche dei requisiti Art. 5 DI 31/07/2025.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap"><i class="fa-solid fa-shield"></i></div>
+        <div class="card-title">Privacy by design</div>
+        <div class="card-desc">I dati non sono inviati a server esterni. Sessione locale nel browser. Conforme GDPR 2016/679.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. I 5 AGENTI -->
+  <section id="agenti">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">2</span>
+        <i class="fa-solid fa-robot stitle-icon"></i>
+        I 5 Agenti del Sistema
+      </h2>
+      <p class="section-desc">Ogni agente copre una fase specifica del processo. L'assistente AI di ogni agente conosce il contesto completo della sessione corrente e supporta il tutor con risposte specializzate.</p>
+    </div>
+
+    <div class="agents">
+      <div class="agent-card a1">
+        <div class="agent-icon"><i class="fa-solid fa-compass"></i></div>
+        <div class="agent-num">Agente 1</div>
+        <div class="agent-name">Orientatore</div>
+        <div class="agent-desc">Raccoglie i dati del volontario e dell'ente, verifica i requisiti minimi di legge e genera la bozza del Patto di Servizio con anteprima DOCX/PDF.</div>
+        <div class="agent-tags">
+          <span class="tag">Scheda accoglienza</span>
+          <span class="tag">Requisiti DI 31/07/25</span>
+          <span class="tag">Patto di Servizio</span>
+        </div>
+      </div>
+      <div class="agent-card a2">
+        <div class="agent-icon"><i class="fa-solid fa-comments"></i></div>
+        <div class="agent-num">Agente 2</div>
+        <div class="agent-name">Stimolatore Riflessivo</div>
+        <div class="agent-desc">Guida i colloqui di emersione delle competenze con metodologia Youthpass Learning Interview. Supporta la valutazione per livelli (1–4).</div>
+        <div class="agent-tags">
+          <span class="tag">EU8</span>
+          <span class="tag">DigComp 2.2</span>
+          <span class="tag">LifeComp</span>
+          <span class="tag">EntreComp</span>
+        </div>
+      </div>
+      <div class="agent-card a3">
+        <div class="agent-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="agent-num">Agente 3</div>
+        <div class="agent-name">Costruttore Dossier</div>
+        <div class="agent-desc">Raccoglie e valida le evidenze concrete secondo i criteri eQval Standard 17 e le classifica nella matrice Lever Up 4R.</div>
+        <div class="agent-tags">
+          <span class="tag">eQval Std. 17</span>
+          <span class="tag">Lever Up 4R</span>
+          <span class="tag">Validazione evidenze</span>
+        </div>
+      </div>
+      <div class="agent-card a4">
+        <div class="agent-icon"><i class="fa-solid fa-map"></i></div>
+        <div class="agent-num">Agente 4</div>
+        <div class="agent-name">Mappatore Normativo</div>
+        <div class="agent-desc">Collega le competenze validate alle ADA dell'Atlante del Lavoro INAPP, ai Risultati di Apprendimento e ai quadri EQF/ECVET.</div>
+        <div class="agent-tags">
+          <span class="tag">ADA INAPP</span>
+          <span class="tag">EQF</span>
+          <span class="tag">ECVET</span>
+          <span class="tag">SEP</span>
+        </div>
+      </div>
+      <div class="agent-card a5">
+        <div class="agent-icon"><i class="fa-solid fa-file-signature"></i></div>
+        <div class="agent-num">Agente 5</div>
+        <div class="agent-name">Redattore di Trasparenza</div>
+        <div class="agent-desc">Genera il Documento di Trasparenza finale conforme all'Allegato A DI 5 gennaio 2021, con export DOCX e PDF pronto per la firma.</div>
+        <div class="agent-tags">
+          <span class="tag">Allegato A DI 5/1/2021</span>
+          <span class="tag">Export DOCX</span>
+          <span class="tag">Export PDF</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PROCEDURA -->
+  <section id="procedura">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">3</span>
+        <i class="fa-solid fa-list-check stitle-icon"></i>
+        Procedura Operativa
+      </h2>
+      <p class="section-desc">Il percorso completo richiede 3–5 ore distribuite su più incontri. Ogni fase deve essere completata nell'ordine indicato.</p>
+    </div>
+
+    <div class="info-box orange">
+      <i class="fa-solid fa-triangle-exclamation box-icon"></i>
+      <div class="info-box-content"><strong>Prima di iniziare</strong> — Verificare che siano soddisfatti i requisiti minimi: prima informazione firmata, progetto personalizzato sottoscritto, almeno 60h di attività svolta, presenza ≥ 75%, ente titolato (DM 115/2024).</div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3><i class="fa-solid fa-compass"></i> Avvio sessione e raccolta dati (Agente 1 — Orientatore)</h3>
+          <p>Aprire il sistema su <strong>hubs-transparentia.vercel.app</strong>. Inserire il nome sessione (es. "Rossi Mario — Coop Calabria 2026"). Compilare la Scheda Accoglienza con i dati del volontario e dell'ente. Verificare le checkboxes dei requisiti. Aggiornare e scaricare la bozza del Patto di Servizio. <strong>Salvare la sessione (💾).</strong></p>
+          <div class="step-note"><i class="fa-regular fa-clock"></i> Tempo stimato: 30–45 min · Partecipanti: Tutor + Volontario</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3><i class="fa-solid fa-comments"></i> Colloqui di emersione competenze (Agente 2 — Stimolatore Riflessivo)</h3>
+          <p>Condurre almeno 3 colloqui narrativi usando la metodologia Youthpass Learning Interview. Per ogni competenza (EU8, DigComp, LifeComp, EntreComp): porre le domande → registrare → assegnare il livello 1–4. Usare l'assistente AI per riformulare domande e gestire volontari reticenti.</p>
+          <div class="step-note"><i class="fa-regular fa-clock"></i> Tempo stimato: 60–90 min per colloquio · Min. 3 colloqui su date diverse</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3><i class="fa-solid fa-folder-open"></i> Raccolta e validazione evidenze (Agente 3 — Costruttore Dossier)</h3>
+          <p>Per ogni competenza emersa: raccogliere almeno 1 evidenza concreta. Valutare con i 5 criteri eQval (Validità, Attualità, Pertinenza, Sufficienza, Autenticità). Classificare nella matrice Lever Up 4R. Assegnare esito: ✓ Accettata / △ Con riserva / ✗ Non accettata con motivazione.</p>
+          <div class="step-note"><i class="fa-regular fa-clock"></i> Tempo stimato: 45–60 min · Partecipanti: solo Tutor</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3><i class="fa-solid fa-map"></i> Mappatura ADA INAPP (Agente 4 — Mappatore Normativo)</h3>
+          <p>Il sistema propone le ADA coerenti con l'attività svolta. Verificare la coerenza ADA ↔ competenze ↔ evidenze. Scaricare le schede INAPP (link "📋 Scheda INAPP ↗") e allegarle al fascicolo. Rivedere i Risultati di Apprendimento coperti.</p>
+          <div class="step-note"><i class="fa-regular fa-clock"></i> Tempo stimato: 30–45 min · ADA disponibili: 962 dall'Atlante INAPP</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3><i class="fa-solid fa-file-signature"></i> Redazione e firma del Documento di Trasparenza (Agente 5 — Redattore)</h3>
+          <p>Il sistema pre-compila il documento con tutti i dati delle fasi precedenti. Aggiungere le Note del Tutor. Verificare la coerenza interna con l'AI. Esportare in DOCX o PDF. Procedura di firma: <strong>Volontario + Tutor + Rappresentante legale ente</strong>. Archiviare 1 copia per ciascuna parte.</p>
+          <div class="step-note"><i class="fa-regular fa-clock"></i> Tempo stimato: 30–45 min · Firma tripartita obbligatoria</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. LIVELLI -->
+  <section id="livelli">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">4</span>
+        <i class="fa-solid fa-chart-simple stitle-icon"></i>
+        Livelli di Competenza
+      </h2>
+      <p class="section-desc">Il sistema utilizza una scala 1–4 coerente con i descrittori EQF e con la metodologia Youthpass.</p>
+    </div>
+
+    <div class="livelli">
+      <div class="livello">
+        <div class="lv-icon"><i class="fa-solid fa-seedling"></i></div>
+        <div class="lv-num">1</div>
+        <div class="lv-name">Base</div>
+        <div class="lv-desc">Con guida costante dell'operatore. Conoscenze elementari, applicazione guidata.</div>
+      </div>
+      <div class="livello">
+        <div class="lv-icon"><i class="fa-solid fa-person-walking"></i></div>
+        <div class="lv-num">2</div>
+        <div class="lv-name">Intermedio</div>
+        <div class="lv-desc">Autonomia con supervisione. Applicazione in contesti noti, gestione situazioni prevedibili.</div>
+      </div>
+      <div class="livello">
+        <div class="lv-icon"><i class="fa-solid fa-bolt"></i></div>
+        <div class="lv-num">3</div>
+        <div class="lv-name">Avanzato</div>
+        <div class="lv-desc">Autonomia piena. Adattamento a contesti diversi, problem solving indipendente.</div>
+      </div>
+      <div class="livello">
+        <div class="lv-icon"><i class="fa-solid fa-star"></i></div>
+        <div class="lv-num">4</div>
+        <div class="lv-name">Esperto</div>
+        <div class="lv-desc">Trasferisce la competenza ad altri. Guida, forma e supervisiona colleghi e volontari.</div>
+      </div>
+    </div>
+
+    <div class="mt20 info-box blue">
+      <i class="fa-solid fa-circle-check box-icon"></i>
+      <div class="info-box-content">
+        <strong>Criteri eQval Standard 17</strong> per la validazione delle evidenze —
+        <strong>Validità</strong> (dimostra la competenza?),
+        <strong>Attualità</strong> (prodotta durante/dopo l'esperienza?),
+        <strong>Pertinenza</strong> (coerente con le attività svolte?),
+        <strong>Sufficienza</strong> (è abbastanza per il livello dichiarato?),
+        <strong>Autenticità</strong> (è del volontario?).
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. DOCUMENTI -->
+  <section id="documenti">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">5</span>
+        <i class="fa-regular fa-file-word stitle-icon"></i>
+        Documenti da Scaricare
+      </h2>
+      <p class="section-desc">Template e guide in formato Word (.docx) pronti da compilare. Tutti i documenti sono conformi alla normativa vigente.</p>
+    </div>
+
+    <div class="downloads">
+      <div class="dl-card">
+        <div class="dl-icon-wrap"><i class="fa-solid fa-book-open"></i></div>
+        <div class="dl-title">Guida Operativa per il Tutor</div>
+        <div class="dl-desc">Istruzioni complete step-by-step per l'utilizzo del sistema, gestione dei casi particolari, riferimenti normativi e procedura di firma.</div>
+        <a class="dl-btn" href="/docs/Guida_Operativa_Tutor.docx" download><i class="fa-solid fa-download"></i> Scarica DOCX</a>
+        <div class="dl-meta"><i class="fa-regular fa-file-word"></i> Word (.docx) · ~45 KB · Aggiornato giugno 2026</div>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon-wrap"><i class="fa-solid fa-handshake"></i></div>
+        <div class="dl-title">Template Patto di Servizio</div>
+        <div class="dl-desc">Modello del Progetto Personalizzato / Patto di Servizio conforme all'Art. 5, c.1, lett. b) DI 31 luglio 2025. Include tutte le sezioni obbligatorie e le dichiarazioni privacy.</div>
+        <a class="dl-btn" href="/docs/Template_Patto_di_Servizio.docx" download><i class="fa-solid fa-download"></i> Scarica DOCX</a>
+        <div class="dl-meta"><i class="fa-regular fa-file-word"></i> Word (.docx) · ~40 KB · Rif. Art. 5 DI 31/07/2025</div>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon-wrap"><i class="fa-solid fa-file-contract"></i></div>
+        <div class="dl-title">Template Documento di Trasparenza</div>
+        <div class="dl-desc">Schema completo conforme all'Allegato A del DI 5 gennaio 2021. 7 sezioni: ente, volontario, percorso, competenze EU8+DigComp, dossier, ADA INAPP, dichiarazioni e firme.</div>
+        <a class="dl-btn" href="/docs/Template_Documento_di_Trasparenza.docx" download><i class="fa-solid fa-download"></i> Scarica DOCX</a>
+        <div class="dl-meta"><i class="fa-regular fa-file-word"></i> Word (.docx) · ~55 KB · Allegato A DI 5/01/2021</div>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon-wrap"><i class="fa-solid fa-map-location-dot"></i></div>
+        <div class="dl-title">Scheda Accompagnamento ADA</div>
+        <div class="dl-desc">Template per documentare il collegamento tra le competenze del volontario e una specifica ADA dell'Atlante INAPP. Include tabelle eQval e matrice Lever Up 4R. Una scheda per ogni ADA identificata.</div>
+        <a class="dl-btn" href="/docs/Scheda_Accompagnamento_ADA.docx" download><i class="fa-solid fa-download"></i> Scarica DOCX</a>
+        <div class="dl-meta"><i class="fa-regular fa-file-word"></i> Word (.docx) · ~45 KB · Atlante del Lavoro INAPP</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. NORMATIVA -->
+  <section id="normativa">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">6</span>
+        <i class="fa-solid fa-scale-balanced stitle-icon"></i>
+        Riferimenti Normativi
+      </h2>
+      <p class="section-desc">Quadro normativo completo su cui si basa il sistema HubS-TransparentIA.</p>
+    </div>
+
+    <table class="norm-table">
+      <thead>
+        <tr>
+          <th style="width:210px">Riferimento</th>
+          <th>Descrizione e rilevanza</th>
+          <th style="width:130px">Fonte ufficiale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="norm-code">DI 31 luglio 2025<span class="norm-sub">Decreto Interministeriale</span></td>
+          <td>Messa in trasparenza delle competenze acquisite nel servizio civile universale. Definisce i requisiti minimi (Art. 5), le figure coinvolte, la struttura del Documento di Trasparenza e il ruolo degli Enti di Accoglienza titolati.</td>
+          <td><a href="https://www.serviziocivile.gov.it/normativa/decreti-interministeriali/" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> serviziocivile.gov.it</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">DI 5 gennaio 2021<span class="norm-sub">Allegato A</span></td>
+          <td><strong>Allegato A</strong> — Schema ufficiale del Documento di Trasparenza. Struttura in 7 sezioni obbligatorie: ente, volontario, percorso, competenze, evidenze, ADA, dichiarazioni. Il sistema genera automaticamente un documento conforme a questo allegato.</td>
+          <td><a href="https://www.serviziocivile.gov.it/normativa/decreti-interministeriali/" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> serviziocivile.gov.it</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">DM n. 115/2024<span class="norm-sub">Min. Lavoro, 9 luglio 2024</span></td>
+          <td>Decreto del Ministero del Lavoro e delle Politiche Sociali — Definisce l'elenco e i requisiti degli Enti di Accoglienza titolati per la certificazione delle competenze nel contesto del servizio civile universale.</td>
+          <td><a href="https://www.lavoro.gov.it/notizie/pages/decreto-ministeriale-9-luglio-2024-n-115.aspx" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> lavoro.gov.it</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">Reg. UE 2016/679<span class="norm-sub">GDPR</span></td>
+          <td>Regolamento Generale sulla Protezione dei Dati. Applicabile al trattamento dei dati personali del volontario nel Documento di Trasparenza: minimizzazione dei dati, finalità chiara, diritto di accesso/rettifica/cancellazione (artt. 15–17 GDPR).</td>
+          <td><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32016R0679" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> EUR-Lex</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">Racc. CE 2012<span class="norm-sub">2012/C 398/01</span></td>
+          <td>Raccomandazione del Consiglio Europeo per la convalida dell'apprendimento non formale e informale. Principi alla base del sistema di riconoscimento delle competenze acquisite fuori dai percorsi scolastici formali.</td>
+          <td><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32012H1222(01)" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> EUR-Lex</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">D.Lgs. 40/2017<span class="norm-sub">6 marzo 2017</span></td>
+          <td>Istituzione del Servizio Civile Universale. Definisce finalità, organizzazione e obblighi delle parti nel servizio civile universale. Base normativa primaria per tutti i decreti attuativi successivi, incluso il DI 31/07/2025.</td>
+          <td><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2017-03-06;40" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Normattiva</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7. FRAMEWORK EUROPEI -->
+  <section id="framework">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">7</span>
+        <i class="fa-solid fa-globe stitle-icon"></i>
+        Framework Europei di Riferimento
+      </h2>
+      <p class="section-desc">Il sistema integra i principali quadri europei per la descrizione e valutazione delle competenze.</p>
+    </div>
+
+    <table class="norm-table">
+      <thead>
+        <tr>
+          <th style="width:190px">Framework</th>
+          <th>Descrizione e utilizzo nel sistema</th>
+          <th style="width:100px">Livelli</th>
+          <th style="width:130px">Fonte</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="norm-code">EU8 — Competenze Chiave<span class="norm-sub">Racc. CE 2018/C 189/01</span></td>
+          <td>8 competenze chiave per l'apprendimento permanente. Nel sistema vengono valutate EU1–EU8 (EU4 DigComp trattata separatamente). Per ogni competenza: descrizione comportamentale, livello 1–4, evidenze a supporto.</td>
+          <td>1 – 4</td>
+          <td><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32018H0604(01)" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> EUR-Lex</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">DigComp 2.2<span class="norm-sub">JRC, 2022</span></td>
+          <td>Quadro europeo delle competenze digitali per i cittadini. 5 aree, 21 competenze, 8 livelli (semplificati a 4 nel sistema). Collegato alle ADA INAPP tramite codici specifici (ADA.QE.01.01–05).</td>
+          <td>1–4 (↔ 1–8 EQF)</td>
+          <td><a href="https://publications.jrc.ec.europa.eu/repository/handle/JRC128415" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> JRC</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">LifeComp<span class="norm-sub">JRC, 2020</span></td>
+          <td>Quadro europeo delle competenze personali, sociali e per l'apprendimento. 3 aree (Personale, Sociale, Apprendimento), 9 competenze. Rilevante per volontari con attività relazionali e di cura.</td>
+          <td>1 – 4</td>
+          <td><a href="https://publications.jrc.ec.europa.eu/repository/handle/JRC120911" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> JRC</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">EntreComp<span class="norm-sub">JRC, 2016</span></td>
+          <td>Quadro europeo per la competenza imprenditoriale. 3 aree (Idee e opportunità, Risorse, Azione), 15 competenze. Rilevante per volontari con ruoli di coordinamento, progettazione, iniziativa.</td>
+          <td>1 – 4</td>
+          <td><a href="https://publications.jrc.ec.europa.eu/repository/handle/JRC101581" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> JRC</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">EQF<span class="norm-sub">Racc. CE 2017/C 189/03</span></td>
+          <td>European Qualifications Framework — Quadro europeo delle qualifiche. 8 livelli che descrivono conoscenze, abilità e responsabilità/autonomia. I livelli 1–4 del sistema corrispondono indicativamente agli EQF 2–5.</td>
+          <td>1 – 8</td>
+          <td><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32017H0615(01)" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> EUR-Lex</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">ECVET<span class="norm-sub">Racc. CE 2009/C 155/02</span></td>
+          <td>European Credit System for Vocational Education and Training. Sistema di crediti per il riconoscimento e trasferimento delle qualifiche professionali. Collegato alle ADA e ai Risultati di Apprendimento dell'Atlante INAPP.</td>
+          <td>—</td>
+          <td><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32009H0706(02)" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> EUR-Lex</a></td>
+        </tr>
+        <tr>
+          <td class="norm-code">Atlante INAPP<span class="norm-sub">atlantelavoro.inapp.org</span></td>
+          <td>Atlante del Lavoro e delle Qualificazioni — Catalogo nazionale delle professioni. 962 ADA (Attività di Area) suddivise in 24 SEP (Settori Economici Professionali). Il sistema include tutte le 962 ADA con link alle schede ufficiali e alle schede di caso.</td>
+          <td>—</td>
+          <td><a href="https://atlantelavoro.inapp.org" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> INAPP</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 8. FAQ -->
+  <section id="faq">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="num">8</span>
+        <i class="fa-regular fa-circle-question stitle-icon"></i>
+        Domande Frequenti
+      </h2>
+      <p class="section-desc">Risposte alle domande più comuni sull'utilizzo del sistema e sulla normativa.</p>
+    </div>
+
+    <details open>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-clipboard-check"></i> Quali sono i requisiti minimi per avviare la messa in trasparenza?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        Secondo l'<strong>Art. 5 del DI 31 luglio 2025</strong>: (a) prima informazione fornita e firmata, (b) progetto personalizzato sottoscritto da entrambe le parti, (c) attività di tutoraggio attiva con minimo 3 colloqui documentati, (d) almeno 60 ore di attività svolta, (e) presenza media ≥ 75% delle ore previste, (f) ente di accoglienza titolato ai sensi del DM 115/2024. Il sistema verifica automaticamente questi requisiti nella Scheda Accoglienza (Agente 1).
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-calendar-days"></i> Quante sessioni di lavoro sono necessarie per completare il percorso?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        Il percorso completo richiede tipicamente <strong>3–5 sessioni di lavoro</strong>: almeno 3 colloqui di emersione con il volontario (Agente 2), 1 sessione di validazione evidenze (Agente 3), 1 sessione di mappatura ADA e redazione finale (Agenti 4 e 5). Il tempo totale stimato è 4–8 ore distribuite su 2–4 settimane.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-wifi"></i> Il sistema funziona senza connessione internet?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        <strong>Parzialmente.</strong> Le funzioni di base (compilazione form, salvataggio sessione JSON, generazione DOCX) funzionano anche offline. Il chatbot AI richiede connessione internet perché chiama l'API Anthropic tramite il server Vercel. I link alle schede INAPP richiedono ovviamente connessione.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-hourglass-half"></i> Come si gestisce un volontario che non ha ancora completato le 60 ore?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        È possibile avviare il percorso di raccolta dati e i colloqui di emersione prima del raggiungimento delle 60 ore, ma il <strong>Documento di Trasparenza può essere emesso solo dopo il completamento del requisito</strong>. Il sistema segnala automaticamente se le ore inserite sono inferiori a 60h. In caso di percorso interrotto prima delle 60h, l'ente valuta se emettere un documento parziale con nota esplicativa.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-pen-to-square"></i> Chi deve firmare il Documento di Trasparenza?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        Il Documento di Trasparenza deve essere firmato da <strong>tre figure</strong>: (1) il Volontario, (2) il Tutor/Responsabile dell'accompagnamento, (3) il Rappresentante Legale dell'Ente di Accoglienza (con timbro dell'ente). Devono essere prodotte almeno 2 copie originali: una per il volontario e una da conservare nel fascicolo dell'ente. Una copia digitale firmata è consigliata per l'archivio.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-shield-halved"></i> Come si gestisce la privacy e il GDPR?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        Il sistema è progettato per la <strong>conformità GDPR</strong>: i dati della sessione non vengono inviati a server esterni (rimangono nel browser), il chatbot AI processa solo le informazioni necessarie per rispondere alla domanda specifica, le sessioni salvate in JSON sono file locali sul dispositivo del tutor. L'ente di accoglienza è il titolare del trattamento dei dati personali del volontario. Raccomandare al tutor di conservare i file JSON in cartelle protette e con accesso limitato.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-robot"></i> Il chatbot AI può sbagliare? Come gestire gli errori?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        Sì, come qualsiasi sistema AI, può produrre risposte imprecise. <strong>L'assistente AI è uno strumento di supporto al tutor, non un sostituto del giudizio professionale.</strong> Per le valutazioni normative critiche (requisiti, livelli di competenza, validità delle evidenze), la decisione finale spetta sempre al tutor. In caso di dubbio, consultare la normativa di riferimento o richiedere una supervisione da un tutor senior.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        <span class="faq-q"><i class="fa-solid fa-map"></i> Come si collegano le competenze alle ADA INAPP?</span>
+        <span class="faq-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="faq-body">
+        L'<strong>Agente 4 (Mappatore Normativo)</strong> guida il tutor nel collegamento. Il sistema propone le ADA più coerenti con il settore di attività indicato nella Scheda Accoglienza. Per ogni ADA selezionata, è disponibile il link diretto alla scheda ufficiale INAPP che contiene i Risultati di Apprendimento (RA) e le declaratorie. Il tutor verifica quali RA sono effettivamente coperti dall'esperienza del volontario e lo documenta nella Scheda di Accompagnamento ADA.
+      </div>
+    </details>
+
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="footer-logo"><i class="fa-solid fa-network-wired"></i> HubS-TransparentIA</div>
+  <p>ASC Calabria · Sistema per la messa in trasparenza delle competenze dei volontari</p>
+  <p style="margin-top:6px;font-size:.8rem">Conforme al DI 31 luglio 2025 · Allegato A DI 5 gennaio 2021 · GDPR 2016/679</p>
+  <div class="footer-links">
+    <a href="/"><i class="fa-solid fa-play"></i> Apri il Sistema</a>
+    <a href="https://github.com/AntScaramuzzino/hubs-transparentia" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> GitHub</a>
+    <a href="https://atlantelavoro.inapp.org" target="_blank" rel="noopener"><i class="fa-solid fa-map"></i> Atlante INAPP</a>
+    <a href="https://www.serviziocivile.gov.it" target="_blank" rel="noopener"><i class="fa-solid fa-landmark"></i> Servizio Civile</a>
+  </div>
+</footer>
+
+<script>
+// Highlight sidebar link on scroll
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('aside a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`aside a[href="#${e.target.id}"]`);
+      if(active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
