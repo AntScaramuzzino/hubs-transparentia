@@ -813,11 +813,17 @@ function startSession() {
 function saveSession() {
   collectAll();
   S.meta.modified = new Date().toISOString();
+  if(!S.meta.saveCount) S.meta.saveCount = 0;
+  S.meta.saveCount++;
+  const clean = s => (s||'').trim().replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_àèìòùÀÈÌÒÙ]/g,'') || null;
+  const cognome = clean(S.a1.vol.cognome);
+  const nome    = clean(S.a1.vol.nome);
+  const num     = String(S.meta.saveCount).padStart(3,'0');
+  const tag     = (cognome && nome) ? `${cognome}_${nome}` : (cognome || nome || clean(S.meta.name) || 'sessione');
   const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  const name = (S.meta.name||'sessione').replace(/[^a-zA-Z0-9_àèìòù]/g,'_');
-  a.download = `HubS_${name}_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `HubS_${tag}_${num}.json`;
   a.click();
   updateSidebar();
 }
