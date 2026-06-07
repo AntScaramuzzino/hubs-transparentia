@@ -315,6 +315,7 @@ Gli operatori volontari saranno impegnati nelle seguenti attività:
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('attivita')"><i class="fa-solid fa-list-check"></i> Attività</button>
         <button class="tab-btn" onclick="switchTab('mappatura')"><i class="fa-solid fa-folder-tree"></i> Mappatura ADA/RA</button>
+        <button class="tab-btn" onclick="switchTab('riscrittura')"><i class="fa-solid fa-pen-to-square"></i> Riscrittura 5.3</button>
         <button class="tab-btn" onclick="switchTab('tabella')"><i class="fa-solid fa-table"></i> Sezione 6D</button>
       </div>
 
@@ -338,6 +339,32 @@ Gli operatori volontari saranno impegnati nelle seguenti attività:
       <div class="tab-pane" id="tab-mappatura">
         <div class="mapping-grid" id="mapping-grid">
           <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Tab: Riscrittura 5.3 -->
+      <div class="tab-pane" id="tab-riscrittura">
+        <div style="font-size:.83rem;color:var(--sub);margin-bottom:16px;line-height:1.6;background:var(--accent-light);border:1px solid var(--accent-border);border-radius:8px;padding:10px 14px;">
+          <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i>
+          Riscrittura della voce 5.3 con le ADA corrispondenti per ciascuna attività. Utilizzabile come allegato al progetto o come traccia per la compilazione della sezione 6D.
+        </div>
+        <div class="table-wrap">
+          <table class="t6d" id="tbl-53">
+            <thead>
+              <tr>
+                <th style="width:3%">N.</th>
+                <th style="width:35%">Attività (voce 5.3)</th>
+                <th style="width:14%">Codice ADA</th>
+                <th style="width:30%">Denominazione ADA</th>
+                <th style="width:12%">RA pertinenti</th>
+                <th style="width:6%">Livello</th>
+              </tr>
+            </thead>
+            <tbody id="tbody53"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;text-align:right">
+          <button class="btn btn-primary" onclick="downloadDoc53()"><i class="fa-regular fa-file-word"></i> Scarica Riscrittura 5.3 (.doc)</button>
         </div>
       </div>
 
@@ -562,7 +589,7 @@ function setStep(n) {
 // TAB MANAGEMENT
 // ══════════════════════════════════════════════════════════
 function switchTab(id) {
-  const tabs = ['attivita','mappatura','tabella'];
+  const tabs = ['attivita','mappatura','riscrittura','tabella'];
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i]===id));
   tabs.forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===id));
 }
@@ -738,6 +765,19 @@ function renderResults(d) {
     </div>
   `).join('');
 
+  // Riscrittura 5.3 table
+  document.getElementById('tbody53').innerHTML =
+    (d.mappatura||[]).map((m,i) => `
+      <tr>
+        <td style="text-align:center;color:var(--sub);font-size:.8rem">${i+1}</td>
+        <td><strong>${escHtml(m.attività)}</strong></td>
+        <td><span style="font-weight:700;color:var(--accent);font-family:monospace;font-size:.82rem">${escHtml(m.ada_code||'')}</span></td>
+        <td style="font-size:.82rem;color:var(--sub)">${escHtml(m.ada_nome||'')}</td>
+        <td style="font-size:.75rem;font-family:monospace">${(m.ra||[]).join('<br>')}</td>
+        <td style="text-align:center;font-weight:700">${m.livello||'—'}<span style="font-weight:400;color:var(--sub)">/3</span></td>
+      </tr>
+    `).join('');
+
   // 6D table
   document.getElementById('tbody6d').innerHTML =
     (d.mappatura||[]).map(m => `
@@ -896,6 +936,79 @@ ${d.note_validatore ? `<h2>Note per il Validatore</h2><div class="nota">${d.note
   a.href = url;
   const fname = m.progetto ? m.progetto.replace(/[^a-zA-Z0-9_\-À-ú ]/g,'').trim().replace(/\s+/g,'_').slice(0,32) : 'progetto';
   a.download = `sezione_6D_${fname}_${today.replace(/\//g,'-')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 12000);
+}
+
+function downloadDoc53() {
+  if (!result) return;
+  const d = result;
+  const m = d._meta || {};
+  const today = new Date().toLocaleDateString('it-IT');
+
+  const rows = (d.mappatura||[]).map((r,i) => `
+    <tr>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;text-align:center;color:#888;font-size:9pt">${i+1}</td>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;vertical-align:top"><b>${r.attività}</b></td>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;vertical-align:top;font-family:Courier New,monospace;font-size:9.5pt;color:#C2410C;font-weight:bold">${r.ada_code||''}</td>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;vertical-align:top;font-size:9.5pt">${r.ada_nome||''}</td>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;vertical-align:top;font-size:8.5pt;font-family:Courier New,monospace">${(r.ra||[]).join('<br>')}</td>
+      <td style="padding:6pt 8pt;border:1pt solid #ccc;text-align:center;font-weight:bold;vertical-align:top">${r.livello||'—'}/3</td>
+    </tr>`).join('');
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>
+  body{font-family:Calibri,sans-serif;font-size:11pt;margin:2cm}
+  h1{font-size:15pt;color:#C2410C;margin-bottom:6pt}
+  h2{font-size:11.5pt;color:#EA580C;margin-top:14pt;margin-bottom:6pt}
+  table{border-collapse:collapse;width:100%;margin-top:8pt}
+  th{background:#EA580C;color:white;padding:6pt 8pt;border:1pt solid #ccc;font-size:9.5pt;text-align:left}
+  p{font-size:10pt;line-height:1.5;margin:3pt 0;color:#444}
+  .footer{color:#999;font-size:8pt;margin-top:22pt;border-top:1pt solid #eee;padding-top:6pt}
+  .nota{background:#FFF7ED;border-left:3pt solid #EA580C;padding:7pt 10pt;margin-top:10pt;font-size:10pt;font-style:italic;color:#374151}
+</style>
+</head>
+<body>
+<h1>Voce 5.3 — Riscrittura con Annotazioni ADA</h1>
+<p style="color:#666;font-size:9.5pt">
+  ${m.progetto ? `<b>Progetto:</b> ${m.progetto} &nbsp;|&nbsp; ` : ''}
+  ${m.ov ? `<b>OV:</b> ${m.ov} &nbsp;|&nbsp; ` : ''}
+  <b>Data:</b> ${today}
+</p>
+
+<div class="nota">
+  Questo documento riporta le attività della voce 5.3 del progetto arricchite con i codici ADA dell'Atlante del Lavoro INAPP, i Risultati Attesi corrispondenti e il livello EQF stimato. Documento preliminare — da verificare con esperto certificatore.
+</div>
+
+<h2>Attività del progetto con mappatura ADA</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:3%">N.</th>
+      <th style="width:34%">Attività (voce 5.3)</th>
+      <th style="width:13%">Codice ADA</th>
+      <th style="width:29%">Denominazione ADA</th>
+      <th style="width:13%">RA pertinenti</th>
+      <th style="width:8%">Livello</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+
+<div class="footer">Generato da HubS-TransparentIA — Documento preliminare da verificare con esperto certificatore prima dell'uso ufficiale.</div>
+</body></html>`;
+
+  const blob = new Blob(['﻿'+html], {type:'application/vnd.ms-word;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const fname = m.progetto ? m.progetto.replace(/[^a-zA-Z0-9_\-À-ú ]/g,'').trim().replace(/\s+/g,'_').slice(0,32) : 'progetto';
+  a.download = `riscrittura_5_3_${fname}_${today.replace(/\//g,'-')}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
