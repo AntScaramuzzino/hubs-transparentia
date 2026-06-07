@@ -1397,12 +1397,12 @@ function renderA4Step1() {
     {key:'eu8',label:'EU8',color:'var(--c-a1)',items:EU8.filter(x=>!x.skip),badge:'L2 — Inferenziale'}
   ];
 
-  let html=`<div class="tabs" id="a4s1-tabs">`;
-  tabs.forEach((t,i)=>{ html+=`<button class="tab-btn ${i===0?'active':''}" style="--tc:${t.color}" onclick="switchA4S1Tab('${t.key}',this)">${t.label} <span class="badge badge-grey" style="font-size:.65rem">${t.badge}</span></button>`; });
+  let html=`<div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px" id="a4s1-tabs">`;
+  tabs.forEach((t,i)=>{ html+=`<button id="a4s1-btn-${t.key}" style="padding:8px 14px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:${i===0?t.color:'var(--sub)'};border-bottom:2px solid ${i===0?t.color:'transparent'};margin-bottom:-2px;font-family:inherit" onclick="toggleA4S1Tab('${t.key}')">${t.label} <span style="background:#f0f2f5;color:#6c757d;padding:2px 6px;border-radius:10px;font-size:.65rem;font-weight:700">${t.badge}</span></button>`; });
   html+=`</div>`;
 
   tabs.forEach((t,i)=>{
-    html+=`<div id="a4s1-${t.key}" class="${i===0?'':'tab-pane'}" style="${i===0?'':'display:none'}">`;
+    html+=`<div id="a4s1-${t.key}" style="display:${i===0?'block':'none'}">`;
     if(t.key==='digcomp') html+=`<div class="alert alert-info" style="margin-bottom:10px"><strong>L1 Deterministico</strong> — Mapping validato da Decreto GOL/EDO Regione Calabria n. 15242/2025. Ogni area DigComp corrisponde a un'ADA.QE.01.0x definita.</div>`;
     else html+=`<div class="alert alert-warn" style="margin-bottom:10px"><strong>L2 Inferenziale</strong> — Le competenze ${t.label} vengono suggerite verso ADA del SEP n. 18 (Atlante INAPP). Il tutor deve validare ogni proposta. Metamodello INAPP atteso fine 2026.</div>`;
 
@@ -1437,11 +1437,12 @@ function renderA4Step1() {
   el('a4-step-1').innerHTML=html;
 }
 
+const A4S1_COLORS = {digcomp:'var(--c-a4)',lifecomp:'var(--c-a2)',entrecomp:'var(--c-a3)',eu8:'var(--c-a1)'};
 function toggleA4S1Tab(key,btn) {
-  document.querySelectorAll('#a4s1-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
   ['digcomp','lifecomp','entrecomp','eu8'].forEach(k=>{
     const p=el('a4s1-'+k); if(p) p.style.display=(k===key?'block':'none');
+    const b=el('a4s1-btn-'+k);
+    if(b){ b.style.color=(k===key?A4S1_COLORS[k]:'var(--sub)'); b.style.borderBottomColor=(k===key?A4S1_COLORS[k]:'transparent'); }
   });
 }
 
