@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HubS – Mappatore Competenze → ADA</title>
+<style>
+  :root {
+    --blu: #1a3a6b; --blu-chiaro: #2d6db5; --blu-sfondo: #e8f0fc;
+    --verde: #1b7a4b; --verde-sfondo: #e6f4ee;
+    --arancio: #c47a1a; --arancio-sfondo: #fef3e2;
+    --rosso: #b71c1c; --grigio: #5f6368;
+    --grigio-chiaro: #f1f3f4; --bordo: #d1d5db; --bianco: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7fb; color: #1f2937; font-size: 14px; line-height: 1.5; }
+  header { background: var(--blu); color: white; padding: 12px 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  header .logo { font-size: 20px; font-weight: 700; }
+  header .logo span { color: #7ab3f5; }
+  header .subtitle { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  header .badge-agente { margin-left: auto; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; }
+  .step-bar { background: white; border-bottom: 1px solid var(--bordo); display: flex; padding: 0 24px; position: sticky; top: 0; z-index: 10; }
+  .step { padding: 10px 18px; border-bottom: 3px solid transparent; cursor: pointer; color: var(--grigio); font-size: 13px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .step:hover { color: var(--blu-chiaro); }
+  .step.active { color: var(--blu); border-bottom-color: var(--blu); }
+  .step .num { width: 20px; height: 20px; border-radius: 50%; background: var(--grigio-chiaro); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .step.active .num { background: var(--blu); color: white; }
+  .step.done .num { background: var(--verde); color: white; }
+  .main { display: flex; height: calc(100vh - 88px); overflow: hidden; }
+  .panel-left { width: 380px; flex-shrink: 0; background: white; border-right: 1px solid var(--bordo); overflow-y: auto; display: flex; flex-direction: column; }
+  .panel-right { flex: 1; overflow-y: auto; padding: 18px 22px; }
+  .section { border-bottom: 1px solid var(--bordo); padding: 14px 16px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--grigio); margin-bottom: 10px; }
+  label { display: block; font-size: 12px; color: var(--grigio); margin-bottom: 3px; font-weight: 500; }
+  input[type="text"], input[type="date"], select, textarea { width: 100%; border: 1px solid var(--bordo); border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #1f2937; background: white; margin-bottom: 9px; transition: border-color 0.2s; }
+  input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--blu-chiaro); outline: none; box-shadow: 0 0 0 2px rgba(45,109,181,0.1); }
+  textarea { resize: vertical; min-height: 60px; }
+  .tab-group { display: flex; border-bottom: 1px solid var(--bordo); background: var(--grigio-chiaro); position: sticky; top: 0; z-index: 5; }
+  .tab { flex: 1; padding: 8px 2px; text-align: center; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--grigio); border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab.active { background: white; color: var(--blu); border-bottom-color: var(--blu); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .comp-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.1s; }
+  .comp-item:hover { background: var(--blu-sfondo); }
+  .comp-item.selected { background: var(--blu-sfondo); border-left: 3px solid var(--blu-chiaro); padding-left: 11px; }
+  .comp-checkbox { width: 16px; height: 16px; border: 2px solid var(--bordo); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+  .comp-item.selected .comp-checkbox { background: var(--blu-chiaro); border-color: var(--blu-chiaro); }
+  .comp-item.selected .comp-checkbox::after { content: '✓'; color: white; font-size: 10px; font-weight: 700; }
+  .comp-info { flex: 1; }
+  .comp-name { font-size: 12px; font-weight: 600; color: #1f2937; }
+  .comp-desc { font-size: 11px; color: var(--grigio); margin-top: 2px; }
+  .comp-ada-hint { font-size: 10px; margin-top: 4px; }
+  .comp-level { display: flex; align-items: center; gap: 4px; margin-top: 7px; opacity: 0; transition: opacity 0.2s; flex-wrap: wrap; }
+  .comp-item.selected .comp-level { opacity: 1; }
+  .level-btn { width: 24px; height: 24px; border: 1px solid var(--bordo); border-radius: 4px; background: white; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--grigio); transition: all 0.1s; flex-shrink: 0; }
+  .level-btn.active { background: var(--blu); border-color: var(--blu); color: white; }
+  .level-label { font-size: 10px; color: var(--grigio); }
+  .section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .section-header h2 { font-size: 16px; font-weight: 700; color: var(--blu); }
+  .section-header p { font-size: 12px; color: var(--grigio); margin-top: 2px; }
+  .placeholder { text-align: center; padding: 40px 24px; color: var(--grigio); }
+  .ada-card { background: white; border: 1px solid var(--bordo); border-radius: 10px; margin-bottom: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .ada-card.validated { border-color: var(--verde); border-left: 4px solid var(--verde); }
+  .ada-card-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .ada-code { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--blu); background: var(--blu-sfondo); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .ada-title { font-size: 13px; font-weight: 600; color: #1f2937; margin-top: 6px; }
+  .ada-source { font-size: 11px; color: var(--grigio); margin-top: 4px; }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-l1 { background: var(--verde-sfondo); color: var(--verde); }
+  .badge-l2 { background: var(--arancio-sfondo); color: var(--arancio); }
+  .ada-card-body { padding: 12px 16px; }
+  .warn-box { background: var(--arancio-sfondo); border: 1px solid #f6d088; border-radius: 6px; padding: 9px 12px; font-size: 11px; color: #7a4a00; margin-bottom: 10px; }
+  .info-box { background: var(--blu-sfondo); border: 1px solid #c5d8f8; border-radius: 6px; padding: 9px 12px; font-size: 11px; color: var(--blu); margin-bottom: 10px; }
+  .comp-source-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .comp-tag { font-size: 11px; background: var(--blu-sfondo); color: var(--blu); padding: 2px 8px; border-radius: 10px; border: 1px solid #c5d8f8; }
+  .livello-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .livello-label { font-size: 12px; color: var(--grigio); font-weight: 500; white-space: nowrap; }
+  .livello-btns { display: flex; gap: 3px; }
+  .lvl-btn { width: 28px; height: 28px; border: 1px solid var(--bordo); border-radius: 5px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.1s; color: var(--grigio); }
+  .lvl-btn.active { background: var(--blu); border-color: var(--blu); color: white; }
+  .livello-desc { font-size: 10px; color: var(--grigio); margin-bottom: 10px; }
+  .ra-list { margin-bottom: 10px; }
+  .ra-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grigio); margin-bottom: 6px; }
+  .ra-item { padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+  .ra-item:last-child { border-bottom: none; }
+  .ra-code { font-family: monospace; font-size: 10px; color: var(--grigio); background: var(--grigio-chiaro); padding: 1px 5px; border-radius: 3px; display: inline-block; margin-bottom: 4px; }
+  .ra-desc { font-size: 11px; color: #374151; line-height: 1.5; margin-bottom: 6px; }
+  .ra-coverage { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .coverage-btn { font-size: 10px; padding: 3px 10px; border: 1px solid var(--bordo); border-radius: 10px; background: white; cursor: pointer; color: var(--grigio); transition: all 0.1s; }
+  .coverage-btn.active-totale { background: var(--verde); border-color: var(--verde); color: white; }
+  .coverage-btn.active-parziale { background: var(--arancio); border-color: var(--arancio); color: white; }
+  .attivita-input { font-size: 11px; padding: 5px 8px; border: 1px solid var(--bordo); border-radius: 5px; width: 100%; margin-top: 5px; }
+  .ada-card-actions { display: flex; gap: 8px; padding: 10px 16px; background: var(--grigio-chiaro); border-top: 1px solid var(--bordo); flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .btn-primary { background: var(--blu); color: white; border-color: var(--blu); }
+  .btn-primary:hover { background: var(--blu-chiaro); }
+  .btn-success { background: var(--verde); color: white; border-color: var(--verde); }
+  .btn-outline { background: white; color: var(--grigio); border-color: var(--bordo); }
+  .btn-outline:hover { background: var(--grigio-chiaro); }
+  .btn-danger { background: white; color: var(--rosso); border-color: #fca5a5; }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-large { padding: 10px 22px; font-size: 13px; }
+  .validated-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--verde); font-weight: 600; }
+  .empty-mapping { text-align: center; padding: 40px; color: var(--grigio); font-size: 13px; }
+  .export-panel { background: white; border: 1px solid var(--bordo); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .export-title { font-size: 15px; font-weight: 700; color: var(--blu); margin-bottom: 8px; }
+  .export-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 12px 0; }
+  .export-table th { background: var(--blu); color: white; padding: 6px 8px; text-align: left; font-weight: 600; }
+  .export-table td { border: 1px solid var(--bordo); padding: 6px 8px; vertical-align: top; }
+  .export-table tr:nth-child(even) td { background: #f9fafb; }
+  .export-text { background: #f8f9fa; border: 1px solid var(--bordo); border-radius: 6px; padding: 12px; font-family: monospace; font-size: 11px; white-space: pre-wrap; max-height: 280px; overflow-y: auto; margin: 10px 0; }
+  .screen { display: none; }
+  .screen.active { display: flex; flex: 1; height: calc(100vh - 88px); overflow: hidden; }
+  a.atlante-link { color: var(--blu-chiaro); font-size: 11px; text-decoration: none; }
+  a.atlante-link:hover { text-decoration: underline; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  .area-header { padding: 8px 14px; background: var(--grigio-chiaro); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--grigio); border-bottom: 1px solid var(--bordo); }
+  .count-badge { background: var(--blu); color: white; font-size: 10px; border-radius: 10px; padding: 1px 7px; margin-left: 6px; }
+  .scheda-link { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--blu-chiaro); text-decoration:none; padding:3px 9px; border:1px solid #c5d8f8; border-radius:10px; background:var(--blu-sfondo); transition:all 0.15s; white-space:nowrap; font-weight:600; }
+  .scheda-link:hover { background:var(--blu); color:white; border-color:var(--blu); }
+  .scheda-link.scheda-online { color:var(--arancio); border-color:#f6d088; background:var(--arancio-sfondo); }
+  .scheda-link.scheda-online:hover { background:var(--arancio); color:white; border-color:var(--arancio); }
+  .ra-scheda-link { display:inline-flex; align-items:center; gap:3px; font-size:10px; color:var(--blu-chiaro); text-decoration:none; padding:2px 6px; border:1px solid #c5d8f8; border-radius:8px; background:var(--blu-sfondo); transition:all 0.12s; margin-left:4px; white-space:nowrap; }
+  .ra-scheda-link:hover { background:var(--blu); color:white; border-color:var(--blu); }
+  .ra-scheda-link.online { color:var(--arancio); border-color:#f6d088; background:var(--arancio-sfondo); }
+  .ra-scheda-link.online:hover { background:var(--arancio); color:white; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">HubS <span>–</span> Agente 4</div>
+    <div class="subtitle">Mappatore Normativo · Competenze → ADA · Atlante del Lavoro INAPP (feb. 2026)</div>
+  </div>
+  <div class="badge-agente">🗺️ Agente Mappatore</div>
+</header>
+
+<div class="step-bar">
+  <div class="step active" id="step-tab-1" onclick="goStep(1)"><div class="num" id="step-num-1">1</div> Dati percorso</div>
+  <div class="step" id="step-tab-2" onclick="goStep(2)"><div class="num" id="step-num-2">2</div> Competenze emerse</div>
+  <div class="step" id="step-tab-3" onclick="goStep(3)"><div class="num" id="step-num-3">3</div> Mappatura ADA</div>
+  <div class="step" id="step-tab-4" onclick="goStep(4)"><div class="num" id="step-num-4">4</div> Export</div>
+</div>
+
+<!-- SCREEN 1 -->
+<div class="screen active" id="screen-1" style="display:flex;">
+  <div class="panel-left">
+    <div class="section">
+      <div class="section-title">👤 Dati volontario</div>
+      <label>Cognome e Nome</label><input type="text" id="vol-nome" placeholder="Es. Rossi Maria">
+      <label>Ente di accoglienza</label><input type="text" id="vol-ente" placeholder="Es. Cooperativa Sorriso">
+      <label>Tutor / Responsabile accompagnamento</label><input type="text" id="vol-tutor" placeholder="Nome del tutor">
+      <label>Codice progetto HubS</label><input type="text" id="vol-codice" placeholder="Es. HubS-2025-001">
+    </div>
+    <div class="section">
+      <div class="section-title">📅 Dati percorso</div>
+      <label>Data inizio</label><input type="date" id="perc-inizio">
+      <label>Data fine</label><input type="date" id="perc-fine">
+      <label>Ore totali svolte</label><input type="text" id="perc-ore" placeholder="Es. 80">
+      <label>Settore di attività</label><input type="text" id="perc-settore" placeholder="Es. Assistenza, educazione...">
+    </div>
+    <div class="section">
+      <div class="section-title">📝 Descrizione attività</div>
+      <textarea id="perc-desc" placeholder="Attività principali svolte..."></textarea>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="placeholder">
+      <div style="font-size:48px;margin-bottom:16px;opacity:0.4;">🗺️</div>
+      <h3 style="font-size:17px;margin-bottom:12px;color:var(--blu);">Mappatore Normativo HubS</h3>
+      <div style="max-width:480px;margin:0 auto;text-align:left;">
+        <div style="display:flex;gap:12px;margin-bottom:12px;padding:12px;background:var(--verde-sfondo);border-radius:8px;border:1px solid #a7f3d0;">
+          <div style="font-size:18px;">✅</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--verde);margin-bottom:2px;">Livello 1 — Deterministico (DigComp)</div>
+          <div style="font-size:11px;">5 ADA certificati da cross-walking GOL/EDO Regione Calabria n.15242/2025. Codici ufficiali INAPP.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;padding:12px;background:var(--arancio-sfondo);border-radius:8px;border:1px solid #fcd34d;">
+          <div style="font-size:18px;">⚠️</div>
+          <div><div style="font-size:12px;font-weight:700;color:var(--arancio);margin-bottom:2px;">Livello 2 — Inferenziale (LifeComp, EntreComp, EU8)</div>
+          <div style="font-size:11px;">9 ADA dal SEP 18 Atlante del Lavoro (feb. 2026). Codici reali — la relazione con i framework EU va validata dal tutor. Metamodello INAPP in elaborazione (scad. ott. 2026).</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--grigio);line-height:1.8;">
+          <strong>Passi:</strong> 1️⃣ Dati percorso &nbsp;→&nbsp; 2️⃣ Seleziona competenze &nbsp;→&nbsp; 3️⃣ Valida ADA &nbsp;→&nbsp; 4️⃣ Export Sezione 4
+        </div>
+      </div>
+      <button class="btn btn-primary btn-large" style="margin-top:24px;" onclick="goStep(2)">Inizia → Seleziona competenze</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2 -->
+<div class="screen" id="screen-2">
+  <div class="panel-left" style="width:420px;">
+    <div class="tab-group">
+      <div class="tab active" onclick="switchTab('digcomp')">DigComp</div>
+      <div class="tab" onclick="switchTab('lifecomp')">LifeComp</div>
+      <div class="tab" onclick="switchTab('entrecomp')">EntreComp</div>
+      <div class="tab" onclick="switchTab('eu8')">EU 8</div>
+    </div>
+    <div class="tab-content active" id="tab-digcomp">
+      <div class="section" style="padding:10px 14px 8px;">
+        <div class="info-box" style="margin-bottom:0;">🔗 <strong>L1 — Deterministico.</strong> Ogni area DigComp → ADA ufficiale (GOL/EDO Calabria 2025). Seleziona le aree dimostrate dal volontario.</div>
+      </div>
+      <div id="digcomp-list"></div>
+    </div>
+    <div class="tab-content" id="tab-lifecomp">
+      <div class="section" style="padding:10px 14px 8px;">
+        <div class="warn-box" style="margin-bottom:0;">⚠️ <strong>L2 — Inferenziale.</strong> Codici ADA reali (SEP 18), relazione con LifeComp da validare. Metamodello INAPP in elaborazione (ott. 2026).</div>
+      </div>
+      <div id="lifecomp-list"></div>
+    </div>
+    <div class="tab-content" id="tab-entrecomp">
+      <div class="section" style="padding:10px 14px 8px;">
+        <div class="warn-box" style="margin-bottom:0;">⚠️ <strong>L2 — Inferenziale.</strong> Codici ADA reali (SEP 18), relazione con EntreComp da validare. Metamodello INAPP in elaborazione (ott. 2026).</div>
+      </div>
+      <div id="entrecomp-list"></div>
+    </div>
+    <div class="tab-content" id="tab-eu8">
+      <div class="section" style="padding:10px 14px 8px;">
+        <div class="warn-box" style="margin-bottom:0;">⚠️ <strong>L2 — Inferenziale.</strong> Associazione concettuale a ADA SEP 18. Verifica su <a class="atlante-link" href="https://atlantelavoro.inapp.org" target="_blank">Atlante INAPP ↗</a></div>
+      </div>
+      <div id="eu8-list"></div>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="section-header">
+      <div>
+        <h2>Riepilogo selezioni</h2>
+        <p>Le competenze selezionate genereranno proposte di ADA nel Passo 3</p>
+      </div>
+      <button class="btn btn-primary" onclick="goStep(3)">Genera mappatura →</button>
+    </div>
+    <div id="selection-summary">
+      <div class="empty-mapping">Seleziona le competenze emerse dal colloquio.<br><span style="font-size:11px;margin-top:6px;display:block;">Le proposte di ADA appariranno automaticamente.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3 -->
+<div class="screen" id="screen-3">
+  <div class="panel-left" style="width:290px;">
+    <div class="section">
+      <div class="section-title">📊 Stato mappatura</div>
+      <div id="map-stats" style="font-size:12px;color:var(--grigio);">Seleziona competenze nel Passo 2.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">➕ Aggiungi ADA manualmente</div>
+      <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;">Per ADA non in elenco — cerca su <a class="atlante-link" href="https://atlantelavoro.inapp.org" target="_blank">atlantelavoro.inapp.org ↗</a></div>
+      <label>Codice ADA</label><input type="text" id="manual-ada-code" placeholder="Es. ADA.18.02.01">
+      <label>Descrizione ADA</label><input type="text" id="manual-ada-desc" placeholder="Da Atlante del Lavoro INAPP">
+      <label>Codice RA</label><input type="text" id="manual-ra-code" placeholder="Es. RA.18.02.01.1">
+      <label>Descrizione RA</label><input type="text" id="manual-ra-desc" placeholder="Titolo del Risultato Atteso">
+      <label>Competenza di origine</label><input type="text" id="manual-comp-source" placeholder="Es. LifeComp — Empatia">
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:2px;" onclick="addManualADA()">+ Aggiungi ADA</button>
+    </div>
+    <div class="section">
+      <div class="section-title">⚡ Azioni rapide</div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:6px;" onclick="validateAll()">✅ Valida tutti gli ADA L1</button>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:6px;" onclick="goStep(2)">← Modifica selezioni</button>
+      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="goStep(4)">Export →</button>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="section-header">
+      <div>
+        <h2>Proposte di mappatura ADA</h2>
+        <p>Valida ogni proposta, imposta livello di realizzazione e copertura RA</p>
+      </div>
+      <button class="btn btn-primary" onclick="goStep(4)">Export →</button>
+    </div>
+    <div id="mapping-cards">
+      <div class="empty-mapping">Torna al Passo 2 per selezionare le competenze.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(2)">← Seleziona competenze</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4 -->
+<div class="screen" id="screen-4">
+  <div class="panel-left" style="width:260px;">
+    <div class="section">
+      <div class="section-title">📊 Stato export</div>
+      <div id="export-stats" style="font-size:12px;color:var(--grigio);">Genera la mappatura prima.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">📥 Formato</div>
+      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="tabella" checked> Tabella HTML (Sezione 4.1)</label>
+      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="csv"> CSV (per Excel)</label>
+      <label><input type="radio" name="export-fmt" value="testo"> Testo strutturato</label>
+    </div>
+    <div class="section">
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="generateExport()">🔄 Aggiorna export</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="copyExport()">📋 Copia negli appunti</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadExport()">💾 Scarica .txt</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadDocx()">📄 Scarica .docx (Word)</button>
+      <button class="btn btn-outline" style="width:100%;" onclick="downloadPdf()">🖨️ Stampa / Salva PDF</button>
+    </div>
+    <div class="section">
+      <div style="font-size:11px;color:var(--grigio);line-height:1.6;">Genera il contenuto per la <strong>Sezione 4.1</strong> del Documento di Trasparenza HubS.<br><br>Firma del tutor obbligatoria (Art. 5 DI 31/07/2025).</div>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="section-header">
+      <div><h2>Export — Sezione 4 Documento di Trasparenza</h2><p>Copia il contenuto nel file 07_Documento_di_Trasparenza</p></div>
+    </div>
+    <div id="export-output">
+      <div class="empty-mapping">Torna al Passo 3 e valida le proposte ADA prima di esportare.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(3)">← Vai alla mappatura</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATABASE ADA REALE (Atlante del Lavoro INAPP, feb. 2026) ====================
+const ADA_DB = {
+  "ADA.QE.01.01": {
+    code:"ADA.QE.01.01", desc:"Ricerca e gestione di informazioni, dati e contenuti digitali",
+    sep:"QE.01", level:"L1", scheda:null,
+    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante",
+    framework:"DigComp 2.2 — Area 1: Informazione e dati",
+    compLinks:["dc1"],
+    ra:[
+      {code:"RA.QE.01.01.1", desc:"RA1: Realizzare ricerche di contenuti, informazioni e dati, a partire dalla individuazione dei fabbisogni informativi, utilizzando strategie di navigazione coerenti con gli obiettivi da conseguire ed effettuando le operazioni di accesso e di acquisizione del dato"},
+      {code:"RA.QE.01.01.2", desc:"RA2: Valutare i dati a partire dall'analisi e dall'interpretazione critica dell'attendibilità delle fonti, degli stessi dati e dei contenuti digitali"},
+      {code:"RA.QE.01.01.3", desc:"RA3: Gestire dati, informazioni e contenuti digitali, organizzandoli e archiviandoli in ambienti digitali o in un ambiente strutturato"}
+    ]
+  },
+  "ADA.QE.01.02": {
+    code:"ADA.QE.01.02", desc:"Comunicazione e collaborazione in contesti digitali",
+    sep:"QE.01", level:"L1", scheda:null,
+    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante",
+    framework:"DigComp 2.2 — Area 2: Comunicazione e collaborazione",
+    compLinks:["dc2"],
+    ra:[
+      {code:"RA.QE.01.02.1", desc:"RA1: Interagire con gli altri attraverso le tecnologie digitali, scegliendo gli strumenti di comunicazione più adatti in un determinato contesto"},
+      {code:"RA.QE.01.02.2", desc:"RA2: Condividere con altri dati, informazioni e contenuti digitali, citando fonti e attribuendo la titolarità, attraverso l'intermediazione e l'utilizzo di prassi adeguate"},
+      {code:"RA.QE.01.02.3", desc:"RA3: Esercitare la cittadinanza digitale utilizzando strumenti e tecnologie più appropriati al fine di trovare opportunità per potenziare le proprie capacità personali e professionali"},
+      {code:"RA.QE.01.02.4", desc:"RA4: Collaborare alla co-costruzione e co-creazione di dati e know how, utilizzando gli strumenti e le tecnologie più funzionali allo sviluppo dei processi collaborativi"},
+      {code:"RA.QE.01.02.5", desc:"RA5: Impiegare le norme comportamentali e il know-how per l'utilizzo delle tecnologie digitali, adeguando le strategie di comunicazione in base agli utenti"},
+      {code:"RA.QE.01.02.6", desc:"RA6: Creare e gestire identità digitali e dati, attraverso l'uso di strumenti, ambienti e servizi digitali, applicando modalità di protezione dei dati"}
+    ]
+  },
+  "ADA.QE.01.03": {
+    code:"ADA.QE.01.03", desc:"Creazione di contenuti digitali",
+    sep:"QE.01", level:"L1", scheda:null,
+    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante",
+    framework:"DigComp 2.2 — Area 3: Creazione di contenuti digitali",
+    compLinks:["dc3"],
+    ra:[
+      {code:"RA.QE.01.03.1", desc:"RA1: Creare e modificare contenuti digitali, utilizzando mezzi digitali idonei"},
+      {code:"RA.QE.01.03.2", desc:"RA2: Creare conoscenze e contenuti digitali nuovi, originali e rilevanti, rielaborando informazioni e contenuti già esistenti, integrandoli, affinandoli e migliorandoli"},
+      {code:"RA.QE.01.03.3", desc:"RA3: Adottare le regole di copyright e licenze appropriate da applicare ai dati, alle informazioni e ai contenuti digitali"},
+      {code:"RA.QE.01.03.4", desc:"RA4: Pianificare e sviluppare istruzioni comprensibili da parte di un sistema informativo, risolvendo specifici problemi"}
+    ]
+  },
+  "ADA.QE.01.04": {
+    code:"ADA.QE.01.04", desc:"Sicurezza Digitale",
+    sep:"QE.01", level:"L1", scheda:null,
+    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante",
+    framework:"DigComp 2.2 — Area 4: Sicurezza",
+    compLinks:["dc4"],
+    ra:[
+      {code:"RA.QE.01.04.1", desc:"RA1: Proteggere i dispositivi e i contenuti digitali, individuando i rischi e le minacce presenti negli ambienti digitali e scegliendo le misure più adatte a garantire l'affidabilità e la privacy"},
+      {code:"RA.QE.01.04.2", desc:"RA2: Proteggere sé stessi e gli altri negli ambienti digitali, applicando le normative europee di protezione della privacy con riferimento all'utilizzo ed alla condivisione di dati personali"},
+      {code:"RA.QE.01.04.3", desc:"RA3: Mitigare i rischi per la salute ed il benessere presenti negli ambienti digitali, utilizzando gli strumenti digitali più idonei a garantire il benessere e l'inclusione sociale"},
+      {code:"RA.QE.01.04.4", desc:"RA4: Limitare l'impatto ambientale dell'utilizzo delle tecnologie digitali, analizzandone l'utilizzo e trovando le soluzioni più adatte e più sostenibili"}
+    ]
+  },
+  "ADA.QE.01.05": {
+    code:"ADA.QE.01.05", desc:"Soluzione di problemi tecnici",
+    sep:"QE.01", level:"L1", scheda:null,
+    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante",
+    framework:"DigComp 2.2 — Area 5: Risoluzione di problemi",
+    compLinks:["dc5"],
+    ra:[
+      {code:"RA.QE.01.05.1", desc:"RA1: Gestire problemi tecnici derivanti dall'utilizzo di dispositivi a partire dalla loro individuazione negli ambienti digitali e provvedendo successivamente alla loro risoluzione o eliminazione"},
+      {code:"RA.QE.01.05.2", desc:"RA2: Personalizzazione degli ambienti digitali in base all'analisi dei bisogni tecnologici, scegliendo gli strumenti digitali e le risposte tecnologiche più idonee"},
+      {code:"RA.QE.01.05.3", desc:"RA3: Creare conoscenza e innovazione utilizzando in modo creativo gli strumenti e le tecnologie digitali"},
+      {code:"RA.QE.01.05.4", desc:"RA4: Aggiornamento continuo delle proprie e altrui competenze digitali, partendo dall'individuazione di eventuali divari e ricercando opportunità di crescita personale"}
+    ]
+  },
+  "ADA.18.01.06": {
+    code:"ADA.18.01.06", desc:"Accoglienza e guida ai servizi per l'occupabilità e l'apprendimento permanente",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-06_ra-18-01-06-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18 (Servizi educazione, formazione e lavoro)",
+    framework:"EU8 Comp.1 (Comunicazione) | LifeComp: Comunicazione, Empatia",
+    compLinks:["eu1","lc4","lc3"],
+    ra:[
+      {code:"RA.18.01.06.1", desc:"RA1: Realizzare la prima accoglienza nei servizi per il lavoro e l'apprendimento permanente, espletando le pratiche amministrative di inserimento e/o aggiornamento dei dati relativi agli utenti e fornendo informazioni in merito alle finalità e alle risorse del servizio"}
+    ]
+  },
+  "ADA.18.01.07": {
+    code:"ADA.18.01.07", desc:"Orientamento informativo",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-07_ra-18-01-07-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.6 (Sociali e civiche) | LifeComp: Comunicazione",
+    compLinks:["eu6","lc4"],
+    ra:[
+      {code:"RA.18.01.07.1", desc:"RA1: Realizzare incontri individuali e/o di gruppo per la divulgazione di informazioni sulle dinamiche del mercato del lavoro e dell'offerta educativa e formativa, favorendo l'avvio di processi di ricerca attiva e auto-consultazione"},
+      {code:"RA.18.01.07.2", desc:"RA2: Realizzare iniziative per l'orientamento, allestendo servizi a livello stabile in centri dedicati e/o stand fieristici finalizzati alla divulgazione di informazioni"},
+      {code:"RA.18.01.07.3", desc:"RA3: Gestire i sistemi integrati di informazione (bacheche fisiche e virtuali), ricercando e catalogando le diverse fonti informative sui servizi e/o sulle offerte di lavoro e formazione"}
+    ]
+  },
+  "ADA.18.01.08": {
+    code:"ADA.18.01.08", desc:"Analisi della domanda e definizione del patto di servizio",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-08_ra-18-01-08-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.5 (Imparare ad imparare) | LifeComp: Crescita continua",
+    compLinks:["eu5","lc6"],
+    ra:[
+      {code:"RA.18.01.08.1", desc:"RA1: Approfondire l'analisi della situazione della persona, dei bisogni e delle motivazioni alla base della richiesta di intervento, indirizzandola verso i servizi offerti e ad altre strutture presenti sul territorio"},
+      {code:"RA.18.01.08.2", desc:"RA2: Offrire le informazioni sulle opportunità formative e professionali, favorendo il processo di auto-consultazione dei materiali informativi disponibili e supportando nella stesura del curriculum vitae"},
+      {code:"RA.18.01.08.3", desc:"RA3: Predisporre il patto di servizio e il relativo piano di azione, definendo e sottoscrivendo il tipo di percorso da attuare sulla base dei dati raccolti"}
+    ]
+  },
+  "ADA.18.01.09": {
+    code:"ADA.18.01.09", desc:"Consulenza orientativa e bilancio di competenze",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-09_ra-18-01-09-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.5+6 | LifeComp: Pensiero critico | EntreComp: Into Action",
+    compLinks:["eu5","eu6","lc7","ec5"],
+    ra:[
+      {code:"RA.18.01.09.1", desc:"RA1: Progettare interventi consulenziali individuali e di gruppo, avendo cura di realizzare preventivamente l'analisi dei fabbisogni del servizio e l'analisi di fattibilità economica"},
+      {code:"RA.18.01.09.2", desc:"RA2: Ricostruire il patrimonio di competenze della persona, analizzando e valorizzando, sulla base della lettura integrata delle informazioni emerse nei colloqui, le risorse e gli interessi della persona"},
+      {code:"RA.18.01.09.3", desc:"RA3: Accompagnare le persone nella costruzione del progetto professionale, supportandole nel processo di ricerca e lettura critica delle informazioni sulle opportunità formative e professionali"},
+      {code:"RA.18.01.09.4", desc:"RA4: Elaborare la documentazione per il monitoraggio e la valutazione del servizio di consulenza orientativa, redigendo e archiviando una scheda di sintesi per ogni percorso realizzato"}
+    ]
+  },
+  "ADA.18.01.10": {
+    code:"ADA.18.01.10", desc:"Supporto e accompagnamento alle transizioni e all'inserimento lavorativo",
+    sep:"18", level:"L2", scheda:null,
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.6 (Sociali e civiche) | EntreComp: Lavorare con gli altri",
+    compLinks:["eu6","ec7"],
+    ra:[
+      {code:"RA.18.01.10.1", desc:"RA1: Monitorare le fasi di passaggio tra cicli di studio e tra canali formativi, raccogliendo informazioni utili per l'identificazione di situazioni di disagio da prevenire"},
+      {code:"RA.18.01.10.2", desc:"RA2: Realizzare azioni finalizzate alla prevenzione del disagio nelle fasi di transizione, promuovendo laboratori di gruppo e iniziative di incontro scuola-famiglia-servizi-imprese"},
+      {code:"RA.18.01.10.3", desc:"RA3: Progettare percorsi personalizzati finalizzati al recupero di soggetti che vivono esperienze difficili nel loro percorso formativo e/o di inserimento lavorativo"},
+      {code:"RA.18.01.10.4", desc:"RA4: Attivare interventi di accompagnamento all'inserimento lavorativo e piani individualizzati a favore di soggetti svantaggiati, svolgendo azioni di tutoring e monitoraggio"}
+    ]
+  },
+  "ADA.18.01.11": {
+    code:"ADA.18.01.11", desc:"Personalizzazione degli interventi formativi",
+    sep:"18", level:"L2", scheda:null,
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.5 (Imparare ad imparare) | EntreComp: Pianificazione e gestione",
+    compLinks:["eu5","ec6"],
+    ra:[
+      {code:"RA.18.01.11.1", desc:"RA1: Valutare la coerenza dell'intervento formativo con la dotazione di competenze degli utenti, individuando apprendimenti pregressi e fabbisogni formativi"},
+      {code:"RA.18.01.11.2", desc:"RA2: Predisporre con gli utenti un patto formativo, identificando motivazioni e aspettative personali nei confronti del percorso formativo"},
+      {code:"RA.18.01.11.3", desc:"RA3: Valutare e riconoscere eventuali crediti formativi, definendo criteri e strumenti per il loro accertamento"}
+    ]
+  },
+  "ADA.18.01.13": {
+    code:"ADA.18.01.13", desc:"Erogazione delle attività didattiche",
+    sep:"18", level:"L2", scheda:null,
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.1 (Comunicazione) | LifeComp: Comunicazione, Collaborazione",
+    compLinks:["eu1","lc4","lc5"],
+    ra:[
+      {code:"RA.18.01.13.1", desc:"RA1: Condurre docenze in ambito formativo, predisponendo il setting d'aula e progettando preventivamente il materiale didattico da utilizzare"},
+      {code:"RA.18.01.13.2", desc:"RA2: Gestire la relazione con gli utenti in fase di apprendimento, favorendo lo sviluppo di un clima d'aula positivo e promuovendo il loro coinvolgimento attivo"}
+    ]
+  },
+  "ADA.18.01.14": {
+    code:"ADA.18.01.14", desc:"Tutoraggio in apprendimento",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-14_ra-18-01-14-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.5 (Imparare ad imparare) | LifeComp: Collaborazione",
+    compLinks:["eu5","lc5","ec7"],
+    ra:[
+      {code:"RA.18.01.14.1", desc:"RA1: Supportare i soggetti in formazione, fornendo informazioni sui programmi di studio, sui materiali didattici e su tutte le procedure e scadenze del corso, rilevando le esigenze dei partecipanti"},
+      {code:"RA.18.01.14.2", desc:"RA2: Organizzare l'attività formativa, reperendo le attrezzature didattiche, predisponendo le aule formative e gestendo la modulistica di riferimento"},
+      {code:"RA.18.01.14.3", desc:"RA3: Supportare il docente nella realizzazione delle attività formative, provvedendo alla riproduzione e al packaging dei materiali didattici e alla loro distribuzione"}
+    ]
+  },
+  "ADA.18.01.17": {
+    code:"ADA.18.01.17", desc:"Supporto all'individuazione e alla messa in trasparenza delle competenze",
+    sep:"18", level:"L2", scheda:"/schede/ada-18-01-17_ra-18-01-17-1_scheda_di_caso.pdf",
+    source:"Atlante del Lavoro INAPP — SEP 18",
+    framework:"EU8 Comp.5+6 | EntreComp: Iniziativa | LifeComp: Crescita continua",
+    compLinks:["eu5","eu6","ec5","lc6"],
+    ra:[
+      {code:"RA.18.01.17.1", desc:"RA1: Gestire il processo di individuazione delle competenze, nel rispetto della procedura prevista, conducendo colloqui individuali o di gruppo, identificando il patrimonio di esperienze della persona per la messa in trasparenza ed eventuale validazione/certificazione"},
+      {code:"RA.18.01.17.2", desc:"RA2: Supportare l'utente nella composizione del dossier documentale, redigendo eventualmente il documento di messa in trasparenza in relazione alle competenze individuate potenzialmente validabili"}
+    ]
+  }
+};
+
+// Build reverse comp→ADA map
+const COMP_TO_ADA = {};
+Object.entries(ADA_DB).forEach(([adaKey, ada]) => {
+  ada.compLinks.forEach(compId => {
+    if (!COMP_TO_ADA[compId]) COMP_TO_ADA[compId] = [];
+    if (!COMP_TO_ADA[compId].includes(adaKey)) COMP_TO_ADA[compId].push(adaKey);
+  });
+});
+
+// ==================== COMPETENCY DEFINITIONS ====================
+const DIGCOMP_ITEMS = [
+  {id:'dc1', name:'Ricerca e gestione informazioni online', desc:'Individua, valuta, organizza e archivia dati e contenuti digitali'},
+  {id:'dc2', name:'Comunicazione e collaborazione digitale', desc:'Comunica e collabora tramite strumenti e tecnologie digitali'},
+  {id:'dc3', name:'Creazione di contenuti digitali', desc:'Produce, modifica, rielabora contenuti digitali in diversi formati'},
+  {id:'dc4', name:'Sicurezza digitale (privacy, dati, dispositivi)', desc:'Protegge dispositivi, dati e identità; tutela salute digitale'},
+  {id:'dc5', name:'Risoluzione di problemi tecnici', desc:'Diagnostica e risolve problemi con strumenti digitali'},
+];
+const LIFECOMP_ITEMS = [
+  {id:'lc3', name:'Empatia', area:'Sociale', desc:'Comprende e condivide i vissuti e le prospettive degli altri'},
+  {id:'lc4', name:'Comunicazione (LifeComp)', area:'Sociale', desc:'Comunica in modo efficace nei contesti relazionali e sociali'},
+  {id:'lc5', name:'Collaborazione', area:'Sociale', desc:'Lavora in team verso obiettivi comuni, co-costruisce soluzioni'},
+  {id:'lc6', name:'Crescita continua e apprendimento', area:'Imparare ad imparare', desc:'Riflette sull\'esperienza e organizza il proprio sviluppo'},
+  {id:'lc7', name:'Pensiero critico', area:'Imparare ad imparare', desc:'Valuta informazioni e situazioni con spirito analitico'},
+  {id:'lc1', name:'Autoregolazione e benessere', area:'Personale', desc:'Gestisce emozioni, stress e adattamento ai cambiamenti'},
+];
+const ENTRECOMP_ITEMS = [
+  {id:'ec5', name:'Iniziativa e azione', area:'Into Action', desc:'Trasforma idee in azioni concrete con determinazione'},
+  {id:'ec6', name:'Pianificazione e gestione', area:'Into Action', desc:'Pianifica, monitora e adatta il lavoro per raggiungere obiettivi'},
+  {id:'ec7', name:'Lavorare con gli altri', area:'Into Action', desc:'Collabora e co-crea con persone diverse verso obiettivi condivisi'},
+  {id:'ec1', name:'Creatività e generazione di idee', area:'Ideas & Opportunities', desc:'Identifica opportunità e genera soluzioni innovative'},
+  {id:'ec3', name:'Motivazione e perseveranza', area:'Resources', desc:'Mantiene impegno e resilienza di fronte agli ostacoli'},
+  {id:'ec4', name:'Mobilitare risorse e collaboratori', area:'Resources', desc:'Attiva e coordina risorse umane, materiali, informative'},
+];
+const EU8_ITEMS = [
+  {id:'eu1', name:'Comunicazione nella madrelingua', desc:'Esprime e interpreta concetti in forma orale e scritta'},
+  {id:'eu2', name:'Comunicazione in lingue straniere', desc:'Comunica in una lingua diversa dalla madrelingua', noADA:true},
+  {id:'eu3', name:'Competenza matematica e scientifica', desc:'Ragiona quantitativamente, usa dati, comprende fenomeni', noADA:true},
+  {id:'eu4', name:'Competenza digitale → usa tab DigComp', desc:'Mappatura dettagliata nel tab DigComp', skip:true},
+  {id:'eu5', name:'Imparare ad imparare', desc:'Organizza il proprio apprendimento, riflette sulle esperienze'},
+  {id:'eu6', name:'Competenze sociali e civiche', desc:'Collabora, gestisce conflitti, partecipa alla vita sociale'},
+  {id:'eu7', name:'Spirito di iniziativa e imprenditorialità', desc:'Trasforma idee in azioni, pianifica, gestisce incertezza'},
+  {id:'eu8', name:'Consapevolezza ed espressione culturale', desc:'Apprezza diversità culturale ed espressione creativa', noADA:true},
+];
+
+// ==================== STATE ====================
+let selections = {};   // compId → { level, compName }
+let mappings = {};     // adaKey → { validated, livello, attivita, comps:[], ra:[] }
+let manualADAs = [];
+
+// ==================== RENDER COMP LISTS ====================
+function renderCompList(items, containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  let lastArea = null;
+  items.forEach(item => {
+    if (item.area && item.area !== lastArea) {
+      lastArea = item.area;
+      const h = document.createElement('div');
+      h.className = 'area-header';
+      h.textContent = item.area;
+      c.appendChild(h);
+    }
+    if (item.skip) {
+      const d = document.createElement('div');
+      d.className = 'comp-item';
+      d.style.opacity = '0.5';
+      d.style.cursor = 'default';
+      d.innerHTML = `<div class="comp-info"><div class="comp-name">🔗 ${item.name}</div><div class="comp-desc">${item.desc}</div></div>`;
+      c.appendChild(d);
+      return;
+    }
+    const sel = selections[item.id];
+    const adaKeys = COMP_TO_ADA[item.id] || [];
+    let adaHint = '';
+    if (item.noADA) {
+      adaHint = `<div class="comp-ada-hint" style="color:var(--grigio);">→ Inserisci ADA manualmente nel Passo 3</div>`;
+    } else if (adaKeys.length > 0) {
+      const lvl = ADA_DB[adaKeys[0]]?.level || 'L2';
+      const color = lvl === 'L1' ? 'color:var(--verde)' : 'color:var(--arancio)';
+      adaHint = `<div class="comp-ada-hint" style="${color};">→ ${lvl === 'L1' ? '✅ L1' : '⚠️ L2'} ${adaKeys.map(k => k).join(', ')}</div>`;
+    }
+    const levelDescs = {1:'Esecutivo',2:'Con supervisione',3:'Autonomo',4:'Expert'};
+    let lvlBtns = '';
+    for (let i = 1; i <= 4; i++) {
+      const active = sel && sel.level === i ? 'active' : '';
+      lvlBtns += `<div class="level-btn ${active}" onclick="setLevel(event,'${item.id}',${i})">${i}</div>`;
+    }
+    const d = document.createElement('div');
+    d.className = 'comp-item' + (sel ? ' selected' : '');
+    d.innerHTML = `
+      <div class="comp-checkbox"></div>
+      <div class="comp-info">
+        <div class="comp-name">${item.name}</div>
+        <div class="comp-desc">${item.desc}</div>
+        ${adaHint}
+        <div class="comp-level">
+          ${lvlBtns}
+          <span class="level-label" style="margin-left:4px;">${sel ? levelDescs[sel.level]||'' : ''}</span>
+        </div>
+      </div>`;
+    d.addEventListener('click', e => { if (e.target.classList.contains('level-btn')) return; toggleSel(item.id, item.name); });
+    c.appendChild(d);
+  });
+}
+
+function toggleSel(id, name) {
+  if (selections[id]) delete selections[id];
+  else selections[id] = { level: 2, compName: name };
+  refreshLists(); updateSummary();
+}
+
+function setLevel(e, id, level) {
+  e.stopPropagation();
+  if (!selections[id]) {
+    const all = [...DIGCOMP_ITEMS,...LIFECOMP_ITEMS,...ENTRECOMP_ITEMS,...EU8_ITEMS];
+    const item = all.find(i=>i.id===id);
+    if (item) selections[id] = { level, compName: item.name };
+  } else { selections[id].level = level; }
+  refreshLists(); updateSummary();
+}
+
+function refreshLists() {
+  renderCompList(DIGCOMP_ITEMS,'digcomp-list');
+  renderCompList(LIFECOMP_ITEMS,'lifecomp-list');
+  renderCompList(ENTRECOMP_ITEMS,'entrecomp-list');
+  renderCompList(EU8_ITEMS,'eu8-list');
+}
+
+function updateSummary() {
+  const c = document.getElementById('selection-summary');
+  const keys = Object.keys(selections);
+  if (!keys.length) {
+    c.innerHTML='<div class="empty-mapping">Seleziona le competenze emerse dal colloquio.<br><span style="font-size:11px;margin-top:6px;display:block;">Le proposte di ADA appariranno automaticamente.</span></div>';
+    return;
+  }
+  // Group by ADA
+  const byADA = {};
+  keys.forEach(id => {
+    const adaKeys = COMP_TO_ADA[id] || ['MANUAL'];
+    adaKeys.forEach(ak => {
+      if (!byADA[ak]) byADA[ak] = [];
+      byADA[ak].push(id);
+    });
+  });
+  let html = '<div style="padding:4px;">';
+  const levelDescs = {1:'Liv.1',2:'Liv.2',3:'Liv.3',4:'Liv.4'};
+  Object.entries(byADA).forEach(([ak, compIds]) => {
+    const ada = ADA_DB[ak];
+    html += `<div style="background:white;border:1px solid var(--bordo);border-radius:8px;padding:10px 12px;margin-bottom:8px;">`;
+    if (ada) {
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">
+        <span class="ada-code">${ada.code}</span>
+        <span class="badge badge-${ada.level.toLowerCase()}">${ada.level === 'L1' ? '✅ L1' : '⚠️ L2'}</span>
+      </div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">${ada.desc}</div>`;
+    } else {
+      html += `<div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--grigio);">⚠️ Inserire ADA manualmente (Passo 3)</div>`;
+    }
+    html += `<div style="display:flex;flex-wrap:wrap;gap:4px;">`;
+    compIds.forEach(id => {
+      const sel = selections[id];
+      html += `<span class="comp-tag">${sel?.compName || id} · ${levelDescs[sel?.level]||'?'}</span>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  c.innerHTML = html;
+}
+
+// ==================== MAPPING ====================
+function generateMappings() {
+  const grouped = {};
+  Object.entries(selections).forEach(([id, sel]) => {
+    const adaKeys = COMP_TO_ADA[id] || [];
+    adaKeys.forEach(ak => {
+      if (!grouped[ak]) grouped[ak] = { comps: [], maxLevel: 0 };
+      grouped[ak].comps.push({ name: sel.compName || id, level: sel.level });
+      grouped[ak].maxLevel = Math.max(grouped[ak].maxLevel, sel.level);
+    });
+  });
+  Object.entries(grouped).forEach(([ak, data]) => {
+    if (!mappings[ak]) {
+      const ada = ADA_DB[ak];
+      mappings[ak] = {
+        adaKey: ak, validated: false,
+        livello: data.maxLevel, attivita: '',
+        comps: data.comps,
+        ra: ada?.ra?.map(r => ({...r, coverage: null, attivita: ''})) || []
+      };
+    } else { mappings[ak].comps = data.comps; }
+  });
+  renderMappingCards();
+  updateMapStats();
+}
+
+function renderMappingCards() {
+  const c = document.getElementById('mapping-cards');
+  const adaKeys = Object.keys(mappings);
+  if (!adaKeys.length && !manualADAs.length) {
+    c.innerHTML='<div class="empty-mapping">Nessuna competenza selezionata.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(2)">← Seleziona competenze</button></div>';
+    return;
+  }
+  c.innerHTML = '';
+  const levelDescs = {1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
+
+  adaKeys.forEach(ak => {
+    const map = mappings[ak];
+    const ada = ADA_DB[ak];
+    const card = document.createElement('div');
+    card.className = 'ada-card' + (map.validated ? ' validated' : '');
+
+    let lvlBtns = '';
+    for (let i=1;i<=4;i++) lvlBtns += `<button class="lvl-btn ${map.livello===i?'active':''}" onclick="setMapLevel('${ak}',${i})">${i}</button>`;
+
+    let raRows = map.ra.map((r,idx) => {
+      const isTotale = r.coverage==='totale', isParziale = r.coverage==='parziale';
+      const raSchedaHref = schedaUrl || 'https://atlantelavoro.inapp.org';
+      const raSchedaClass = schedaUrl ? 'ra-scheda-link' : 'ra-scheda-link online';
+      const raSchedaLabel = schedaUrl ? '📋 scheda' : '🔗 INAPP';
+      return `<div class="ra-item">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+          <span class="ra-code" style="margin-bottom:0;">${r.code}</span>
+          <a class="${raSchedaClass}" href="${raSchedaHref}" target="_blank">${raSchedaLabel}</a>
+        </div>
+        <div class="ra-desc">${r.desc}</div>
+        <div class="ra-coverage">
+          <span style="font-size:10px;color:var(--grigio);">Copertura:</span>
+          <button class="coverage-btn ${isTotale?'active-totale':''}" onclick="setCoverage('${ak}',${idx},'totale')">✅ Totale</button>
+          <button class="coverage-btn ${isParziale?'active-parziale':''}" onclick="setCoverage('${ak}',${idx},'parziale')">⚠️ Parziale</button>
+        </div>
+        ${isTotale||isParziale?`<input class="attivita-input" placeholder="Attività del RA sviluppata dal volontario..." value="${r.attivita||''}" onchange="setRAAttivita('${ak}',${idx},this.value)">`:``}
+      </div>`;
+    }).join('');
+
+    const schedaUrl = ada?.scheda || null;
+    const schedaBtn = schedaUrl
+      ? `<a class="scheda-link" href="${schedaUrl}" target="_blank">📋 Scheda di Caso INAPP</a>`
+      : `<a class="scheda-link scheda-online" href="https://atlantelavoro.inapp.org" target="_blank">🔗 Cerca su Atlante INAPP</a>`;
+
+    const l1warn = ada?.level === 'L1' ? '' : `
+      <div class="warn-box">⚠️ <strong>ADA L2 — da validare.</strong> Il codice <strong>${ada?.code||ak}</strong> viene dall'Atlante del Lavoro (SEP 18), ma la correlazione al framework EU è inferenziale. Verifica la pertinenza prima di validare.<br>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${schedaUrl
+          ? `<a class="scheda-link" href="${schedaUrl}" target="_blank">📋 Scheda di Caso INAPP (PDF)</a>`
+          : `<a class="scheda-link scheda-online" href="https://atlantelavoro.inapp.org" target="_blank">🔗 atlantelavoro.inapp.org ↗</a>`}
+        <span style="font-size:10px;color:var(--grigio);">Verifica la corrispondenza al framework EU prima di validare.</span>
+      </div>
+      </div>`;
+
+    const compTags = map.comps.map(c => `<span class="comp-tag">${c.name} · Liv.${c.level}</span>`).join('');
+
+    card.innerHTML = `
+      <div class="ada-card-header">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="ada-code">${ada?.code||ak}</span>
+          <span class="badge badge-${ada?.level?.toLowerCase()||'l2'}">${ada?.level==='L1'?'✅ L1 — Deterministico':'⚠️ L2 — Inferenziale'}</span>
+          ${schedaBtn}
+          ${map.validated?'<span class="validated-badge">✅ Validato dal tutor</span>':'<span style="font-size:11px;color:var(--grigio);">In attesa di validazione</span>'}
+        </div>
+        <div class="ada-title">${ada?.desc||ak}</div>
+        <div class="ada-source">📋 ${ada?.framework||''} &nbsp;|&nbsp; 🔗 ${ada?.source||''}</div>
+        <div class="comp-source-row" style="margin-top:6px;">Competenze: ${compTags}</div>
+      </div>
+      <div class="ada-card-body">
+        ${l1warn}
+        <div class="livello-row">
+          <span class="livello-label">Livello realizzazione:</span>
+          <div class="livello-btns">${lvlBtns}</div>
+        </div>
+        <div class="livello-desc">${levelDescs[map.livello]||'—'}</div>
+        <label style="margin-top:8px;">Attività svolta (per Sezione 4.1):</label>
+        <input type="text" placeholder="Descrivi l'attività concreta svolta dal volontario..." value="${map.attivita||''}" onchange="setAttivita('${ak}',this.value)">
+        <div class="ra-list">
+          <div class="ra-label">Risultati Attesi (${map.ra.length} RA)</div>
+          ${raRows}
+        </div>
+      </div>
+      <div class="ada-card-actions">
+        ${!map.validated
+          ? `<button class="btn btn-success" onclick="validateADA('${ak}')">✅ Valida questa mappatura</button>`
+          : `<button class="btn btn-outline" onclick="unvalidateADA('${ak}')">✏️ Modifica</button>`}
+        <button class="btn btn-danger btn-sm" onclick="removeADA('${ak}')">🗑️ Rimuovi</button>
+      </div>`;
+    c.appendChild(card);
+  });
+
+  // Manual ADAs
+  manualADAs.forEach((m,i) => {
+    const card = document.createElement('div');
+    card.className = 'ada-card' + (m.validated?' validated':'');
+    card.innerHTML = `
+      <div class="ada-card-header">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="ada-code">${m.code||'N/D'}</span>
+          <span class="badge" style="background:#f0f0f0;color:#555;">✏️ Inserito manualmente</span>
+          ${m.validated?'<span class="validated-badge">✅ Validato</span>':''}
+        </div>
+        <div class="ada-title">${m.desc}</div>
+        <div class="ada-source">Origine: ${m.compSource||'Manuale'}</div>
+      </div>
+      <div class="ada-card-body">
+        <div class="ra-list"><div class="ra-label">Risultato Atteso</div>
+          <div class="ra-item"><div class="ra-code">${m.ra[0]?.code||'—'}</div><div class="ra-desc">${m.ra[0]?.desc||''}</div></div>
+        </div>
+      </div>
+      <div class="ada-card-actions">
+        ${!m.validated?`<button class="btn btn-success" onclick="validateManual(${i})">✅ Valida</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="removeManual(${i})">🗑️ Rimuovi</button>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+function setCoverage(ak,idx,val){ if(!mappings[ak])return; const r=mappings[ak].ra[idx]; r.coverage = r.coverage===val?null:val; renderMappingCards(); }
+function setRAAttivita(ak,idx,v){ if(mappings[ak]) mappings[ak].ra[idx].attivita=v; }
+function setAttivita(ak,v){ if(mappings[ak]) mappings[ak].attivita=v; }
+function setMapLevel(ak,l){ if(mappings[ak]){ mappings[ak].livello=l; renderMappingCards(); updateMapStats(); } }
+function validateADA(ak){ if(mappings[ak]){ mappings[ak].validated=true; renderMappingCards(); updateMapStats(); } }
+function unvalidateADA(ak){ if(mappings[ak]){ mappings[ak].validated=false; renderMappingCards(); updateMapStats(); } }
+function removeADA(ak){ delete mappings[ak]; renderMappingCards(); updateMapStats(); }
+function validateManual(i){ manualADAs[i].validated=true; renderMappingCards(); updateMapStats(); }
+function removeManual(i){ manualADAs.splice(i,1); renderMappingCards(); updateMapStats(); }
+function validateAll(){ Object.keys(mappings).forEach(k=>{ if(ADA_DB[k]?.level==='L1') mappings[k].validated=true; }); renderMappingCards(); updateMapStats(); }
+
+function addManualADA(){
+  const code=document.getElementById('manual-ada-code').value.trim();
+  const desc=document.getElementById('manual-ada-desc').value.trim();
+  const raCode=document.getElementById('manual-ra-code').value.trim();
+  const raDesc=document.getElementById('manual-ra-desc').value.trim();
+  const compSource=document.getElementById('manual-comp-source').value.trim();
+  if(!desc){ alert('Inserisci almeno la descrizione dell\'ADA'); return; }
+  manualADAs.push({code,desc,ra:[{code:raCode,desc:raDesc}],compSource,validated:false});
+  ['manual-ada-code','manual-ada-desc','manual-ra-code','manual-ra-desc','manual-comp-source'].forEach(id=>document.getElementById(id).value='');
+  renderMappingCards(); updateMapStats();
+}
+
+function updateMapStats(){
+  const tot = Object.keys(mappings).length + manualADAs.length;
+  const val = Object.values(mappings).filter(m=>m.validated).length + manualADAs.filter(m=>m.validated).length;
+  const l1 = Object.keys(mappings).filter(k=>ADA_DB[k]?.level==='L1').length;
+  const l2 = Object.keys(mappings).filter(k=>ADA_DB[k]?.level==='L2').length;
+  document.getElementById('map-stats').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+      <div style="text-align:center;padding:8px;background:var(--blu-sfondo);border-radius:6px;"><div style="font-size:20px;font-weight:700;color:var(--blu);">${tot}</div><div style="font-size:10px;color:var(--grigio);">ADA totali</div></div>
+      <div style="text-align:center;padding:8px;background:var(--verde-sfondo);border-radius:6px;"><div style="font-size:20px;font-weight:700;color:var(--verde);">${val}</div><div style="font-size:10px;color:var(--grigio);">Validati</div></div>
+      <div style="text-align:center;padding:8px;background:var(--verde-sfondo);border-radius:6px;"><div style="font-size:16px;font-weight:700;color:var(--verde);">${l1}</div><div style="font-size:10px;color:var(--grigio);">L1 (certi)</div></div>
+      <div style="text-align:center;padding:8px;background:var(--arancio-sfondo);border-radius:6px;"><div style="font-size:16px;font-weight:700;color:var(--arancio);">${l2}</div><div style="font-size:10px;color:var(--grigio);">L2 (da validare)</div></div>
+    </div>
+    ${val<tot?`<div style="font-size:11px;color:var(--arancio);">⚠️ ${tot-val} ADA non ancora validati</div>`:'<div style="font-size:11px;color:var(--verde);">✅ Tutti gli ADA validati</div>'}`;
+}
+
+// ==================== EXPORT ====================
+function generateExport(){
+  const c=document.getElementById('export-output');
+  const allMaps=[...Object.values(mappings),...manualADAs.map((m,i)=>({adaKey:`MAN_${i}`,validated:m.validated,livello:m.livello||3,attivita:'',comps:[{name:m.compSource}],ra:m.ra.map(r=>({...r,coverage:'parziale'})),_m:m}))];
+  if(!allMaps.length){c.innerHTML='<div class="empty-mapping">Nessuna mappatura. Torna al Passo 3.</div>';return;}
+  const fmt=document.querySelector('input[name="export-fmt"]:checked')?.value||'tabella';
+  const nome=document.getElementById('vol-nome').value||'(Nome volontario)';
+  const ente=document.getElementById('vol-ente').value||'(Ente)';
+  const tutor=document.getElementById('vol-tutor').value||'(Tutor)';
+  const codice=document.getElementById('vol-codice').value||'';
+  const lvlD={1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
+  const val=allMaps.filter(m=>m.validated).length, nval=allMaps.filter(m=>!m.validated).length;
+
+  let html=`<div class="export-panel">
+    <div class="export-title">📄 Sezione 4.1 — Mappatura verso l'Atlante del Lavoro e delle Qualificazioni</div>
+    <div style="font-size:12px;color:var(--grigio);margin-bottom:10px;">Volontario: <strong>${nome}</strong> · Ente: <strong>${ente}</strong> · Tutor: <strong>${tutor}</strong>${codice?' · Cod.: <strong>'+codice+'</strong>':''}</div>
+    ${nval>0?`<div class="warn-box">⚠️ ${nval} ADA non ancora validati dal tutor. Verifica prima di includere nel Documento di Trasparenza.</div>`:`<div class="info-box">✅ Tutti i ${val} ADA validati. Pronti per il Documento di Trasparenza.</div>`}`;
+
+  if(fmt==='tabella'){
+    html+=`<div style="overflow-x:auto;"><table class="export-table"><thead><tr>
+      <th>N.</th><th>Attività svolta</th><th>Comp. origine</th>
+      <th>ADA Codice</th><th>ADA Descrizione</th>
+      <th>RA Codice</th><th>RA Descrizione</th>
+      <th>Livello</th><th>Copertura RA</th><th>Attività RA</th><th>St.</th>
+    </tr></thead><tbody>`;
+    let n=1;
+    allMaps.forEach(map=>{
+      const ada=map._m?null:ADA_DB[map.adaKey];
+      const code=map._m?.code||ada?.code||map.adaKey;
+      const desc=map._m?.desc||ada?.desc||'';
+      const comps=map.comps?.map(c=>c.name).join(', ')||'';
+      const raL=map.ra?.length?map.ra:[{code:'—',desc:'—',coverage:null,attivita:''}];
+      raL.forEach((ra,ri)=>{
+        html+=`<tr>
+          ${ri===0?`<td rowspan="${raL.length}" style="text-align:center;font-weight:700;">${n}</td>
+          <td rowspan="${raL.length}">${map.attivita||''}</td>
+          <td rowspan="${raL.length}" style="font-size:10px;">${comps}</td>
+          <td rowspan="${raL.length}" style="font-family:monospace;font-size:11px;">${code}</td>
+          <td rowspan="${raL.length}">${desc}</td>`:''}
+          <td style="font-family:monospace;font-size:10px;">${ra.code||'—'}</td>
+          <td style="font-size:11px;">${ra.desc||'—'}</td>
+          ${ri===0?`<td rowspan="${raL.length}" style="text-align:center;">${map.livello||'—'}<br><span style="font-size:9px;color:var(--grigio);">${lvlD[map.livello]||''}</span></td>`:''}
+          <td style="text-align:center;">${ra.coverage==='totale'?'✅ Tot.':ra.coverage==='parziale'?'⚠️ Parz.':'—'}</td>
+          <td style="font-size:11px;">${ra.attivita||''}</td>
+          ${ri===0?`<td rowspan="${raL.length}" style="text-align:center;">${map.validated?'✅':'⏳'}</td>`:''}
+        </tr>`;
+      });
+      n++;
+    });
+    html+=`</tbody></table></div>`;
+  } else if(fmt==='csv'){
+    let csv='N.,Attività svolta,Comp. origine,ADA Codice,ADA Descrizione,RA Codice,RA Descrizione,Livello,Copertura RA,Attività RA,Validato\n';
+    let n=1;
+    allMaps.forEach(map=>{
+      const ada=ADA_DB[map.adaKey]; const code=(map._m?.code||ada?.code||'').replace(/,/g,''); const desc=(map._m?.desc||ada?.desc||'').replace(/,/g,';');
+      const comps=(map.comps?.map(c=>c.name).join(' | ')||'').replace(/,/g,';');
+      const raL=map.ra?.length?map.ra:[{code:'',desc:'',coverage:''}];
+      raL.forEach(ra=>{
+        csv+=`${n},"${map.attivita||''}","${comps}","${code}","${desc}","${ra.code||''}","${(ra.desc||'').replace(/"/g,'')}",${map.livello||''},"${ra.coverage||''}","${(ra.attivita||'').replace(/"/g,'')}","${map.validated?'Sì':'No'}"\n`;
+      });
+      n++;
+    });
+    html+=`<div class="export-text">${csv}</div>`;
+  } else {
+    let txt=`SEZIONE 4.1 — MAPPATURA COMPETENZE → ATLANTE DEL LAVORO\nVolontario: ${nome} | Ente: ${ente} | Tutor: ${tutor}\n${'='.repeat(60)}\n\n`;
+    let n=1;
+    allMaps.forEach(map=>{
+      const ada=ADA_DB[map.adaKey]; const code=map._m?.code||ada?.code||map.adaKey; const desc=map._m?.desc||ada?.desc||'';
+      txt+=`${n}. [${ada?.level||'L2'}] ${code}\n   ${desc}\n   Livello: ${map.livello} — ${lvlD[map.livello]||''}\n   Attività: ${map.attivita||'(da completare)'}\n`;
+      map.ra?.forEach(ra=>{txt+=`   RA ${ra.code}: ${ra.desc}\n      Copertura: ${ra.coverage||'(da indicare)'}\n${ra.attivita?'      Attività: '+ra.attivita+'\n':''}`});
+      txt+=`   Stato: ${map.validated?'✅ Validato':'⏳ In attesa'}\n\n`;
+      n++;
+    });
+    html+=`<div class="export-text">${txt}</div>`;
+  }
+  html+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-primary" onclick="copyExport()">📋 Copia negli appunti</button>
+    <button class="btn btn-outline" onclick="downloadExport()">💾 .txt</button>
+    <button class="btn btn-outline" onclick="downloadDocx()">📄 .docx</button>
+    <button class="btn btn-outline" onclick="downloadPdf()">🖨️ PDF</button>
+  </div>
+  <div style="margin-top:10px;font-size:10px;color:var(--grigio);">HubS-TransparentIA Agente 4 — Atlante del Lavoro INAPP (feb. 2026) — ${new Date().toLocaleDateString('it-IT')} — Firma tutor obbligatoria (Art. 5 DI 31/07/2025)</div>
+  </div>`;
+  c.innerHTML=html;
+  document.getElementById('export-stats').innerHTML=`<div style="font-size:12px;"><div>🗺️ <strong>${allMaps.length}</strong> ADA</div><div>✅ <strong>${val}</strong> validati</div>${nval>0?`<div style="color:var(--arancio);">⚠️ ${nval} da validare</div>`:''}</div>`;
+}
+
+function copyExport(){
+  const t=document.getElementById('export-output').innerText||'';
+  navigator.clipboard.writeText(t).then(()=>alert('Copiato! Incolla nel Documento di Trasparenza.')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copiato!');
+  });
+}
+function downloadExport(){
+  const t=document.getElementById('export-output').innerText||'';
+  const nome=(document.getElementById('vol-nome').value||'volontario').replace(/\s/g,'_');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+  a.download=`HubS_Mappatura_ADA_${nome}_${new Date().toISOString().slice(0,10)}.txt`;a.click();
+}
+
+function buildDocumentData(){
+  // Collect all current mapping state into a structured object for document export
+  const nome=document.getElementById('vol-nome').value||'';
+  const ente=document.getElementById('vol-ente').value||'';
+  const tutor=document.getElementById('vol-tutor').value||'';
+  const codice=document.getElementById('vol-codice').value||'';
+  const inizio=document.getElementById('perc-inizio').value||'';
+  const fine=document.getElementById('perc-fine').value||'';
+  const ore=document.getElementById('perc-ore').value||'';
+  const settore=document.getElementById('perc-settore').value||'';
+  const desc=document.getElementById('perc-desc').value||'';
+  const lvlD={1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
+  const rows=[];
+  let n=1;
+  Object.values(mappings).forEach(map=>{
+    const ada=ADA_DB[map.adaKey];
+    const code=ada?.code||map.adaKey;
+    const adaDesc=ada?.desc||'';
+    const comps=map.comps?.map(c=>c.name).join(', ')||'';
+    const lvl=map.livello||'';
+    const raL=map.ra?.length?map.ra:[{code:'—',desc:'—',coverage:null,attivita:''}];
+    raL.forEach((ra,ri)=>{
+      rows.push({n:ri===0?n:null, attivita:ri===0?(map.attivita||''):'', comps:ri===0?comps:'',
+        adaCode:ri===0?code:'', adaDesc:ri===0?adaDesc:'',
+        raCode:ra.code||'—', raDesc:ra.desc||'—',
+        livello:ri===0?lvl:'', livelloDesc:ri===0?(lvlD[lvl]||''):'',
+        coverage:ra.coverage==='totale'?'Totale':ra.coverage==='parziale'?'Parziale':'—',
+        raAttivita:ra.attivita||'', validated:ri===0?map.validated:null, raCount:ri===0?raL.length:0});
+    });
+    if(raL.length) n++;
+  });
+  manualADAs.forEach(m=>{
+    rows.push({n:n, attivita:'', comps:m.compSource||'', adaCode:m.code||'', adaDesc:m.desc||'',
+      raCode:m.ra[0]?.code||'—', raDesc:m.ra[0]?.desc||'—', livello:'', livelloDesc:'',
+      coverage:'—', raAttivita:'', validated:m.validated, raCount:1});
+    n++;
+  });
+  return {nome,ente,tutor,codice,inizio,fine,ore,settore,desc,rows,date:new Date().toLocaleDateString('it-IT')};
+}
+
+function downloadDocx(){
+  const d=buildDocumentData();
+  if(!d.rows.length){alert('Nessuna mappatura da esportare. Completa il Passo 3.');return;}
+  const nomeFile=(d.nome||'volontario').replace(/\s/g,'_');
+
+  // Build Word-compatible HTML (same technique used dai file XLS INAPP)
+  let tableRows='';
+  d.rows.forEach(r=>{
+    const bg=r.validated===true?'#e6f4ee':r.validated===false?'#fff3e0':'#ffffff';
+    tableRows+=`<tr style="background:${bg};">
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;font-weight:bold;vertical-align:top;" rowspan="${r.raCount}">${r.n}</td>`:''}
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;" rowspan="${r.raCount}">${r.attivita}</td>`:''}
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;font-size:9pt;" rowspan="${r.raCount}">${r.comps}</td>`:''}
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;font-family:Courier New;font-size:9pt;vertical-align:top;" rowspan="${r.raCount}">${r.adaCode}</td>`:''}
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;" rowspan="${r.raCount}">${r.adaDesc}</td>`:''}
+      <td style="border:1px solid #1a3a6b;padding:5pt;font-family:Courier New;font-size:8pt;vertical-align:top;">${r.raCode}</td>
+      <td style="border:1px solid #1a3a6b;padding:5pt;font-size:9pt;vertical-align:top;">${r.raDesc}</td>
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;" rowspan="${r.raCount}">${r.livello}<br><span style="font-size:7pt;color:#555;">${r.livelloDesc}</span></td>`:''}
+      <td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;">${r.coverage}</td>
+      <td style="border:1px solid #1a3a6b;padding:5pt;font-size:9pt;vertical-align:top;">${r.raAttivita}</td>
+      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;" rowspan="${r.raCount}">${r.validated?'✅':'⏳'}</td>`:''}
+    </tr>`;
+  });
+
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>
+  body{font-family:Arial,sans-serif;font-size:10pt;margin:2cm;}
+  h1{font-size:14pt;color:#1a3a6b;margin-bottom:6pt;}
+  h2{font-size:12pt;color:#1a3a6b;margin-top:14pt;margin-bottom:4pt;}
+  .meta{font-size:9pt;color:#555;margin-bottom:12pt;border-left:3px solid #1a3a6b;padding-left:8pt;}
+  table{border-collapse:collapse;width:100%;font-size:9pt;}
+  th{background:#1a3a6b;color:white;padding:5pt 4pt;text-align:left;font-size:8pt;}
+  .footer{font-size:7pt;color:#888;margin-top:18pt;border-top:1px solid #ccc;padding-top:4pt;}
+  .warn{background:#fef3e2;border:1px solid #f6d088;padding:6pt;font-size:9pt;margin-bottom:8pt;}
+</style>
+</head>
+<body>
+<h1>SEZIONE 4.1 — MAPPATURA VERSO L'ATLANTE DEL LAVORO E DELLE QUALIFICAZIONI</h1>
+<p style="font-size:9pt;color:#1a3a6b;font-style:italic;">Documento di Trasparenza HubS — Rif. Art. 5, c. 1, lett. d) DI 31 luglio 2025</p>
+<div class="meta">
+  <strong>Volontario/a:</strong> ${d.nome||'—'}<br>
+  <strong>Ente di accoglienza:</strong> ${d.ente||'—'}<br>
+  <strong>Tutor / Resp. accompagnamento:</strong> ${d.tutor||'—'}<br>
+  <strong>Codice progetto HubS:</strong> ${d.codice||'—'}<br>
+  <strong>Periodo:</strong> ${d.inizio||'—'} → ${d.fine||'—'} &nbsp;|&nbsp; <strong>Ore svolte:</strong> ${d.ore||'—'} &nbsp;|&nbsp; <strong>Settore:</strong> ${d.settore||'—'}
+</div>
+${d.desc?`<p style="font-size:9pt;margin-bottom:10pt;"><strong>Descrizione attività:</strong> ${d.desc}</p>`:''}
+<div class="warn">⚠️ Gli ADA contrassegnati con ⏳ non sono ancora stati validati dal tutor. Verificare prima della firma. Gli ADA L2 (SEP 18) richiedono verifica della corrispondenza al framework EU su atlantelavoro.inapp.org</div>
+<table>
+  <thead><tr>
+    <th style="width:3%;">N.</th>
+    <th style="width:9%;">Attività svolta</th>
+    <th style="width:9%;">Competenza</th>
+    <th style="width:10%;">ADA Codice</th>
+    <th style="width:16%;">ADA Descrizione</th>
+    <th style="width:10%;">RA Codice</th>
+    <th style="width:20%;">RA Descrizione</th>
+    <th style="width:6%;">Livello</th>
+    <th style="width:6%;">Copertura</th>
+    <th style="width:9%;">Attività RA</th>
+    <th style="width:3%;">St.</th>
+  </tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>
+<h2>SCALA LIVELLI DI REALIZZAZIONE</h2>
+<table style="width:auto;">
+  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">1</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Esecutivo con istruzioni</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">2</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Autonomia operativa con supervisione</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">3</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Autonomia realizzativa</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">4</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Expertise tecnico</td></tr>
+</table>
+<table style="margin-top:24pt;width:60%;border-collapse:collapse;">
+  <tr>
+    <td style="border:1px solid #1a3a6b;padding:6pt 10pt;width:50%;font-size:9pt;"><strong>Tutor / Responsabile accompagnamento</strong><br><br><br>Firma: _____________________<br>Data: _____________________</td>
+    <td style="border:1px solid #1a3a6b;padding:6pt 10pt;width:50%;font-size:9pt;"><strong>Volontario/a</strong><br><br><br>Firma: _____________________<br>Data: _____________________</td>
+  </tr>
+</table>
+<div class="footer">
+  Generato da HubS-TransparentIA — Agente 4 Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · ${d.date}<br>
+  Conforme all'Allegato A del D.I. 5 gennaio 2021 come richiesto dall'Art. 5, c. 1, lett. d) del D.I. 31 luglio 2025 · GDPR 2016/679
+</div>
+</body></html>`;
+
+  const blob=new Blob(['﻿'+html],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`HubS_Mappatura_ADA_${nomeFile}_${new Date().toISOString().slice(0,10)}.docx`;
+  a.click();
+}
+
+function downloadPdf(){
+  const d=buildDocumentData();
+  if(!d.rows.length){alert('Nessuna mappatura da esportare. Completa il Passo 3.');return;}
+  const lvlD={1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
+
+  let tableRows='';
+  d.rows.forEach(r=>{
+    const bg=r.validated===true?'#e6f4ee':r.validated===false?'#fff3e0':'#fff';
+    tableRows+=`<tr style="background:${bg};">
+      ${r.n!==null?`<td class="c" rowspan="${r.raCount}">${r.n}</td>`:''}
+      ${r.n!==null?`<td rowspan="${r.raCount}">${r.attivita}</td>`:''}
+      ${r.n!==null?`<td rowspan="${r.raCount}" class="sm">${r.comps}</td>`:''}
+      ${r.n!==null?`<td rowspan="${r.raCount}" class="mono">${r.adaCode}</td>`:''}
+      ${r.n!==null?`<td rowspan="${r.raCount}">${r.adaDesc}</td>`:''}
+      <td class="mono sm">${r.raCode}</td>
+      <td class="sm">${r.raDesc}</td>
+      ${r.n!==null?`<td class="c" rowspan="${r.raCount}">${r.livello}</td>`:''}
+      <td class="c">${r.coverage}</td>
+      <td class="sm">${r.raAttivita}</td>
+      ${r.n!==null?`<td class="c" rowspan="${r.raCount}">${r.validated?'✅':'⏳'}</td>`:''}
+    </tr>`;
+  });
+
+  const printWin=window.open('','_blank','width=1200,height=800');
+  printWin.document.write(`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+<title>HubS Mappatura ADA — ${d.nome}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:1.5cm;}
+  h1{font-size:13pt;color:#1a3a6b;margin-bottom:4pt;}
+  h2{font-size:10pt;color:#1a3a6b;margin:12pt 0 4pt;}
+  .sub{font-size:8pt;color:#1a3a6b;font-style:italic;margin-bottom:8pt;}
+  .meta{font-size:8pt;border-left:3px solid #1a3a6b;padding-left:8pt;margin-bottom:10pt;line-height:1.8;}
+  table{border-collapse:collapse;width:100%;margin-bottom:10pt;}
+  th{background:#1a3a6b;color:#fff;padding:4pt 3pt;text-align:left;font-size:7.5pt;}
+  td{border:1px solid #aaa;padding:3pt;vertical-align:top;font-size:8pt;}
+  .c{text-align:center;}
+  .mono{font-family:'Courier New',monospace;font-size:7pt;}
+  .sm{font-size:7.5pt;}
+  .warn{background:#fef3e2;border:1px solid #f6d088;padding:5pt;font-size:7.5pt;margin-bottom:8pt;}
+  .scale-table td{border:1px solid #ccc;padding:2pt 6pt;}
+  .firme td{border:1px solid #1a3a6b;padding:8pt;width:50%;}
+  .footer{font-size:6.5pt;color:#888;border-top:1px solid #ccc;padding-top:4pt;margin-top:12pt;}
+  @media print{body{padding:0.8cm;} @page{size:A4 landscape;margin:1cm;}}
+</style>
+</head><body>
+<h1>SEZIONE 4.1 — MAPPATURA VERSO L'ATLANTE DEL LAVORO E DELLE QUALIFICAZIONI</h1>
+<div class="sub">Documento di Trasparenza HubS · Rif. Art. 5, c. 1, lett. d) DI 31 luglio 2025</div>
+<div class="meta">
+  <strong>Volontario/a:</strong> ${d.nome||'—'} &nbsp;|&nbsp; <strong>Ente:</strong> ${d.ente||'—'} &nbsp;|&nbsp; <strong>Tutor:</strong> ${d.tutor||'—'} &nbsp;|&nbsp; <strong>Codice:</strong> ${d.codice||'—'}<br>
+  <strong>Periodo:</strong> ${d.inizio||'—'} → ${d.fine||'—'} &nbsp;|&nbsp; <strong>Ore:</strong> ${d.ore||'—'} &nbsp;|&nbsp; <strong>Settore:</strong> ${d.settore||'—'}
+  ${d.desc?`<br><strong>Attività:</strong> ${d.desc}`:''}
+</div>
+<div class="warn">⚠️ ADA ⏳ = non ancora validati dal tutor. ADA L2 (SEP 18) richiedono verifica su atlantelavoro.inapp.org prima della firma.</div>
+<table>
+  <thead><tr>
+    <th>N.</th><th>Attività svolta</th><th>Competenza origine</th>
+    <th>ADA Codice</th><th>ADA Descrizione</th>
+    <th>RA Codice</th><th>RA Descrizione</th>
+    <th>Lv.</th><th>Copertura</th><th>Attività RA</th><th>St.</th>
+  </tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>
+<h2>Scala livelli di realizzazione</h2>
+<table class="scale-table" style="width:auto;">
+  <tr><td><strong>1</strong></td><td>Esecutivo con istruzioni</td><td><strong>2</strong></td><td>Autonomia operativa con supervisione</td><td><strong>3</strong></td><td>Autonomia realizzativa</td><td><strong>4</strong></td><td>Expertise tecnico</td></tr>
+</table>
+<h2>Firme</h2>
+<table class="firme" style="width:70%;">
+  <tr>
+    <td><strong>Tutor / Responsabile accompagnamento</strong><br><br><br>Firma: ___________________________<br>Data: ___________________________</td>
+    <td><strong>Volontario/a</strong><br><br><br>Firma: ___________________________<br>Data: ___________________________</td>
+  </tr>
+</table>
+<div class="footer">
+  HubS-TransparentIA — Agente 4 Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${d.date}<br>
+  Conforme Allegato A D.I. 5 gennaio 2021 · Art. 5 c. 1 lett. d) D.I. 31 luglio 2025 · GDPR 2016/679
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`);
+  printWin.document.close();
+}
+
+// ==================== NAVIGATION ====================
+let currentStep=1;
+function goStep(n){
+  currentStep=n;
+  for(let i=1;i<=4;i++){
+    document.getElementById(`step-tab-${i}`).className='step'+(i===n?' active':'')+(i<n?' done':'');
+    document.getElementById(`step-num-${i}`).textContent=i<n?'✓':i;
+    document.getElementById(`screen-${i}`).style.display=i===n?'flex':'none';
+  }
+  if(n===3){ generateMappings(); }
+  if(n===4){ generateExport(); }
+}
+
+function switchTab(name){
+  const names=['digcomp','lifecomp','entrecomp','eu8'];
+  document.querySelectorAll('.tab-group .tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  names.forEach(n=>{const el=document.getElementById(`tab-${n}`);if(el)el.classList.toggle('active',n===name);});
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', refreshLists);
+</script>
+</body>
+</html>
