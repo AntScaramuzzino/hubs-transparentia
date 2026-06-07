@@ -616,7 +616,7 @@ async function avviaAnalisi() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8000,
         system: SYS,
         messages: [{role:'user', content: userMsg}]
       })
@@ -646,8 +646,16 @@ async function avviaAnalisi() {
     if (!jsonStr) throw new Error('Risposta non valida dall\'AI: nessun JSON trovato');
 
     let parsed;
-    try { parsed = JSON.parse(jsonStr); }
-    catch(pe) { throw new Error('JSON malformato: ' + pe.message + '\n\nRiprova — l\'AI ha restituito una risposta non strutturata.'); }
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch(pe) {
+      // Try to repair truncated JSON (happens when response hits token limit)
+      parsed = repairJson(jsonStr);
+      if (!parsed) {
+        throw new Error('Risposta troppo lunga o malformata.\n\nSe il testo 5.3 è molto lungo, prova a dividerlo in più parti e analizzale separatamente.');
+      }
+      console.warn('JSON riparato automaticamente (risposta troncata)');
+    }
 
     result = parsed;
     result._meta = meta;
@@ -743,6 +751,49 @@ function renderResults(d) {
         <td style="font-size:.76rem">${(m.entrecomp||[]).join('<br>')}</td>
       </tr>
     `).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// JSON REPAIR — handles responses truncated at token limit
+// ══════════════════════════════════════════════════════════
+function repairJson(text) {
+  // Track open brackets/braces using a stack
+  const stack = [];
+  let inString = false, escape = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\' && inString) { escape = true; continue; }
+    if (c === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (c === '{') stack.push('}');
+    else if (c === '[') stack.push(']');
+    else if ((c === '}' || c === ']') && stack.length && stack[stack.length-1] === c) {
+      stack.pop();
+    }
+  }
+
+  if (stack.length === 0) return null; // no unclosed structures — parse failed for other reason
+
+  // Remove trailing partial token (comma, partial string, partial key)
+  let repaired = text.trimEnd();
+  // Remove trailing comma before closing
+  repaired = repaired.replace(/,\s*$/, '');
+  // If we're in the middle of a string value, close it
+  let inStr = false, esc = false;
+  for (let i = 0; i < repaired.length; i++) {
+    const c = repaired[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\' && inStr) { esc = true; continue; }
+    if (c === '"') inStr = !inStr;
+  }
+  if (inStr) repaired += '"'; // close unclosed string
+
+  // Close all open structures
+  repaired += stack.reverse().join('');
+
+  try { return JSON.parse(repaired); } catch(e) { return null; }
 }
 
 function openMapping(i) {
