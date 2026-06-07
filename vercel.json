@@ -1,9 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/guida",
-      "destination": "/guida.html"
-    }
+    {"source": "/guida", "destination": "/site/guida.html"},
+    {"source": "/(.*)", "destination": "/site/$1"}
   ]
 }
