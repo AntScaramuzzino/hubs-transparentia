@@ -1,7 +1,17 @@
 {
   "version": 2,
   "rewrites": [
-    {"source": "/guida", "destination": "/site/guida.html"},
-    {"source": "/(.*)", "destination": "/site/$1"}
+    {
+      "source": "/guida",
+      "destination": "/site/guida.html"
+    },
+    {
+      "source": "/analisi-progetto",
+      "destination": "/site/analisi_progetto.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/site/$1"
+    }
   ]
 }
