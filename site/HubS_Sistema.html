@@ -3600,11 +3600,47 @@ function renderChatPanel(agentId){
   +'</div>';
 }
 
+/* ── Lightweight markdown → HTML (chat only) ── */
+function mdToHtml(text){
+  // code blocks first (protect from inline processing)
+  var blocks={};
+  var bi=0;
+  text=text.replace(/```([\s\S]*?)```/g,function(_,code){
+    var k='__BLK'+bi+'__';
+    blocks[k]='<pre style="background:#1e1e2e;color:#cdd6f4;padding:10px 12px;border-radius:6px;overflow-x:auto;font-size:.78rem;margin:6px 0;white-space:pre-wrap">'+escHtml(code.replace(/^\n/,''))+'</pre>';
+    bi++;return k;
+  });
+  text=text.replace(/`([^`]+)`/g,function(_,c){return '<code style="background:#eef0f6;padding:1px 5px;border-radius:3px;font-size:.82rem">'+escHtml(c)+'</code>';});
+  // headings
+  text=text.replace(/^### (.+)$/gm,'<strong style="display:block;margin:8px 0 2px;font-size:.9rem">$1</strong>');
+  text=text.replace(/^## (.+)$/gm,'<strong style="display:block;margin:10px 0 3px;font-size:.95rem;border-bottom:1px solid #e5e7eb;padding-bottom:3px">$1</strong>');
+  text=text.replace(/^# (.+)$/gm,'<strong style="display:block;margin:10px 0 4px;font-size:1rem">$1</strong>');
+  // bold / italic
+  text=text.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  // bullet lists
+  text=text.replace(/((?:^[\-*] .+\n?)+)/gm,function(_,block){
+    var items=block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^[\-*] /,'')+'</li>';});
+    return '<ul style="margin:4px 0 4px 16px;padding:0">'+items.join('')+'</ul>';
+  });
+  // numbered lists
+  text=text.replace(/((?:^\d+\. .+\n?)+)/gm,function(_,block){
+    var items=block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^\d+\. /,'')+'</li>';});
+    return '<ol style="margin:4px 0 4px 16px;padding:0">'+items.join('')+'</ol>';
+  });
+  // paragraphs: double newline → <br><br>
+  text=text.replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  // restore code blocks
+  Object.keys(blocks).forEach(function(k){text=text.replace(k,blocks[k]);});
+  return text;
+}
+
 function chatMsgHtml(role,content){
   var isUser=role==='user';
+  var html=isUser?escHtml(content):mdToHtml(content);
   return '<div class="chat-msg'+(isUser?' user':'')+'">'
     +'<div class="msg-avatar">'+(isUser?'👤':'🤖')+'</div>'
-    +'<div class="msg-bubble">'+escHtml(content)+'</div>'
+    +'<div class="msg-bubble" style="'+(isUser?'':'line-height:1.55')+'">'+html+'</div>'
     +'</div>';
 }
 
