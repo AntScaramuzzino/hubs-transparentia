@@ -287,8 +287,9 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
   <a class="hbtn" href="/guida" target="_blank" style="text-decoration:none"><i class="fa-solid fa-book-open"></i> Guida</a>
   <button class="hbtn" onclick="openNewSession()"><i class="fa-solid fa-plus"></i> Nuova</button>
   <button class="hbtn" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica</button>
-  <button class="hbtn green" onclick="saveSession()"><i class="fa-solid fa-floppy-disk"></i> Salva sessione</button>
-  <input type="file" id="load-input" accept=".json" style="display:none" onchange="loadSession(event)">
+  <button class="hbtn" onclick="saveSession()"><i class="fa-solid fa-floppy-disk"></i> Salva JSON</button>
+  <button class="hbtn green" onclick="exportSessionPdf()"><i class="fa-regular fa-file-pdf"></i> Esporta PDF</button>
+  <input type="file" id="load-input" accept=".json,.pdf" style="display:none" onchange="loadSession(event)">
 </div>
 
 <div id="app">
@@ -860,19 +861,42 @@ function triggerLoad() { el('load-input').click(); }
 
 function loadSession(event) {
   const file = event.target.files[0]; if(!file) return;
+  event.target.value = '';
+  if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+    _importSessionFromPdf(file); return;
+  }
   const reader = new FileReader();
   reader.onload = e => {
     try {
       S = JSON.parse(e.target.result);
       if(!S.meta) S.meta = {};
-      populateAll();
-      updateSidebar();
-      showScreen('a1');
+      populateAll(); updateSidebar(); showScreen('a1');
       showAlert('welcome-alert','Sessione caricata: <strong>'+(S.meta.name||'senza nome')+'</strong>','ok');
     } catch(err) { alert('Errore nel caricamento del file: '+err.message); }
   };
   reader.readAsText(file);
-  event.target.value='';
+}
+
+function _importSessionFromPdf(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const bytes = new Uint8Array(e.target.result);
+      const MARKER = '%%HubS-Session-Data\n';
+      const tailStart = Math.max(0, bytes.length - 262144); // last 256KB
+      const tail = new TextDecoder('utf-8', {fatal:false}).decode(bytes.slice(tailStart));
+      const mi = tail.lastIndexOf(MARKER);
+      if (mi < 0) throw new Error('Nessun dato sessione trovato nel PDF.\nUsa un file esportato da HubS-TransparentIA.');
+      const after = tail.slice(mi + MARKER.length);
+      const ei = after.indexOf('%%HubS-Session-End');
+      const jsonStr = (ei >= 0 ? after.slice(0, ei) : after).trim();
+      S = JSON.parse(jsonStr);
+      if (!S.meta) S.meta = {};
+      populateAll(); updateSidebar(); showScreen('a1');
+      showAlert('welcome-alert','Sessione importata da PDF: <strong>'+(S.meta.name||'senza nome')+'</strong>','ok');
+    } catch(err) { alert('Errore importazione PDF:\n'+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function collectAll() {
@@ -2029,6 +2053,205 @@ function downloadPdf() {
     <script>window.onload=()=>{window.print();}<\/script>
     </body></html>`);
   w.document.close();
+}
+
+// ============================================================
+// PDF EXPORT — Pattern B+A (pdf-lib + JSON appended)
+// ============================================================
+let _PDFLib = null;
+async function _loadPdfLib() {
+  if (_PDFLib) return _PDFLib;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+    s.onload = () => { _PDFLib = window.PDFLib; res(_PDFLib); };
+    s.onerror = () => rej(new Error('Impossibile caricare pdf-lib. Verifica la connessione.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function exportSessionPdf() {
+  collectAll();
+  S.meta.modified = new Date().toISOString();
+  S.meta.schemaVersion = 'hubs-transparentia/1.0';
+  S.meta.elmCompatible = true;
+
+  const btnEl = document.querySelector('button[onclick="exportSessionPdf()"]');
+  if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '⏳ Generazione...'; }
+
+  try {
+    const { PDFDocument, StandardFonts, rgb } = await _loadPdfLib();
+    const doc = await PDFDocument.create();
+    doc.setTitle('Documento di Trasparenza — HubS-TransparentIA');
+    doc.setCreator('HubS-TransparentIA v2.0');
+    doc.setCreationDate(new Date());
+
+    const fR = await doc.embedFont(StandardFonts.Helvetica);
+    const fB = await doc.embedFont(StandardFonts.HelveticaBold);
+    const fI = await doc.embedFont(StandardFonts.HelveticaOblique);
+
+    const W=595, H=842, ML=45, MR=45, MT=50, MB=50, CW=505;
+    const C=(r,g,b)=>rgb(r,g,b);
+    const DARK=C(.08,.08,.12), BLUE=C(.10,.32,.46), GREEN=C(.11,.42,.23),
+          ORANGE=C(.63,.25,.00), PURPLE=C(.29,.14,.35), RED=C(.50,.10,.10),
+          SUB=C(.45,.45,.50), MID=C(.78,.78,.82), WHITE=C(1,1,1);
+
+    const pages=[];
+    const np=()=>{ const p=doc.addPage([W,H]); pages.push(p); return p; };
+
+    const wrap=(txt,font,sz,maxW)=>{
+      const words=String(txt||'').split(' '), ls=[]; let ln='';
+      for(const w of words){ const t=ln?ln+' '+w:w; if(font.widthOfTextAtSize(t,sz)>maxW&&ln){ls.push(ln);ln=w;}else ln=t; }
+      if(ln)ls.push(ln); return ls.length?ls:[''];
+    };
+    const tx=(page,text,x,y,{f=fR,sz=9,col=DARK,maxW=CW}={})=>{
+      const lh=sz*1.45;
+      for(const l of wrap(text,f,sz,maxW)){page.drawText(l,{x,y,size:sz,font:f,color:col});y-=lh;}
+      return y;
+    };
+    const sH=(page,y,title,col=BLUE)=>{
+      page.drawRectangle({x:ML,y:y-3,width:CW,height:17,color:col});
+      page.drawText(title.toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
+      return y-23;
+    };
+    const tr=(page,y,cells,{hdr=false,alt=false,rH=16}={})=>{
+      let x=ML;
+      const bg=hdr?C(.88,.91,.95):alt?C(.965,.965,.97):WHITE;
+      for(const {t='',w} of cells){
+        page.drawRectangle({x,y:y-rH,width:w,height:rH,color:bg,borderColor:MID,borderWidth:.4});
+        let txt=String(t||'—'), f2=hdr?fB:fR, sz=7.5;
+        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'…';
+        page.drawText(txt,{x:x+3,y:y-rH+5,size:sz,font:f2,color:hdr?BLUE:DARK});
+        x+=w;
+      }
+      return y-rH;
+    };
+    const cur={page:null,y:0};
+    const nsp=(needed=50)=>{ if(cur.y<MB+needed){cur.page=np();cur.y=H-MT;} };
+
+    const EUL={eu1:'Comunicazione in lingua madre',eu2:'Comunicazione in lingue straniere',
+      eu3:'Competenza matematica/scientifica',eu4:'Competenza digitale (DigComp)',
+      eu5:'Imparare a imparare',eu6:'Competenze sociali e civiche',
+      eu7:'Spirito di iniziativa (EntreComp)',eu8:'Consapevolezza culturale (LifeComp)'};
+    const LVL=['—','Base (1)','Intermedio (2)','Avanzato (3)','Esperto (4)'];
+
+    // ── COVER ──────────────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.page.drawRectangle({x:0,y:H-90,width:W,height:90,color:BLUE});
+    cur.page.drawText('HubS-TransparentIA',{x:ML,y:H-42,size:22,font:fB,color:WHITE});
+    cur.page.drawText('Documento di Trasparenza delle Competenze — SCU',{x:ML,y:H-64,size:10,font:fR,color:C(.78,.90,1)});
+    cur.page.drawText('Conforme Allegato A — D.I. 5 gennaio 2021 | ELM-compatibile',{x:ML,y:H-78,size:8,font:fI,color:C(.65,.80,.95)});
+    cur.y=H-110;
+    const vn=[S.a1?.vol?.nome,S.a1?.vol?.cognome].filter(Boolean).join(' ')||'Volontario';
+    cur.y=tx(cur.page,vn,ML,cur.y,{f:fB,sz:18,col:DARK}); cur.y-=8;
+    for(const [k,v] of [
+      ['Ente',S.a1?.ente?.denominazione],['Progetto',S.meta?.name],
+      ['Settore',S.a1?.percorso?.settore],
+      ['Periodo',[S.a1?.percorso?.dataInizio,S.a1?.percorso?.dataFine].filter(Boolean).join(' – ')],
+      ['Tutor',S.a1?.ente?.tutor],
+    ]){
+      cur.page.drawText(k+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
+      cur.y=tx(cur.page,v||'—',ML+58,cur.y,{sz:8,maxW:CW-58}); cur.y-=2;
+    }
+    cur.y-=12;
+    cur.page.drawLine({start:{x:ML,y:cur.y},end:{x:W-MR,y:cur.y},thickness:.5,color:MID});
+    cur.y-=16;
+    cur.y=tx(cur.page,'Questo PDF contiene i dati strutturati della sessione (JSON ELM-compatibile). Per importare: trascina in HubS-TransparentIA → Carica.',ML,cur.y,{sz:8,font:fI,col:SUB,maxW:CW});
+    cur.y-=10;
+    cur.y=tx(cur.page,'Generato il '+new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})+' con HubS-TransparentIA',ML,cur.y,{sz:8,font:fI,col:SUB});
+
+    // ── ENTE + VOLONTARIO + PERCORSO ──────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'1 · Ente di accoglienza'); cur.y-=3;
+    const eR=[['Denominazione',S.a1?.ente?.denominazione],['Tipo',S.a1?.ente?.tipo],['Codice fiscale',S.a1?.ente?.cfEnte],['Indirizzo',S.a1?.ente?.indirizzo],['Rappresentante legale',S.a1?.ente?.repLegale],['Tutor referente',S.a1?.ente?.tutor],['Codice Helios',S.a1?.ente?.codice]];
+    for(let i=0;i<eR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:eR[i][0],w:160},{t:eR[i][1],w:CW-160}],{alt:i%2===1});}
+    cur.y-=14;
+    cur.y=sH(cur.page,cur.y,'2 · Dati del volontario'); cur.y-=3;
+    const vol=S.a1?.vol||{};
+    const vR=[['Nome e cognome',[vol.nome,vol.cognome].filter(Boolean).join(' ')],['CF',vol.cf],['Nato il',vol.dob],['Luogo nascita',vol.luogoNascita],['Residenza',vol.residenza],['Titolo di studio',vol.titoloStudio]];
+    for(let i=0;i<vR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:vR[i][0],w:160},{t:vR[i][1],w:CW-160}],{alt:i%2===1});}
+    cur.y-=14;
+    cur.y=sH(cur.page,cur.y,'3 · Percorso di servizio civile',GREEN); cur.y-=3;
+    const per=S.a1?.percorso||{};
+    const pR=[['Settore',per.settore],['Data inizio',per.dataInizio],['Data fine',per.dataFine],['Ore previste',String(per.orePreviste||'—')],['Ore svolte',String(per.oreSvolte||'—')],['Sede',per.luogo]];
+    for(let i=0;i<pR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:pR[i][0],w:160},{t:pR[i][1],w:CW-160}],{alt:i%2===1});}
+    if(per.attivita){cur.y-=8;cur.page.drawText('Descrizione attività:',{x:ML,y:cur.y,size:8,font:fB,color:BLUE});cur.y-=13;cur.y=tx(cur.page,per.attivita,ML+4,cur.y,{sz:8.5,maxW:CW-8});}
+
+    // ── COMPETENZE ────────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'4 · Competenze chiave EU8',GREEN); cur.y-=3;
+    cur.y=tr(cur.page,cur.y,[{t:'Competenza',w:220},{t:'Livello',w:80},{t:'Note',w:CW-300}],{hdr:true});
+    let ri=0;
+    for(const [code,lbl] of Object.entries(EUL)){const v=S.a2?.eu?.[code]||{};if(!v.livello)continue;nsp(18);cur.y=tr(cur.page,cur.y,[{t:lbl,w:220},{t:LVL[v.livello]||'',w:80},{t:v.note||'',w:CW-300}],{alt:ri%2===1});ri++;}
+    cur.y-=14;
+    nsp(50); cur.y=sH(cur.page,cur.y,'4b · Competenze digitali DigComp 2.2',GREEN); cur.y-=3;
+    cur.y=tr(cur.page,cur.y,[{t:'Codice',w:60},{t:'Competenza',w:220},{t:'Livello',w:70},{t:'Note',w:CW-350}],{hdr:true});
+    ri=0;
+    for(const [code,v] of Object.entries(S.a2?.dc||{})){if(!v.livello)continue;nsp(18);cur.y=tr(cur.page,cur.y,[{t:code,w:60},{t:code,w:220},{t:LVL[v.livello]||'',w:70},{t:v.note||'',w:CW-350}],{alt:ri%2===1});ri++;}
+
+    // ── EVIDENZE + ADA ────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'5 · Evidenze e dossier',ORANGE); cur.y-=3;
+    const evs=S.a3?.evidenze||[];
+    if(!evs.length){cur.y=tx(cur.page,'Nessuna evidenza registrata.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{
+      cur.y=tr(cur.page,cur.y,[{t:'#',w:22},{t:'Tipo',w:85},{t:'Descrizione',w:190},{t:'Competenza',w:120},{t:'Data',w:CW-417}],{hdr:true});
+      for(let i=0;i<evs.length;i++){const ev=evs[i];nsp(18);cur.y=tr(cur.page,cur.y,[{t:String(i+1),w:22},{t:ev.tipo,w:85},{t:ev.descrizione,w:190},{t:ev.competenza,w:120},{t:ev.data,w:CW-417}],{alt:i%2===1});}
+    }
+    cur.y-=14;
+    nsp(60); cur.y=sH(cur.page,cur.y,'6 · Mappatura ADA — Atlante del Lavoro INAPP',PURPLE); cur.y-=3;
+    const sels=Object.keys(S.a4?.selections||{}).filter(k=>S.a4.selections[k]);
+    if(!sels.length){cur.y=tx(cur.page,'Nessuna ADA mappata.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{
+      cur.y=tr(cur.page,cur.y,[{t:'Codice ADA',w:130},{t:'Titolo / Descrizione',w:CW-130}],{hdr:true});
+      for(let i=0;i<sels.length;i++){nsp(18);const m=S.a4?.mappings?.[sels[i]]||{};cur.y=tr(cur.page,cur.y,[{t:sels[i],w:130},{t:m.titolo||sels[i],w:CW-130}],{alt:i%2===1});}
+    }
+    cur.y-=14;
+    nsp(60); cur.y=sH(cur.page,cur.y,'7 · Obiettivi di apprendimento',RED); cur.y-=3;
+    const obs=(S.a1?.obiettivi||[]).filter(Boolean);
+    if(!obs.length){cur.y=tx(cur.page,'Nessun obiettivo registrato.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{for(let i=0;i<obs.length;i++){nsp(18);cur.page.drawText(String(i+1)+'.',{x:ML+4,y:cur.y,size:8.5,font:fB,color:DARK});cur.y=tx(cur.page,obs[i],ML+18,cur.y+1,{sz:8.5,maxW:CW-20});cur.y-=3;}}
+
+    // ── NOTE + FIRME ──────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'8 · Note conclusive del tutor',RED); cur.y-=8;
+    cur.y=tx(cur.page,S.a5?.notetutor||'Nessuna nota inserita.',ML+4,cur.y,{sz:9,maxW:CW-8,col:S.a5?.notetutor?DARK:SUB});
+    cur.y-=30;
+    cur.y=sH(cur.page,cur.y,'9 · Firme e dichiarazioni',BLUE); cur.y-=28;
+    for(const fl of ['Il Volontario','Il Tutor','Il Responsabile dell\'Ente']){
+      cur.page.drawText(fl,{x:ML+10,y:cur.y,size:9,font:fB,color:DARK}); cur.y-=22;
+      cur.page.drawLine({start:{x:ML+10,y:cur.y},end:{x:ML+150,y:cur.y},thickness:.5,color:MID});
+      cur.page.drawText('firma e data',{x:ML+10,y:cur.y-10,size:7,font:fI,color:SUB}); cur.y-=40;
+    }
+    cur.y-=10;
+    cur.page.drawText('Documento generato con HubS-TransparentIA — Conforme D.I. 5 gennaio 2021 Allegato A',{x:ML,y:cur.y,size:7.5,font:fI,color:SUB});
+
+    // ── FOOTERS ──────────────────────────────────────────────
+    pages.forEach((pg,i)=>{
+      pg.drawLine({start:{x:ML,y:MB-5},end:{x:W-MR,y:MB-5},thickness:.5,color:MID});
+      pg.drawText('HubS-TransparentIA — Messa in trasparenza competenze SCU',{x:ML,y:MB-16,size:7,font:fI,color:SUB});
+      pg.drawText((i+1)+' / '+pages.length,{x:W-MR-22,y:MB-16,size:7,font:fR,color:SUB});
+    });
+
+    // ── COMBINA PDF + JSON ────────────────────────────────────
+    const pdfBytes = await doc.save();
+    const jsonPayload = '\n%%HubS-Session-Data\n' + JSON.stringify(S) + '\n%%HubS-Session-End\n';
+    const jBytes = new TextEncoder().encode(jsonPayload);
+    const combined = new Uint8Array(pdfBytes.length + jBytes.length);
+    combined.set(pdfBytes); combined.set(jBytes, pdfBytes.length);
+
+    const tag=([S.a1?.vol?.cognome,S.a1?.vol?.nome].filter(Boolean).join('_')||S.meta?.name||'sessione').replace(/[^a-zA-Z0-9_]/g,'').slice(0,30);
+    const blob=new Blob([combined],{type:'application/pdf'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`HubS_${tag}.pdf`; a.click();
+    URL.revokeObjectURL(a.href);
+    updateSidebar();
+
+  } catch(err) {
+    alert('Errore generazione PDF:\n'+err.message);
+  } finally {
+    if(btnEl){btnEl.disabled=false;btnEl.innerHTML='<i class="fa-regular fa-file-pdf"></i> Esporta PDF';}
+  }
 }
 
 // ============================================================
