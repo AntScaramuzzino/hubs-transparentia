@@ -2390,8 +2390,15 @@ async function exportSessionPdf() {
     const pages=[];
     const np=()=>{ const p=doc.addPage([W,H]); pages.push(p); return p; };
 
+    // Normalizza caratteri fuori WinAnsiEncoding (pdf-lib usa font standard con encoding Latin-1)
+    const safe=(s)=>String(s||'')
+      .replace(/→/g,'->').replace(/←/g,'<-').replace(/↑/g,'^').replace(/↓/g,'v')
+      .replace(/–/g,'-').replace(/—/g,'--').replace(/…/g,'...').replace(/•/g,'*')
+      .replace(/[""]/g,'"').replace(/['']/g,"'")
+      .replace(/[^\x00-\xFF]/g,'?');  // fallback: rimpiazza ogni altro char non-Latin1
+
     const wrap=(txt,font,sz,maxW)=>{
-      const words=String(txt||'').split(' '), ls=[]; let ln='';
+      const words=safe(txt).split(' '), ls=[]; let ln='';
       for(const w of words){ const t=ln?ln+' '+w:w; if(font.widthOfTextAtSize(t,sz)>maxW&&ln){ls.push(ln);ln=w;}else ln=t; }
       if(ln)ls.push(ln); return ls.length?ls:[''];
     };
@@ -2402,7 +2409,7 @@ async function exportSessionPdf() {
     };
     const sH=(page,y,title,col=BLUE)=>{
       page.drawRectangle({x:ML,y:y-3,width:CW,height:17,color:col});
-      page.drawText(title.toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
+      page.drawText(safe(title).toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
       return y-23;
     };
     const tr=(page,y,cells,{hdr=false,alt=false,rH=16}={})=>{
@@ -2410,8 +2417,8 @@ async function exportSessionPdf() {
       const bg=hdr?C(.88,.91,.95):alt?C(.965,.965,.97):WHITE;
       for(const {t='',w} of cells){
         page.drawRectangle({x,y:y-rH,width:w,height:rH,color:bg,borderColor:MID,borderWidth:.4});
-        let txt=String(t||'—'), f2=hdr?fB:fR, sz=7.5;
-        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'…';
+        let txt=safe(t||'—'), f2=hdr?fB:fR, sz=7.5;
+        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'...';
         page.drawText(txt,{x:x+3,y:y-rH+5,size:sz,font:f2,color:hdr?BLUE:DARK});
         x+=w;
       }
@@ -2441,7 +2448,7 @@ async function exportSessionPdf() {
       ['Periodo',[S.a1?.percorso?.dataInizio,S.a1?.percorso?.dataFine].filter(Boolean).join(' – ')],
       ['Tutor',S.a1?.ente?.tutor],
     ]){
-      cur.page.drawText(k+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
+      cur.page.drawText(safe(k)+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
       cur.y=tx(cur.page,v||'—',ML+58,cur.y,{sz:8,maxW:CW-58}); cur.y-=2;
     }
     cur.y-=12;
