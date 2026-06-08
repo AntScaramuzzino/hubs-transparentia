@@ -1851,7 +1851,7 @@ function guardedDownloadDocx() {
   const perc = prev>0?Math.round(svolte/prev*100):0;
   if(perc>0 && perc<75) issues.push('• Presenza sotto il 75% ('+perc+'%)');
   if(issues.length) {
-    const cont = confirm('⚠ Criticità rilevate prima dell'export:\n\n'+issues.join('\n')+'\n\nProcedere comunque con il download?');
+    const cont = confirm('⚠ Criticità rilevate prima dell\'export:\n\n'+issues.join('\n')+'\n\nProcedere comunque con il download?');
     if(!cont) return;
   }
   downloadDocx();
