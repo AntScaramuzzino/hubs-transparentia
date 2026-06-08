@@ -25,6 +25,8 @@ header{background:var(--blu);color:#fff;padding:12px 24px;display:flex;align-ite
 .logo{font-size:18px;font-weight:700}.logo span{color:#7ab3f5}
 .subtitle{font-size:11px;opacity:.8;margin-top:2px}
 .badge{margin-left:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 12px;font-size:11px}
+.home-link{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.75);font-size:12px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:4px 10px;transition:all .15s;white-space:nowrap}
+.home-link:hover{color:#fff;background:rgba(255,255,255,.15)}
 
 /* TOP NAV */
 .topnav{background:#fff;border-bottom:1px solid var(--bordo);display:flex;align-items:center;padding:0 20px;gap:0;position:sticky;top:0;z-index:20}
@@ -139,6 +141,10 @@ header{background:var(--blu);color:#fff;padding:12px 24px;display:flex;align-ite
 <body>
 
 <header>
+  <a href="/" class="home-link" title="Torna alla pagina iniziale del sistema">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Sistema
+  </a>
   <div>
     <div class="logo">HubS <span>TransparentIA</span></div>
     <div class="subtitle">INRETE Cooperativa Sociale / Arci Servizio Civile Calabria</div>
@@ -60805,13 +60811,24 @@ function populateSepFilter() {
 
 function onSepFilter() {
   currentSep = document.getElementById('sep-filter').value;
-  if (currentCompId) renderAdaList(currentCompId);
+  if (currentCompId) {
+    renderAdaList(currentCompId);
+  } else if (currentFramework) {
+    renderSidebar(currentFramework);
+    renderFrameworkHome(currentFramework);
+  }
 }
 
 function onGlobalSearch(val) {
   globalSearch = val.toLowerCase();
-  if (currentCompId) renderAdaList(currentCompId);
-  if (currentView === 'ada') renderAdaBrowser();
+  if (currentCompId) {
+    renderAdaList(currentCompId);
+  } else {
+    // auto-switch to Cerca ADA da qualsiasi vista
+    const adaTab = document.querySelector('.nav-tab[data-view="ada"]');
+    if (adaTab && currentView !== 'ada') switchView('ada', adaTab);
+    else renderAdaBrowser();
+  }
 }
 
 // ─── NAVIGAZIONE ─────────────────────────────────────────────────────────
@@ -60933,12 +60950,16 @@ function renderSidebar(framework) {
           <span class="chevron">▼</span>
         </div>
         <div class="sb-section-body">
-          ${area.competenze.map(c => `
+          ${area.competenze.map(c => {
+            const n = currentSep
+              ? c.ada.filter(a => a.sep === currentSep || (a.sep||'').startsWith(currentSep)).length
+              : c.n_ada;
+            return `
             <div class="comp-item" id="sb-${c.id}" onclick="selectComp('${c.id}')">
               <span class="comp-label">${c.label}</span>
-              <span class="comp-count ${c.n_ada===0?'zero':''}">${c.n_ada}</span>
-            </div>
-          `).join('')}
+              <span class="comp-count ${n===0?'zero':''}">${n}${currentSep?' ✦':''}</span>
+            </div>`;
+          }).join('')}
         </div>
       </div>`;
   });
@@ -60973,13 +60994,17 @@ function renderFrameworkHome(framework) {
       <div class="framework-panel">
         <h3 style="color:${area.color}">${area.label}</h3>
         <div class="comp-list-grid">
-          ${area.competenze.map(c => `
-            <div class="mini-comp" onclick="selectComp('${c.id}')">
+          ${area.competenze.map(c => {
+            const n = currentSep
+              ? c.ada.filter(a => a.sep === currentSep || (a.sep||'').startsWith(currentSep)).length
+              : c.n_ada;
+            return `
+            <div class="mini-comp" onclick="selectComp('${c.id}')" style="${currentSep&&n===0?'opacity:.35':''}">
               <div class="mc-label">${c.label}</div>
-              <div class="mc-count">${c.n_ada} ADA</div>
+              <div class="mc-count">${n} ADA${currentSep?' ✦':''}</div>
               <div style="font-size:10px;color:var(--grigio);margin-top:2px">${c.label_en}</div>
-            </div>
-          `).join('')}
+            </div>`;
+          }).join('')}
         </div>
       </div>
     `).join('')}
