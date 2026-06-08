@@ -84,6 +84,84 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .ai-chip{background:#eaf2fb;border:1px solid #93c5fd;color:#1a3a6e;padding:4px 11px;border-radius:16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;border-width:1px}
 .ai-chip:hover{background:#dbeafe;transform:translateY(-1px)}
 
+
+/* ── SCROLLABLE TABS ── */
+.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{white-space:nowrap;flex-shrink:0}
+
+/* ── NAV COMPLETION BADGE ── */
+.nav-badge{font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0;line-height:1.4}
+.nav-badge.done{background:#d1fae5;color:#065f46}
+.nav-badge.partial{background:#fef3c7;color:#92400e}
+.nav-badge.empty{background:var(--border);color:var(--sub)}
+
+/* ── FASE 2 DASHBOARD ── */
+.a2-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.a2-dash-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center;border-top:3px solid var(--dc,#ccc);cursor:pointer;transition:box-shadow .15s}
+.a2-dash-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.a2-dash-card .adc-done{font-size:1.4rem;font-weight:800;color:var(--dc,#333);line-height:1}
+.a2-dash-card .adc-total{font-size:.75rem;color:var(--sub)}
+.a2-dash-card .adc-label{font-size:.67rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.a2-dash-bar{height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden}
+.a2-dash-bar-fill{height:100%;border-radius:2px;background:var(--dc,#888);transition:width .4s}
+@media(max-width:768px){.a2-dash{grid-template-columns:repeat(2,1fr)}}
+
+/* ── FILTER BAR ── */
+.a2-filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.filter-toggle{background:var(--grey);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--sub);transition:all .15s}
+.filter-toggle.active{background:var(--c-a2);border-color:var(--c-a2);color:#fff}
+
+/* ── COMP STATUS BADGE ── */
+.comp-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0}
+.cbadge-empty{background:#f1f5f9;color:#64748b}
+.cbadge-note{background:#fef3c7;color:#92400e}
+.cbadge-level{background:#dbeafe;color:#1e40af}
+.cbadge-done{background:#d1fae5;color:#065f46}
+
+/* ── COMP AI CHIPS INSIDE CARD ── */
+.comp-ai-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* ── EQVAL VISUAL ── */
+.eqval-vis-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.eqval-vis-cell{border:1px solid var(--border);border-radius:7px;padding:7px 4px;text-align:center}
+.eqval-vis-cell .evc-lbl{font-size:.62rem;font-weight:800;color:var(--sub);display:block;text-transform:uppercase;margin-bottom:5px;letter-spacing:.04em}
+.eqval-vis-cell .evc-btns{display:flex;flex-direction:column;gap:3px}
+.eqvc-btn{border:none;border-radius:4px;padding:4px 2px;font-size:.68rem;cursor:pointer;font-weight:700;font-family:inherit;width:100%;transition:all .1s}
+.eqvc-btn.q-piena{background:#d1fae5;color:#065f46}
+.eqvc-btn.q-parziale{background:#fef3c7;color:#92400e}
+.eqvc-btn.q-insufficiente{background:#fee2e2;color:#991b1b}
+.eqvc-btn.q-inactive{background:var(--grey);color:#94a3b8}
+.eqvc-btn.q-selected-piena{background:#16a34a!important;color:#fff!important}
+.eqvc-btn.q-selected-parziale{background:#d97706!important;color:#fff!important}
+.eqvc-btn.q-selected-insufficiente{background:#dc2626!important;color:#fff!important}
+
+/* ── EVIDENCE SCORE ── */
+.ev-score{border-radius:8px;padding:8px 14px;margin:10px 0;font-size:.83rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.ev-score.es-strong{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.ev-score.es-weak{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.ev-score.es-incomplete{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+
+/* ── COMP LINK TAGS (full names) ── */
+.comp-link-tag{display:inline-flex;flex-direction:column;align-items:flex-start;padding:5px 8px;font-size:.7rem;line-height:1.3;border-radius:6px;min-width:70px;max-width:120px;word-break:break-word;cursor:pointer;transition:all .12s;border-width:1px;border-style:solid;font-weight:600}
+.comp-link-tag .clt-id{font-size:.65rem;opacity:.7;font-weight:800}
+
+/* ── READINESS PANEL ── */
+.readiness-panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:0;margin-bottom:16px;overflow:hidden}
+.readiness-title{background:var(--grey);padding:10px 18px;font-size:.82rem;font-weight:800;color:var(--text);border-bottom:1px solid var(--border)}
+.readiness-row{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--border)}
+.readiness-row:last-child{border-bottom:none}
+.readiness-icon{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0}
+.readiness-lbl{flex:1;font-size:.83rem;font-weight:600;color:var(--text)}
+.readiness-detail{font-size:.75rem;color:var(--sub)}
+.r-ok{color:#16a34a}.r-warn{color:#d97706}.r-err{color:#dc2626}
+
+/* ── A4 STEP GUIDE ── */
+.a4-step-guide{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.a4-step-guide p{font-size:.82rem;color:var(--sub);margin:0 0 6px}
+.a4-step-guide .a4sg-stats{display:flex;gap:16px;flex-wrap:wrap}
+.a4sg-stat{font-size:.78rem;font-weight:700;color:var(--text)}
+.a4sg-stat span{color:var(--c-a4)}
 /* ── MOBILE ── */
 @media(max-width:768px){
   #menu-btn{display:inline-flex}
@@ -320,7 +398,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .obiettivi-list .obj-item input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:.82rem;font-family:inherit}
 
 /* STICKY NAV FOOTER */
-.agent-nav-footer{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:18px;border-top:2px solid var(--border)}
+.agent-nav-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 0 18px;border-top:2px solid var(--border);position:sticky;bottom:0;background:#fff;z-index:50;margin-top:auto}
 
 /* UTIL */
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
@@ -406,48 +484,53 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 <!-- SIDEBAR -->
 <nav id="sidebar">
   <div class="nav-section">Processo</div>
-  <div class="nav-item" data-a="a1" onclick="showScreen('a1')">
+  <div class="nav-item" data-a="a1" role="button" tabindex="0" onclick="showScreen('a1')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a1');}">
     <div class="nav-num">1</div>
     <div class="nav-info">
       <span class="nav-title"><i class="fa-solid fa-compass" style="margin-right:5px;opacity:.7"></i>Avvio</span>
       <span class="nav-sub">Accoglienza · Profilo ingresso</span>
     </div>
-    <span class="nav-status" id="ns-a1">○</span>
+    <span class="nav-status" id="ns-a1" style="display:none">○</span>
+    <span class="nav-badge empty" id="nb-a1"></span>
   </div>
-  <div class="nav-item" data-a="a2" onclick="showScreen('a2')">
+  <div class="nav-item" data-a="a2" role="button" tabindex="0" onclick="showScreen('a2')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a2');}">
     <div class="nav-num" style="background:var(--c-a2)">2</div>
     <div class="nav-info">
       <span class="nav-title"><i class="fa-solid fa-comments" style="margin-right:5px;opacity:.7"></i>Emersione</span>
       <span class="nav-sub">Narrazione · Biografia · Competenze</span>
     </div>
-    <span class="nav-status" id="ns-a2">○</span>
+    <span class="nav-status" id="ns-a2" style="display:none">○</span>
+    <span class="nav-badge empty" id="nb-a2"></span>
   </div>
-  <div class="nav-item" data-a="a3" onclick="showScreen('a3')">
+  <div class="nav-item" data-a="a3" role="button" tabindex="0" onclick="showScreen('a3')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a3');}">
     <div class="nav-num" style="background:var(--c-a3)">3</div>
     <div class="nav-info">
       <span class="nav-title"><i class="fa-solid fa-folder-open" style="margin-right:5px;opacity:.7"></i>Istruttoria</span>
       <span class="nav-sub">Evidenze · eQval · Valutazione</span>
     </div>
-    <span class="nav-status" id="ns-a3">○</span>
+    <span class="nav-status" id="ns-a3" style="display:none">○</span>
+    <span class="nav-badge empty" id="nb-a3"></span>
   </div>
-  <div class="nav-item" data-a="a4" onclick="showScreen('a4')">
+  <div class="nav-item" data-a="a4" role="button" tabindex="0" onclick="showScreen('a4')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a4');}">
     <div class="nav-num" style="background:var(--c-a4)">4</div>
     <div class="nav-info">
       <span class="nav-title"><i class="fa-solid fa-map" style="margin-right:5px;opacity:.7"></i>Ricognizione</span>
       <span class="nav-sub">Repertori · ADA · INAPP</span>
     </div>
-    <span class="nav-status" id="ns-a4">○</span>
+    <span class="nav-status" id="ns-a4" style="display:none">○</span>
+    <span class="nav-badge empty" id="nb-a4"></span>
   </div>
-  <div class="nav-item" data-a="a5" onclick="showScreen('a5')">
+  <div class="nav-item" data-a="a5" role="button" tabindex="0" onclick="showScreen('a5')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a5');}">
     <div class="nav-num" style="background:var(--c-a5)">5</div>
     <div class="nav-info">
       <span class="nav-title"><i class="fa-solid fa-file-signature" style="margin-right:5px;opacity:.7"></i>Formalizzazione</span>
       <span class="nav-sub">Documento · Export · Firma</span>
     </div>
-    <span class="nav-status" id="ns-a5">○</span>
+    <span class="nav-status" id="ns-a5" style="display:none">○</span>
+    <span class="nav-badge empty" id="nb-a5"></span>
   </div>
   <hr class="nav-divider">
-  <div class="nav-item" onclick="showScreen('welcome')">
+  <div class="nav-item" role="button" tabindex="0" onclick="showScreen('welcome')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('welcome');}">
     <div class="nav-num" style="background:#6c757d"><i class="fa-solid fa-house" style="font-size:.65rem"></i></div>
     <div class="nav-info"><span class="nav-title">Dashboard</span></div>
   </div>
@@ -816,12 +899,42 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="card" style="background:#eafaf1;border-color:#27ae60">
     <p style="font-size:.82rem;color:#1b6b3a">💡 <strong>Come usare questo agente:</strong> Per ciascuna competenza, espandi il pannello, usa le <em>domande guida</em> per condurre il colloquio Youthpass con il volontario, prendi note nel campo apposito e seleziona il livello di padronanza osservato (1–4).</p>
   </div>
+  <!-- A2 DASHBOARD -->
+  <div class="a2-dash" id="a2-dash">
+    <div class="a2-dash-card" style="--dc:var(--c-a1)" onclick="switchA2Tab('eu8',document.querySelector('#a2-tabs .tab-btn'))">
+      <div class="adc-done" id="a2d-eu8">0</div><div class="adc-total" id="a2d-eu8-lbl">/ 7 competenze</div>
+      <div class="adc-label">EU 8 chiave</div>
+      <div class="a2-dash-bar"><div class="a2-dash-bar-fill" id="a2db-eu8" style="width:0%"></div></div>
+    </div>
+    <div class="a2-dash-card" style="--dc:var(--c-a4)" onclick="switchA2Tab('digcomp',document.querySelectorAll('#a2-tabs .tab-btn')[1])">
+      <div class="adc-done" id="a2d-dc">0</div><div class="adc-total">/ 5 competenze</div>
+      <div class="adc-label">DigComp 2.2</div>
+      <div class="a2-dash-bar"><div class="a2-dash-bar-fill" id="a2db-dc" style="width:0%"></div></div>
+    </div>
+    <div class="a2-dash-card" style="--dc:var(--c-a2)" onclick="switchA2Tab('lifecomp',document.querySelectorAll('#a2-tabs .tab-btn')[2])">
+      <div class="adc-done" id="a2d-lc">0</div><div class="adc-total">/ 9 competenze</div>
+      <div class="adc-label">LifeComp</div>
+      <div class="a2-dash-bar"><div class="a2-dash-bar-fill" id="a2db-lc" style="width:0%"></div></div>
+    </div>
+    <div class="a2-dash-card" style="--dc:var(--c-a3)" onclick="switchA2Tab('entrecomp',document.querySelectorAll('#a2-tabs .tab-btn')[3])">
+      <div class="adc-done" id="a2d-ec">0</div><div class="adc-total">/ 7 competenze</div>
+      <div class="adc-label">EntreComp</div>
+      <div class="a2-dash-bar"><div class="a2-dash-bar-fill" id="a2db-ec" style="width:0%"></div></div>
+    </div>
+  </div>
+  <!-- FILTER BAR -->
+  <div class="a2-filter-bar">
+    <button class="filter-toggle" id="a2-filter-btn" onclick="toggleA2Filter(this)">
+      <i class="fa-solid fa-filter" aria-hidden="true"></i> Mostra solo incomplete
+    </button>
+    <span id="a2-filter-status" style="font-size:.75rem;color:var(--sub)"></span>
+  </div>
   <div class="tabs" id="a2-tabs">
-    <button class="tab-btn active" style="--tc:var(--c-a1)" onclick="switchA2Tab('eu8',this)">8 Competenze Chiave EU</button>
-    <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA2Tab('digcomp',this)">DigComp 2.2</button>
-    <button class="tab-btn" style="--tc:var(--c-a2)" onclick="switchA2Tab('lifecomp',this)">LifeComp</button>
-    <button class="tab-btn" style="--tc:var(--c-a3)" onclick="switchA2Tab('entrecomp',this)">EntreComp</button>
-    <button class="tab-btn" style="--tc:#7d3c00" onclick="switchA2Tab('riflessione',this)">Riflessione globale</button>
+    <button class="tab-btn active" style="--tc:var(--c-a1)" onclick="switchA2Tab('eu8',this)">8 Competenze EU <span id="a2t-eu8" style="font-size:.7rem;opacity:.7"></span></button>
+    <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA2Tab('digcomp',this)">DigComp <span id="a2t-dc" style="font-size:.7rem;opacity:.7"></span></button>
+    <button class="tab-btn" style="--tc:var(--c-a2)" onclick="switchA2Tab('lifecomp',this)">LifeComp <span id="a2t-lc" style="font-size:.7rem;opacity:.7"></span></button>
+    <button class="tab-btn" style="--tc:var(--c-a3)" onclick="switchA2Tab('entrecomp',this)">EntreComp <span id="a2t-ec" style="font-size:.7rem;opacity:.7"></span></button>
+    <button class="tab-btn" style="--tc:#7d3c00" onclick="switchA2Tab('riflessione',this)">Riflessione</button>
   </div>
   <div id="a2-tab-eu8" class="tab-pane active"></div>
   <div id="a2-tab-digcomp" class="tab-pane"></div>
@@ -844,10 +957,10 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
   </div>
   <div class="agent-nav-footer">
-    <button class="btn btn-outline" onclick="collectA2();showScreen('a1')">← Fase 1: Avvio</button>
+    <button class="btn btn-outline" onclick="collectA2();showScreen('a1')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 1</button>
     <div class="flex gap8">
-      <button class="btn btn-a2" onclick="collectA2();alert('Dati salvati')">💾 Salva dati</button>
-      <button class="btn btn-a3" onclick="collectA2();showScreen('a3')">Fase 3: Istruttoria →</button>
+      <button class="btn btn-a2" onclick="collectA2();updateA2Dashboard();showAlert('a2-alert','Dati salvati nella sessione.','ok');updateSidebar()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva</button>
+      <button class="btn btn-a3" onclick="collectA2();showScreen('a3')">Fase 3: Istruttoria <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 </div>
@@ -872,15 +985,24 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <div id="ev-list-body"></div>
     </div>
     <div id="ev-detail">
-      <p class="text-sub text-center" style="padding:40px 0" id="ev-placeholder">Seleziona un'evidenza dalla lista o aggiungine una nuova.</p>
+      <div id="ev-placeholder" style="padding:30px 20px;text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:10px">📂</div>
+        <p style="font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:6px">Nessuna evidenza selezionata</p>
+        <p style="font-size:.81rem;color:var(--sub);margin-bottom:18px">Seleziona un'evidenza dalla lista o aggiungila con i pulsanti qui sotto.</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-a3" onclick="addEvidenza()"><i class="fa-solid fa-plus" aria-hidden="true"></i> Prima evidenza</button>
+          <button class="btn btn-outline" onclick="importEvFromA2()" title="Crea evidenza partendo dalle competenze annotate in Fase 2"><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importa da Fase 2</button>
+          <button class="btn btn-outline" onclick="addEvidenzaColloquio()" title="Crea evidenza di tipo 'Autovalutazione' dal colloquio"><i class="fa-solid fa-comments" aria-hidden="true"></i> Da colloquio</button>
+        </div>
+      </div>
       <div id="ev-form" style="display:none"></div>
     </div>
   </div>
   <div class="agent-nav-footer">
-    <button class="btn btn-outline" onclick="showScreen('a2')">← Fase 2: Emersione</button>
+    <button class="btn btn-outline" onclick="showScreen('a2')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 2</button>
     <div class="flex gap8">
-      <button class="btn btn-a3" onclick="alert('Dati salvati nella sessione')">💾 Salva dati</button>
-      <button class="btn btn-a4" onclick="showScreen('a4')">Fase 4: Ricognizione →</button>
+      <button class="btn btn-a3" onclick="collectA3();showAlert('a3-alert','Dati salvati nella sessione.','ok');updateSidebar()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva</button>
+      <button class="btn btn-a4" onclick="collectA3();showScreen('a4')">Fase 4: Ricognizione <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 </div>
@@ -895,6 +1017,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <p>Competenze → ADA Atlante del Lavoro INAPP · L1 DigComp (deterministico) · L2 SEP18 (inferenziale)</p>
     </div>
   </div>
+  <div id="a4-alert"></div>
   <div id="a4-steps">
     <div class="tabs">
       <button class="tab-btn active" style="--tc:var(--c-a4)" onclick="switchA4Step(1,this)">1. Seleziona competenze</button>
@@ -908,8 +1031,11 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div id="a4-step-4" class="tab-pane"></div>
   </div>
   <div class="agent-nav-footer">
-    <button class="btn btn-outline" onclick="showScreen('a3')">← Fase 3: Istruttoria</button>
-    <button class="btn btn-a5" onclick="showScreen('a5')">Fase 5: Formalizzazione →</button>
+    <button class="btn btn-outline" onclick="showScreen('a3')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 3</button>
+    <div class="flex gap8">
+      <button class="btn btn-a4" onclick="updateNavStatus();showAlert('a4-alert','Mappatura salvata nella sessione.','ok')" id="btn-a4-save"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva</button>
+      <button class="btn btn-a5" onclick="showScreen('a5')">Fase 5: Formalizzazione <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+    </div>
   </div>
 </div>
 
@@ -923,10 +1049,33 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <p>Documento di Trasparenza conforme Allegato A — DI 5 gennaio 2021 — GDPR 2016/679</p>
     </div>
   </div>
-  <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
-    <button class="btn btn-a5" onclick="renderDocPreview()">🔄 Aggiorna anteprima</button>
-    <button class="btn btn-a5" onclick="downloadDocx()">📄 Scarica DOCX (Word)</button>
-    <button class="btn btn-outline" onclick="downloadPdf()">🖨 Stampa / PDF</button>
+  <!-- A5 READINESS PANEL -->
+  <div class="readiness-panel" id="a5-readiness">
+    <div class="readiness-title">📋 Prontezza documento — Verifica prima di esportare</div>
+    <div id="a5-readiness-rows">
+      <div class="readiness-row"><span class="readiness-icon r-err" id="a5r-vol">✗</span><span class="readiness-lbl">Dati volontario</span><span class="readiness-detail" id="a5rd-vol">Nome e ente mancanti</span></div>
+      <div class="readiness-row"><span class="readiness-icon r-err" id="a5r-ev">✗</span><span class="readiness-lbl">Evidenze istruttoria</span><span class="readiness-detail" id="a5rd-ev">Nessuna evidenza accettata</span></div>
+      <div class="readiness-row"><span class="readiness-icon r-err" id="a5r-ada">✗</span><span class="readiness-lbl">ADA validate</span><span class="readiness-detail" id="a5rd-ada">Nessuna ADA validata in Fase 4</span></div>
+      <div class="readiness-row"><span class="readiness-icon r-err" id="a5r-presenza">✗</span><span class="readiness-lbl">Presenza ore</span><span class="readiness-detail" id="a5rd-presenza">Dati ore mancanti</span></div>
+      <div class="readiness-row"><span class="readiness-icon r-err" id="a5r-req">✗</span><span class="readiness-lbl">Requisiti Art. 5</span><span class="readiness-detail" id="a5rd-req">0 / 4 requisiti spuntati</span></div>
+      <div class="readiness-row"><span class="readiness-icon r-warn" id="a5r-note">⚠</span><span class="readiness-lbl">Note tutor</span><span class="readiness-detail" id="a5rd-note">Facoltative ma raccomandate</span></div>
+    </div>
+  </div>
+  <!-- EXPORT ACTIONS -->
+  <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-a5 fw" onclick="guardedDownloadDocx()" id="btn-docx-export" style="flex:1">
+      <i class="fa-regular fa-file-word" aria-hidden="true"></i> Scarica DOCX (Word)
+    </button>
+    <div class="hbtn-actions" id="a5-export-more" style="position:relative">
+      <button class="btn btn-outline" onclick="el('a5-export-menu').classList.toggle('open')">
+        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i> Altro
+      </button>
+      <div class="actions-menu" id="a5-export-menu">
+        <button onclick="el('a5-export-menu').classList.remove('open');renderDocPreview()"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Aggiorna anteprima</button>
+        <button onclick="el('a5-export-menu').classList.remove('open');downloadPdf()"><i class="fa-solid fa-print" aria-hidden="true"></i> Stampa / PDF</button>
+        <button onclick="el('a5-export-menu').classList.remove('open');exportSessionPdf()"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Esporta PDF sessione</button>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="card-title"><i class="fa-solid fa-clipboard-check"></i> Verifica Requisiti — Art. 5 DI 31/07/2025</div>
@@ -945,8 +1094,11 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
   <div id="doc-preview-container"></div>
   <div class="agent-nav-footer">
-    <button class="btn btn-outline" onclick="showScreen('a4')">← Fase 4: Ricognizione</button>
-    <button class="btn btn-success" onclick="saveSession()">💾 Salva sessione completa</button>
+    <button class="btn btn-outline" onclick="showScreen('a4')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 4</button>
+    <div class="flex gap8">
+      <button class="btn btn-a5" onclick="saveSession()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva sessione</button>
+      <button class="btn btn-success" onclick="guardedDownloadDocx()"><i class="fa-regular fa-file-word" aria-hidden="true"></i> Esporta DOCX</button>
+    </div>
   </div>
 </div>
 
@@ -1227,16 +1379,59 @@ function updateSidebar() {
 }
 
 function updateNavStatus() {
-  const a1ok = S.a1.vol.nome && S.a1.ente.denominazione;
-  const a2ok = Object.keys(S.a2.eu).length > 0 || Object.keys(S.a2.dc).length > 0;
-  const a3ok = S.a3.evidenze.length > 0;
-  const a4ok = Object.keys(S.a4.mappings).length > 0;
-  const a5ok = !!S.a5.notetutor;
-  setVal('ns-a1', a1ok ? '●' : '○');
-  setVal('ns-a2', a2ok ? '●' : '○');
-  setVal('ns-a3', a3ok ? '●' : '○');
-  setVal('ns-a4', a4ok ? '●' : '○');
-  setVal('ns-a5', a5ok ? '●' : '○');
+  // ── A1 ──────────────────────────────────────────────
+  const a1fields = [S.a1.vol.nome, S.a1.vol.cognome, S.a1.ente.denominazione, S.a1.ente.tutor];
+  const a1done = a1fields.filter(Boolean).length;
+  const a1total = a1fields.length;
+  const a1ok = a1done === a1total;
+  _setNavBadge('nb-a1', a1done + '/' + a1total + ' campi', a1ok ? 'done' : a1done > 0 ? 'partial' : 'empty');
+
+  // ── A2 ──────────────────────────────────────────────
+  const allCompsA2 = [...EU8.filter(x=>!x.skip), ...DIGCOMP, ...LIFECOMP, ...ENTRECOMP];
+  const a2done = allCompsA2.filter(c => {
+    const grp = c.id.startsWith('eu')?'eu':c.id.startsWith('dc')?'dc':c.id.startsWith('lc')?'lc':'ec';
+    const d = S.a2[grp][c.id];
+    return d && (d.livello > 0 || d.note);
+  }).length;
+  const a2total = allCompsA2.length;
+  const a2ok = a2done > 0;
+  _setNavBadge('nb-a2', a2done + '/' + a2total + ' comp.', a2ok ? (a2done >= a2total * 0.8 ? 'done' : 'partial') : 'empty');
+
+  // ── A3 ──────────────────────────────────────────────
+  const a3accepted = S.a3.evidenze.filter(e => e.esito === 'accettata').length;
+  const a3total = S.a3.evidenze.length;
+  const a3ok = a3accepted > 0;
+  _setNavBadge('nb-a3', a3total ? a3accepted + '/' + a3total + ' ev.' : '0 evidenze', a3ok ? 'done' : a3total > 0 ? 'partial' : 'empty');
+
+  // ── A4 ──────────────────────────────────────────────
+  const a4validated = Object.values(S.a4.mappings).filter(m => m.validated).length;
+  const a4sel = Object.keys(S.a4.selections).length;
+  const a4ok = a4validated > 0;
+  _setNavBadge('nb-a4', a4validated + ' ADA', a4ok ? 'done' : a4sel > 0 ? 'partial' : 'empty');
+
+  // ── A5 ──────────────────────────────────────────────
+  const a5ready = a1ok && a3ok && a4ok;
+  _setNavBadge('nb-a5', a5ready ? 'Pronto' : 'In attesa', a5ready ? 'done' : 'empty');
+
+  // Update welcome cards sub-desc
+  _updateWelcomeCard('a1', a1done + '/' + a1total + ' campi chiave');
+  _updateWelcomeCard('a2', a2done + '/' + a2total + ' competenze');
+  _updateWelcomeCard('a3', a3total + ' evidenze · ' + a3accepted + ' accettate');
+  _updateWelcomeCard('a4', a4validated + ' ADA validate');
+
+  // A5 readiness
+  checkA5Readiness();
+}
+
+function _setNavBadge(id, text, cls) {
+  const el2 = el(id); if(!el2) return;
+  el2.textContent = text;
+  el2.className = 'nav-badge ' + cls;
+}
+
+function _updateWelcomeCard(phase, text) {
+  const card = document.querySelector('.welcome-agent[data-a="' + phase + '"] .wa-progress');
+  if(card) card.textContent = text;
 }
 
 // ============================================================
@@ -1258,7 +1453,7 @@ function showScreen(id) {
   // Close sidebar on mobile
   closeSidebar();
   if(id==='a4') renderA4Step(a4ActiveStep);
-  if(id==='a5') { collectA5(); renderDocPreview(); }
+  if(id==='a5') { collectA5(); renderDocPreview(); checkA5Readiness(); }
 }
 
 // ============================================================
@@ -1513,6 +1708,202 @@ function openAIChip(phase, promptText) {
       sendAIChat(phase);
     }
   }, 120);
+}
+
+
+// ── A2 DASHBOARD ────────────────────────────────────────────
+function updateA2Dashboard() {
+  const groups = [
+    {key:'eu', items:EU8.filter(x=>!x.skip), dashId:'eu8', tabId:'a2t-eu8', store: S.a2.eu},
+    {key:'dc', items:DIGCOMP, dashId:'dc', tabId:'a2t-dc', store: S.a2.dc},
+    {key:'lc', items:LIFECOMP, dashId:'lc', tabId:'a2t-lc', store: S.a2.lc},
+    {key:'ec', items:ENTRECOMP, dashId:'ec', tabId:'a2t-ec', store: S.a2.ec},
+  ];
+  groups.forEach(g => {
+    const total = g.items.length;
+    const done = g.items.filter(it => {
+      const d = g.store[it.id];
+      return d && (d.livello > 0 || (d.note && d.note.trim()));
+    }).length;
+    const complete = g.items.filter(it => {
+      const d = g.store[it.id];
+      return d && d.livello > 0 && d.note && d.note.trim();
+    }).length;
+    const numEl = el('a2d-'+g.dashId);
+    if(numEl) numEl.textContent = complete;
+    const barEl = el('a2db-'+g.dashId);
+    if(barEl) barEl.style.width = (Math.round(done/total*100))+'%';
+    const tabEl = el(g.tabId);
+    if(tabEl) tabEl.textContent = complete+'/'+total;
+  });
+}
+
+// ── A2 FILTER ───────────────────────────────────────────────
+let a2FilterActive = false;
+function toggleA2Filter(btn) {
+  a2FilterActive = !a2FilterActive;
+  btn.classList.toggle('active', a2FilterActive);
+  applyA2Filter();
+}
+function applyA2Filter() {
+  const cards = document.querySelectorAll('#screen-a2 .comp-card');
+  let hidden = 0;
+  cards.forEach(card => {
+    if(a2FilterActive && card.dataset.complete === '1') {
+      card.style.display = 'none'; hidden++;
+    } else {
+      card.style.display = '';
+    }
+  });
+  const stat = el('a2-filter-status');
+  if(stat) stat.textContent = a2FilterActive ? hidden + ' complete nascoste' : '';
+}
+
+// ── A3 IMPORT FROM A2 ──────────────────────────────────────
+function importEvFromA2() {
+  const compsWithNotes = [];
+  [...EU8.filter(x=>!x.skip),...DIGCOMP,...LIFECOMP,...ENTRECOMP].forEach(it => {
+    const grp = it.id.startsWith('eu')?'eu':it.id.startsWith('dc')?'dc':it.id.startsWith('lc')?'lc':'ec';
+    const d = S.a2[grp][it.id];
+    if(d && d.note && d.note.trim()) compsWithNotes.push({id:it.id, nome:it.nome, note:d.note, livello:d.livello});
+  });
+  if(!compsWithNotes.length) {
+    alert('Nessuna nota di colloquio trovata in Fase 2. Aggiungi prima le note nelle competenze.');
+    return;
+  }
+  compsWithNotes.slice(0,3).forEach(c => {
+    const ev = {
+      id:'ev'+(evNextId++), titolo:'Colloquio — '+c.nome, tipo:'Autovalutazione', data:'',
+      autore:'volontario', formato:'digitale', descrizione:c.note.substring(0,200),
+      attivita: S.a1.percorso.attivita || '',
+      eqval:{validita:'',attualita:'',pertinenza:'parziale',sufficienza:'',autenticita:''},
+      lever:{r1:false,r2:false,r3:false,r4:true}, leverPrinc:'R4',
+      compCollegate:[c.id], esito:'', posizione:'', note:'Importato da Fase 2', inclusa:true
+    };
+    S.a3.evidenze.push(ev);
+  });
+  renderEvidenze(); updateEvidenzaCount();
+  showAlert('a3-alert', compsWithNotes.length>0 ? compsWithNotes.slice(0,3).length + ' evidenze create dalle note di colloquio di Fase 2.' : '', 'ok');
+}
+function addEvidenzaColloquio() {
+  const ev = {
+    id:'ev'+(evNextId++), titolo:'Autovalutazione colloquio', tipo:'Autovalutazione', data:'',
+    autore:'volontario', formato:'digitale', descrizione:'',
+    attivita: S.a1.percorso.attivita || '',
+    eqval:{validita:'parziale',attualita:'piena',pertinenza:'',sufficienza:'',autenticita:'parziale'},
+    lever:{r1:false,r2:false,r3:false,r4:true}, leverPrinc:'R4',
+    compCollegate:[], esito:'', posizione:'', note:'', inclusa:true
+  };
+  S.a3.evidenze.push(ev);
+  renderEvidenze(); updateEvidenzaCount();
+  selectEvidenza(ev.id);
+}
+
+// ── A5 READINESS ────────────────────────────────────────────
+function checkA5Readiness() {
+  if(currentScreen !== 'a5' && !el('a5-readiness')) return;
+  const volOk = !!(S.a1.vol.nome && S.a1.vol.cognome && S.a1.ente.denominazione);
+  const evAcc = S.a3.evidenze.filter(e => e.esito === 'accettata').length;
+  const evTotal = S.a3.evidenze.length;
+  const adaVal = Object.values(S.a4.mappings).filter(m => m.validated).length;
+  const prev = parseFloat(S.a1.percorso?.orePreviste) || 0;
+  const svolte = parseFloat(S.a1.percorso?.oreSvolte) || 0;
+  const perc = prev > 0 ? Math.round(svolte / prev * 100) : 0;
+  const presOk = perc >= 75 && svolte >= 60;
+  const reqCount = ['primaInfo','progetto','tutoraggio','doc'].filter(r => S.a1.req && S.a1.req[r]).length;
+
+  function _setRow(id, detailId, ok, warn, iconTxt, detail) {
+    const ic = el(id), dt = el(detailId);
+    if(!ic || !dt) return;
+    ic.textContent = iconTxt;
+    ic.className = 'readiness-icon ' + (ok ? 'r-ok' : warn ? 'r-warn' : 'r-err');
+    dt.textContent = detail;
+  }
+  _setRow('a5r-vol','a5rd-vol', volOk, false, volOk?'✓':'✗', volOk?'Nome, cognome, ente compilati':'Completa i dati in Fase 1');
+  _setRow('a5r-ev','a5rd-ev', evAcc>0, evTotal>0&&!evAcc, evAcc>0?'✓':evTotal>0?'⚠':'✗',
+    evAcc>0?evAcc+'/'+evTotal+' evidenze accettate':evTotal>0?evTotal+' evidenze ma 0 accettate':'Aggiungi evidenze in Fase 3');
+  _setRow('a5r-ada','a5rd-ada', adaVal>0, false, adaVal>0?'✓':'✗', adaVal>0?adaVal+' ADA validate':'Valida ADA in Fase 4');
+  _setRow('a5r-presenza','a5rd-presenza', presOk, perc>0&&perc<75, presOk?'✓':perc>0?'⚠':'✗',
+    perc>0?perc+'% presenza ('+svolte+' / '+prev+' ore)':'Inserisci ore in Fase 1');
+  _setRow('a5r-req','a5rd-req', reqCount>=3, reqCount>=1&&reqCount<3, reqCount>=3?'✓':reqCount>0?'⚠':'✗',
+    reqCount+' / 4 requisiti Art. 5 spuntati');
+  const noteOk = !!(S.a5 && S.a5.notetutor);
+  _setRow('a5r-note','a5rd-note', noteOk, !noteOk, noteOk?'✓':'⚠', noteOk?'Note inserite':'Raccomandate per il documento');
+
+  // Update DOCX button
+  const allOk = volOk && evAcc > 0 && adaVal > 0;
+  const btn = el('btn-docx-export');
+  if(btn) {
+    btn.style.background = allOk ? '' : '';
+    btn.title = allOk ? 'Esporta DOCX' : 'Attenzione: alcune verifiche non superate';
+  }
+}
+
+// ── GUARDED EXPORT ──────────────────────────────────────────
+function guardedDownloadDocx() {
+  collectA5();
+  const issues = [];
+  if(!S.a1.vol.nome || !S.a1.ente.denominazione) issues.push('• Dati volontario/ente incompleti');
+  const adaVal = Object.values(S.a4.mappings).filter(m=>m.validated).length;
+  if(!adaVal) issues.push('• Nessuna ADA validata in Fase 4');
+  const prev = parseFloat(S.a1.percorso?.orePreviste)||0;
+  const svolte = parseFloat(S.a1.percorso?.oreSvolte)||0;
+  const perc = prev>0?Math.round(svolte/prev*100):0;
+  if(perc>0 && perc<75) issues.push('• Presenza sotto il 75% ('+perc+'%)');
+  if(issues.length) {
+    const cont = confirm('⚠ Criticità rilevate prima dell'export:\n\n'+issues.join('\n')+'\n\nProcedere comunque con il download?');
+    if(!cont) return;
+  }
+  downloadDocx();
+}
+
+
+// ── EQVAL HELPERS ───────────────────────────────────────────
+function setEqval(evId, criterion, value, btn) {
+  // Update hidden input
+  const inp = el('ef-eqval-'+criterion);
+  if(inp) inp.value = value;
+  // Update button visuals in this cell
+  const cell = btn.closest('.eqval-vis-cell');
+  if(cell) {
+    cell.querySelectorAll('.eqvc-btn').forEach(b => {
+      b.className = b.className.replace(/q-selected-\S+/,'');
+      const v = b.onclick.toString().includes("'piena'") ? 'piena' :
+                b.onclick.toString().includes("'parziale'") ? 'parziale' : 'insufficiente';
+      if(v === value) b.classList.add('q-selected-'+value);
+    });
+  }
+  // Update the score display
+  const ev = S.a3.evidenze.find(e=>e.id===evId);
+  if(ev) {
+    const crit = ['validita','attualita','pertinenza','sufficienza','autenticita'];
+    const vals = {};
+    crit.forEach(c => { const i=el('ef-eqval-'+c); vals[c]=i?i.value:ev.eqval[c]; });
+    const tmpEv = {...ev, eqval:{...ev.eqval, ...vals, [criterion]:value}};
+    const scoreEl = el('ev-score-'+evId);
+    if(scoreEl) {
+      scoreEl.className = 'ev-score ' + computeEvidenzaScore(tmpEv);
+      scoreEl.textContent = getEvidenzaScoreLabel(tmpEv);
+    }
+  }
+}
+function computeEvidenzaScore(ev) {
+  const vals = Object.values(ev.eqval||{}).filter(Boolean);
+  if(!vals.length) return 'es-incomplete';
+  const piena = vals.filter(v=>v==='piena').length;
+  const insuff = vals.filter(v=>v==='insufficiente').length;
+  if(vals.length < 3) return 'es-incomplete';
+  if(insuff >= 2) return 'es-incomplete';
+  if(piena >= 4) return 'es-strong';
+  if(piena >= 2 && insuff === 0) return 'es-weak';
+  return 'es-incomplete';
+}
+function getEvidenzaScoreLabel(ev) {
+  const s = computeEvidenzaScore(ev);
+  const vals = Object.values(ev.eqval||{}).filter(Boolean);
+  if(s==='es-strong') return '💚 Evidenza forte — tutti o quasi i criteri eQval soddisfatti';
+  if(s==='es-weak') return '🟡 Evidenza parziale — richiede integrazione o ulteriore validazione';
+  return '🔴 Evidenza incompleta — compilare la valutazione eQval (' + vals.length + '/5 criteri)';
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -1778,12 +2169,16 @@ function buildCompCard(item, group, stored) {
     </div>`;
   }
 
-  return `<div class="comp-card" id="cc-${item.id}">
+  const hasnote = !!(data.note && data.note.trim());
+  const badgeCls = (!lvl&&!hasnote)?'cbadge-empty':(!lvl&&hasnote)?'cbadge-note':(lvl&&!hasnote)?'cbadge-level':'cbadge-done';
+  const badgeTxt = (!lvl&&!hasnote)?'Da compilare':(!lvl&&hasnote)?'Note inserite':(lvl&&!hasnote)?'Livello selezionato':'Completa';
+  const adaCount = (COMP_TO_ADA[item.id]||[]).length;
+  return `<div class="comp-card" id="cc-${item.id}" data-complete="${(lvl&&hasnote)?'1':'0'}">
     <div class="comp-card-hdr" onclick="toggleCompCard('${item.id}')">
-      <div class="comp-num" style="background:${isSkip?'#aaa':'var(--c-a2)'}">${item.id.replace(/[a-z]/,'').replace(/\d/,'')}</div>
+      <div class="comp-num" style="background:${isSkip?'#aaa':'var(--c-a2)'}">${item.id.replace(/[a-z]/g,'').replace(/\d/g,'')}</div>
       <div class="comp-name">${item.nome}</div>
-      <div class="comp-area">${item.area}</div>
-      <span style="font-size:1rem">${lvl?'●':'○'}</span>
+      <div class="comp-area">${item.area}${adaCount?' · '+adaCount+' ADA':''}</div>
+      <span class="comp-badge ${badgeCls}">${badgeTxt}</span>
     </div>
     <div class="comp-card-body" id="ccb-${item.id}">
       <div class="questions-hint">
@@ -1795,6 +2190,11 @@ function buildCompCard(item, group, stored) {
         <textarea id="${group}_${item.id}_note" rows="3" placeholder="Trascrivi brevemente quanto emerso dal colloquio...">${data.note||''}</textarea>
       </div>`:''}
       ${lvlHtml}
+      ${!isSkip ? `<div class="comp-ai-chips">
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){return 'Aiutami a formulare una domanda Youthpass specifica per: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-question-circle" aria-hidden="true"></i> Domanda guida</button>
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){var el2=document.getElementById('${group}_${item.id}_note');var n=el2&&el2.value;return n?'Analizza queste note di colloquio e suggerisci il livello di padronanza (1-4) per la competenza '+${JSON.stringify(item.nome)}+': '+n:'Descrivi i criteri per valutare il livello 1-4 della competenza: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Suggerisci livello</button>
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){var el2=document.getElementById('${group}_${item.id}_note');var n=el2&&el2.value;return n?'Riassumi in 2-3 frasi queste note di colloquio per la competenza '+${JSON.stringify(item.nome)}+': '+n:'Cosa sono le evidenze documentali utili per attestare la competenza: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Riassumi / Evidenze</button>
+      </div>` : ''}
     </div>
   </div>`;
 }
@@ -1829,6 +2229,7 @@ function initA2() {
   });
   el('a2-tab-entrecomp').innerHTML = `<div class="alert alert-info" style="margin-bottom:12px">
     La mappatura EntreComp→ADA è inferenziale (L2). Inclusa nella Sezione 4.4 del Documento di Trasparenza.</div>`+ecHtml;
+  updateA2Dashboard();
 }
 
 function collectA2() {
@@ -1859,6 +2260,8 @@ function collectA2() {
   S.a2.rifl.cambiamento=getVal('a2-rifl-cambiamento');
   S.a2.rifl.lavoro=getVal('a2-rifl-lavoro');
   updateNavStatus();
+  updateA2Dashboard();
+  if(a2FilterActive) applyA2Filter();
 }
 
 function populateA2() {
@@ -1988,18 +2391,22 @@ function selectEvidenza(id) {
       <textarea id="ef-attivita" rows="2">${escHtml(ev.attivita)}</textarea></div>
 
     <div class="card-title mt12">B — Valutazione eQval (Standard 17)</div>
-    <div class="eqval-grid">
-      ${['validita','attualita','pertinenza','sufficienza','autenticita'].map(cr=>`
-      <div class="eqval-item">
-        <label>${{validita:'1. Validità',attualita:'2. Attualità',pertinenza:'3. Pertinenza',sufficienza:'4. Sufficienza',autenticita:'5. Autenticità'}[cr]}</label>
-        <select id="ef-eqval-${cr}">
-          <option value="">—</option>
-          <option value="piena" ${ev.eqval[cr]==='piena'?'selected':''}>Piena</option>
-          <option value="parziale" ${ev.eqval[cr]==='parziale'?'selected':''}>Parziale</option>
-          <option value="insufficiente" ${ev.eqval[cr]==='insufficiente'?'selected':''}>Insufficiente</option>
-        </select>
-      </div>`).join('')}
+    <div class="eqval-vis-grid">
+      ${['validita','attualita','pertinenza','sufficienza','autenticita'].map(cr=>{
+        const labels={validita:'1. Validità',attualita:'2. Attualità',pertinenza:'3. Pertinenza',sufficienza:'4. Sufficienza',autenticita:'5. Autenticità'};
+        const current = ev.eqval[cr]||'';
+        return `<div class="eqval-vis-cell">
+          <span class="evc-lbl">${labels[cr]}</span>
+          <div class="evc-btns">
+            <button type="button" class="eqvc-btn ${current==='piena'?'q-selected-piena':'q-piena'}" onclick="setEqval('${id}','${cr}','piena',this)">✓ Piena</button>
+            <button type="button" class="eqvc-btn ${current==='parziale'?'q-selected-parziale':'q-parziale'}" onclick="setEqval('${id}','${cr}','parziale',this)">≈ Parziale</button>
+            <button type="button" class="eqvc-btn ${current==='insufficiente'?'q-selected-insufficiente':'q-insufficiente'}" onclick="setEqval('${id}','${cr}','insufficiente',this)">✗ Insuff.</button>
+          </div>
+          <input type="hidden" id="ef-eqval-${cr}" value="${current}">
+        </div>`;
+      }).join('')}
     </div>
+    <div id="ev-score-${id}" class="ev-score ${computeEvidenzaScore(ev)}">${getEvidenzaScoreLabel(ev)}</div>
     <div class="frow">
       <label>Esito complessivo</label>
       <div class="esito-sel">
@@ -2036,8 +2443,11 @@ function selectEvidenza(id) {
         const sel = (ev.compCollegate||[]).includes(c.id);
         const color = c.group==='EU8'?'var(--c-a1)':c.group==='DigComp'?'var(--c-a4)':c.group==='LifeComp'?'var(--c-a2)':'var(--c-a3)';
         return `<span class="comp-link-tag" id="clt-${id}-${c.id}"
-          style="color:${sel?'#fff':color};background:${sel?color:'#fff'};border-color:${color}"
-          onclick="toggleCompLink('${id}','${c.id}')" title="${c.group}: ${c.nome}">${c.id}</span>`;
+          style="color:${sel?'#fff':color};background:${sel?color:'transparent'};border-color:${color}"
+          onclick="toggleCompLink('${id}','${c.id}')" title="${c.group}: ${c.nome}">
+          <span class="clt-id">${c.id}</span>
+          <span>${c.nome.substring(0,30)}</span>
+        </span>`;
       }).join('')}
     </div>
 
@@ -2251,7 +2661,12 @@ function renderA4Step3() {
   });
 
   if(!Object.keys(adaSet).length && !Object.keys(S.a4.mappings).length){
-    el('a4-step-3').innerHTML='<div class="alert alert-warn">Nessuna ADA da validare. Seleziona competenze nello step 1.</div>';
+    el('a4-step-3').innerHTML=`<div class="alert alert-warn" style="text-align:center;padding:28px 20px">
+      <div style="font-size:2rem;margin-bottom:10px">🗂️</div>
+      <p style="font-weight:700;margin-bottom:8px">Nessuna ADA da validare</p>
+      <p style="font-size:.83rem;margin-bottom:16px">Seleziona prima le competenze nello Step 1 per generare le ADA candidate.</p>
+      <button class="btn btn-a4" onclick="switchA4Step(1)"><i class="fa-solid fa-arrow-left"></i> Torna a selezionare competenze</button>
+    </div>`;
     return;
   }
 
