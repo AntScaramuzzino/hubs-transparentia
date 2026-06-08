@@ -543,10 +543,10 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
   </div>
   <div class="ai-chips" style="margin-bottom:16px">
-    <button class="ai-chip" onclick="openAIChip('a1','Suggerisci 3 obiettivi specifici di apprendimento per un volontario in questo settore: '+document.getElementById('a1-percorso-settore').value" title="AI: suggerisci obiettivi"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggerisci obiettivi</button>
-    <button class="ai-chip" onclick="openAIChip('a1','Genera una bozza di piano di tutoraggio mensile per un volontario nel settore: '+document.getElementById('a1-percorso-settore').value)" title="AI: bozza tutoraggio"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Bozza tutoraggio</button>
-    <button class="ai-chip" onclick="openAIChip('a1','Suggerisci le ADA preliminari più pertinenti per un volontario che svolge: '+document.getElementById('a1-percorso-settore').value)" title="AI: suggerisci ADA"><i class="fa-solid fa-map" aria-hidden="true"></i> Suggerisci ADA</button>
-    <button class="ai-chip" onclick="openAIChip('a1','Verifica la completezza dei campi compilati nella Fase 1 e indica cosa manca per procedere.')" title="AI: verifica completezza"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verifica completezza</button>
+    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci 3 obiettivi specifici di apprendimento per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci obiettivi"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggerisci obiettivi</button>
+    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Genera una bozza di piano di tutoraggio mensile per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: bozza tutoraggio"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Bozza tutoraggio</button>
+    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci le ADA più pertinenti (con codice e titolo) per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci ADA"><i class="fa-solid fa-map" aria-hidden="true"></i> Suggerisci ADA</button>
+    <button class="ai-chip" onclick="openAIChip('a1', function(){ var nome=el('a1-vol-nome'),cog=el('a1-vol-cognome'),ente=el('a1-ente-denominazione'),tutor=el('a1-ente-tutor'),data=el('a1-percorso-dataInizio'); var miss=[]; if(!nome||!nome.value)miss.push('Nome volontario'); if(!cog||!cog.value)miss.push('Cognome volontario'); if(!ente||!ente.value)miss.push('Denominazione ente'); if(!tutor||!tutor.value)miss.push('Tutor'); if(!data||!data.value)miss.push('Data inizio'); return miss.length?'Nella Fase 1 mancano questi campi: '+miss.join(', ')+'. Spiega brevemente perché sono importanti e cosa inserire in ciascuno.':'La Fase 1 sembra completa. Suggerisci 3 elementi aggiuntivi che migliorerebbero la qualità del documento di trasparenza.'; })" title="AI: verifica completezza"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verifica completezza</button>
   </div>
   <div id="a1-alert"></div>
 
@@ -1493,20 +1493,26 @@ document.addEventListener('input', function(e) {
 });
 
 // ── AI CONTEXTUAL CHIPS ─────────────────────────────────────
-function openAIChip(phase, prompt) {
-  // Find the AI chat panel in the current phase and pre-fill + send
+function openAIChip(phase, promptText) {
+  // 1. Navigate to the correct screen
   showScreen(phase);
-  // Scroll to AI chat section
-  const chatInp = el('chatinp-'+phase);
-  if(chatInp) {
-    chatInp.value = typeof prompt === 'function' ? prompt() : prompt;
-    chatInp.scrollIntoView({behavior:'smooth', block:'center'});
-    chatInp.focus();
-  } else {
-    // If chat panel isn't rendered, open it
-    const chatBtn = document.querySelector('#screen-'+phase+' [onclick*="renderChatPanel"]');
-    if(chatBtn) { chatBtn.click(); setTimeout(()=>openAIChip(phase, prompt), 300); }
-  }
+  // 2. Evaluate prompt string (may reference DOM values — do after showScreen)
+  const text = typeof promptText === 'function' ? promptText() : promptText;
+  // 3. Switch to AI tab (this renders the chat panel lazily)
+  showAgentTab(phase, 'ai');
+  // 4. After render, fill input and auto-send
+  setTimeout(function() {
+    const chatInp = el('chatinp-'+phase);
+    if(chatInp) {
+      chatInp.value = text;
+      chatInp.dispatchEvent(new Event('input'));
+      // Scroll panel into view
+      const cpane = el(phase+'-cpane');
+      if(cpane) cpane.scrollIntoView({behavior:'smooth', block:'nearest'});
+      // Auto-send
+      sendAIChat(phase);
+    }
+  }, 120);
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
