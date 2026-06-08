@@ -33,6 +33,81 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 #hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
 #hdr .hbtn.green:hover{background:#1e8449}
 
+/* ── HAMBURGER (desktop hidden) ── */
+#menu-btn{display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:7px;cursor:pointer;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-family:inherit}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199}
+.sidebar-overlay.visible{display:block}
+
+/* ── ACTIONS DROPDOWN ── */
+.hbtn-group{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.hbtn-actions{position:relative}
+.actions-menu{display:none;position:absolute;right:0;top:48px;background:#1e2a4a;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 0;min-width:175px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.actions-menu.open{display:block}
+.actions-menu a,.actions-menu button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 16px;color:#fff;background:none;border:none;cursor:pointer;font-size:.85rem;font-weight:600;font-family:inherit;white-space:nowrap;text-decoration:none;transition:background .12s}
+.actions-menu a:hover,.actions-menu button:hover{background:rgba(255,255,255,.12)}
+.actions-menu hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:4px 0}
+
+/* ── SESSION STATE ── */
+.sess-unsaved{color:#f59e0b!important}
+.sess-saved{color:#4ade80!important}
+.sess-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#94a3b8}
+.sess-dot.saved{background:#4ade80}
+.sess-dot.unsaved{background:#f59e0b}
+
+/* ── COLLAPSIBLE SEZ ── */
+.sez-label{cursor:pointer;user-select:none;justify-content:space-between}
+.sez-toggle-ico{font-size:.7rem;opacity:.55;transition:transform .2s;flex-shrink:0;margin-left:4px}
+.sez-label.collapsed .sez-toggle-ico{transform:rotate(180deg)}
+.sez-hidden{display:none!important}
+
+/* ── LIVE PROGRESS ── */
+.req-progress-wrap{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.req-progress-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.req-progress-row:last-child{margin-bottom:0}
+.req-progress-label{font-size:.8rem;font-weight:700;color:var(--sub);min-width:95px;flex-shrink:0}
+.req-bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.req-bar-fill{height:100%;border-radius:4px;transition:width .4s ease,background .3s;background:#e74c3c}
+.req-bar-fill.warn{background:#e67e22}
+.req-bar-fill.ok{background:#27ae60}
+.req-progress-val{font-size:.8rem;font-weight:700;min-width:54px;text-align:right;color:var(--text)}
+
+/* ── FIELD VALIDATION ── */
+.frow input.invalid,.frow select.invalid,.frow textarea.invalid{border-color:#e74c3c!important;background:#fff8f8}
+.field-err{font-size:.76rem;color:#e74c3c;margin-top:3px;display:none}
+.field-err.vis{display:block}
+.val-banner{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;line-height:1.7;display:none}
+.val-banner.vis{display:block}
+.val-banner strong{color:#92400e}
+
+/* ── AI CONTEXTUAL CHIPS ── */
+.ai-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ai-chip{background:#eaf2fb;border:1px solid #93c5fd;color:#1a3a6e;padding:4px 11px;border-radius:16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;border-width:1px}
+.ai-chip:hover{background:#dbeafe;transform:translateY(-1px)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  #menu-btn{display:inline-flex}
+  #sidebar{position:fixed;left:-280px;top:0;bottom:0;z-index:200;transition:left .25s;box-shadow:4px 0 20px rgba(0,0,0,.3);width:268px;min-width:0}
+  #sidebar.open{left:0}
+  #hdr .sess-name{max-width:100px;font-size:.75rem}
+  .hbtn .hbtn-lbl{display:none}
+  .hbtn{padding:7px 10px}
+  .grid2,.grid3{grid-template-columns:1fr!important}
+  #main{padding:14px}
+  .agent-hdr{padding:16px 18px;gap:10px}
+  .agent-hdr .ahnum{font-size:1.8rem}
+  .agent-hdr .ahtxt h2{font-size:1.05rem}
+  .agent-nav-footer{flex-direction:column;gap:8px}
+  .agent-nav-footer .flex{flex-direction:column;width:100%}
+  .agent-nav-footer .btn{width:100%;justify-content:center}
+  .frow.inline{flex-direction:column;gap:0}
+  .frow.inline .narrow{flex:none;width:100%}
+  .ptbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+  .welcome-agent[style*="grid-column"]{grid-column:auto!important}
+  .welcome-grid{grid-template-columns:1fr!important}
+}
+
+
 /* LAYOUT */
 #app{display:flex;flex:1;overflow:hidden}
 
@@ -298,16 +373,35 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 
 <!-- HEADER -->
 <div id="hdr">
-  <div class="logo"><i class="fa-solid fa-network-wired"></i>HubS<span>·</span>TransparentIA</div>
-  <div class="sess-name" id="hdr-sess-name">Nessuna sessione caricata</div>
-  <a class="hbtn" href="/guida" target="_blank" style="text-decoration:none"><i class="fa-solid fa-book-open"></i> Guida</a>
-  <button class="hbtn" onclick="openNewSession()"><i class="fa-solid fa-plus"></i> Nuova</button>
-  <button class="hbtn" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica</button>
-  <button class="hbtn" onclick="saveSession()"><i class="fa-solid fa-floppy-disk"></i> Salva JSON</button>
-  <button class="hbtn green" onclick="exportSessionPdf()"><i class="fa-regular fa-file-pdf"></i> Esporta PDF</button>
+  <button id="menu-btn" onclick="toggleSidebar()" aria-label="Apri menu navigazione"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+  <div class="logo"><i class="fa-solid fa-network-wired" aria-hidden="true"></i>HubS<span>·</span>TransparentIA</div>
+  <div class="sess-name" id="hdr-sess-name"><span class="sess-dot" id="sess-dot"></span>Nessuna sessione</div>
+  <div class="hbtn-group">
+    <div class="hbtn-actions" id="hbtn-actions">
+      <button class="hbtn" onclick="toggleActionsMenu()" aria-label="Azioni sessione" aria-haspopup="true">
+        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+        <span class="hbtn-lbl">Azioni</span>
+      </button>
+      <div class="actions-menu" id="actions-menu" role="menu">
+        <a href="/guida" target="_blank" role="menuitem"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Guida</a>
+        <hr>
+        <button onclick="closeActionsMenu();openNewSession()" role="menuitem"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nuova sessione</button>
+        <button onclick="closeActionsMenu();triggerLoad()" role="menuitem"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Carica (.json/.pdf)</button>
+      </div>
+    </div>
+    <button class="hbtn" onclick="saveSession()" aria-label="Salva sessione come JSON" id="btn-save">
+      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+      <span class="hbtn-lbl">Salva</span>
+    </button>
+    <button class="hbtn green" onclick="exportSessionPdf()" aria-label="Esporta PDF">
+      <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
+      <span class="hbtn-lbl">PDF</span>
+    </button>
+  </div>
   <input type="file" id="load-input" accept=".json,.pdf" style="display:none" onchange="loadSession(event)">
 </div>
 
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div id="app">
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -448,17 +542,23 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <p>Raccolta dati · Piano attività · Tutoraggio · Mappatura ADA preliminare · Patto di Servizio — Rif. Art. 5 DI 31/07/2025</p>
     </div>
   </div>
+  <div class="ai-chips" style="margin-bottom:16px">
+    <button class="ai-chip" onclick="openAIChip('a1','Suggerisci 3 obiettivi specifici di apprendimento per un volontario in questo settore: '+document.getElementById('a1-percorso-settore').value" title="AI: suggerisci obiettivi"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggerisci obiettivi</button>
+    <button class="ai-chip" onclick="openAIChip('a1','Genera una bozza di piano di tutoraggio mensile per un volontario nel settore: '+document.getElementById('a1-percorso-settore').value)" title="AI: bozza tutoraggio"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Bozza tutoraggio</button>
+    <button class="ai-chip" onclick="openAIChip('a1','Suggerisci le ADA preliminari più pertinenti per un volontario che svolge: '+document.getElementById('a1-percorso-settore').value)" title="AI: suggerisci ADA"><i class="fa-solid fa-map" aria-hidden="true"></i> Suggerisci ADA</button>
+    <button class="ai-chip" onclick="openAIChip('a1','Verifica la completezza dei campi compilati nella Fase 1 e indica cosa manca per procedere.')" title="AI: verifica completezza"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verifica completezza</button>
+  </div>
   <div id="a1-alert"></div>
 
   <!-- SEZ. A -->
-  <div class="sez-label"><i class="fa-solid fa-circle-dot"></i> Sezione A — Parti del Progetto</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-circle-dot" aria-hidden="true"></i> Sezione A — Parti del Progetto</span><span class="sez-toggle-ico">▲</span></div>
   <div class="grid2">
     <div>
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-user"></i> Dati del Volontario</div>
         <div class="frow inline">
-          <div><label>Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome"></div>
-          <div><label>Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome"></div>
+          <div><label>Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome" required aria-required="true" aria-label="Nome volontario"></div>
+          <div><label>Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome" required aria-required="true" aria-label="Cognome volontario"></div>
         </div>
         <div class="frow inline">
           <div><label>Data di nascita</label><input type="date" id="a1-vol-dob"></div>
@@ -497,7 +597,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div>
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-building"></i> Ente di Accoglienza</div>
-        <div class="frow"><label>Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione"></div>
+        <div class="frow"><label>Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione" required aria-required="true" aria-label="Denominazione ente"></div>
         <div class="frow inline">
           <div><label>Codice Fiscale ente</label><input type="text" id="a1-ente-cfEnte"></div>
           <div><label>Tipologia</label>
@@ -511,7 +611,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         </div>
         <div class="frow"><label>Indirizzo sede legale</label><input type="text" id="a1-ente-indirizzo"></div>
         <div class="frow"><label>Rappresentante legale</label><input type="text" id="a1-ente-repLegale"></div>
-        <div class="frow"><label>Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor"></div>
+        <div class="frow"><label>Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor" required aria-required="true" aria-label="Tutor responsabile"></div>
         <div class="frow inline">
           <div><label>Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
           <div><label>Data di sottoscrizione</label><input type="date" id="a1-dataRotte"></div>
@@ -523,13 +623,25 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <div class="frow"><label>Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
         <div class="frow"><label>Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
         <div class="frow inline">
-          <div><label>Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()"></div>
+          <div><label>Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
           <div><label>Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
         </div>
         <div class="frow inline">
-          <div class="narrow"><label>Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()"></div>
-          <div class="narrow"><label>Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()"></div>
-          <div><label>% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700"></div>
+          <div class="narrow"><label>Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()" aria-label="Ore previste"></div>
+          <div class="narrow"><label>Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()" aria-label="Ore svolte"></div>
+          <div><label>% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700" aria-label="Percentuale presenza"></div>
+        </div>
+        <div class="req-progress-wrap" id="req-progress-wrap" style="display:none">
+          <div class="req-progress-row">
+            <span class="req-progress-label">Ore svolte</span>
+            <div class="req-bar-track"><div class="req-bar-fill" id="ore-bar-fill" style="width:0%"></div></div>
+            <span class="req-progress-val" id="ore-stat-val">0 / 60 h</span>
+          </div>
+          <div class="req-progress-row">
+            <span class="req-progress-label">Presenza</span>
+            <div class="req-bar-track"><div class="req-bar-fill" id="pres-bar-fill" style="width:0%"></div></div>
+            <span class="req-progress-val" id="pres-stat-val">0%</span>
+          </div>
         </div>
         <div id="a1-presenza-alert"></div>
       </div>
@@ -539,7 +651,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
 
   <!-- SEZ. B -->
-  <div class="sez-label"><i class="fa-solid fa-bullseye"></i> Sezione B — Obiettivi del Percorso</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Sezione B — Obiettivi del Percorso</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
     <div class="frow">
       <label>Obiettivo generale del volontariato</label>
@@ -562,21 +674,21 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
 
   <!-- SEZ. C -->
-  <div class="sez-label"><i class="fa-solid fa-list-check"></i> Sezione C — Piano delle Attività</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-list-check" aria-hidden="true"></i> Sezione C — Piano delle Attività</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
     <p class="text-sub" style="margin-bottom:12px">Totale ore ≥ 60 in 12 mesi. Presenza minima per Documento di Trasparenza: 75% — DM 115/2024 Art. 5.</p>
-    <table class="ptbl">
+    <div class="ptbl-wrap"><table class="ptbl">
       <thead><tr><th style="width:32px">N.</th><th>Attività</th><th style="width:200px">Area di competenza</th><th style="width:90px">Ore previste</th></tr></thead>
       <tbody id="a1-pa-tbody"></tbody>
       <tfoot><tr style="background:var(--c-a1bg)"><td colspan="3" style="text-align:right;font-weight:700;color:var(--c-a1);font-size:.82rem">TOTALE ORE</td><td><input id="a1-pa-totale" readonly style="background:transparent;font-weight:700;color:var(--c-a1)"></td></tr></tfoot>
-    </table>
+    </table></div>
     <button class="btn btn-outline" style="margin-top:10px;font-size:.8rem;padding:5px 14px" onclick="addPianoAttivita()"><i class="fa-solid fa-plus"></i> Aggiungi attività</button>
   </div>
 
   <!-- SEZ. D -->
-  <div class="sez-label"><i class="fa-solid fa-calendar-week"></i> Sezione D — Calendario Indicativo</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-calendar-week" aria-hidden="true"></i> Sezione D — Calendario Indicativo</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
-    <table class="ptbl">
+    <div class="ptbl-wrap"><table class="ptbl">
       <thead><tr><th style="width:110px">Mese</th><th>Attività previste</th><th style="width:90px">Ore</th></tr></thead>
       <tbody id="a1-cal-tbody">
         <tr><td style="font-weight:600;color:var(--sub)">Mese 1</td><td><input id="a1-cal-att-0" placeholder="..."></td><td><input id="a1-cal-ore-0" type="number" min="0" placeholder="0"></td></tr>
@@ -587,11 +699,11 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <tr><td style="font-weight:600;color:var(--sub)">Mese 6</td><td><input id="a1-cal-att-5" placeholder="..."></td><td><input id="a1-cal-ore-5" type="number" min="0" placeholder="0"></td></tr>
         <tr><td style="font-weight:600;color:var(--sub)">Mese 7–12</td><td><input id="a1-cal-att-6" placeholder="..."></td><td><input id="a1-cal-ore-6" type="number" min="0" placeholder="0"></td></tr>
       </tbody>
-    </table>
+    </table></div>
   </div>
 
   <!-- SEZ. E + F -->
-  <div class="sez-label"><i class="fa-solid fa-handshake"></i> Sezione E — Piano di Tutoraggio &nbsp;|&nbsp; <i class="fa-solid fa-map-pin"></i> Sezione F — Mappatura ADA Preliminare</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-handshake" aria-hidden="true"></i> Sez. E — Tutoraggio &nbsp;|&nbsp; <i class="fa-solid fa-map-pin" aria-hidden="true"></i> Sez. F — ADA Preliminare</span><span class="sez-toggle-ico">▲</span></div>
   <div class="grid2">
     <div class="card">
       <div class="card-title">Piano di Tutoraggio</div>
@@ -636,7 +748,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
 
   <!-- SEZ. G -->
-  <div class="sez-label"><i class="fa-solid fa-star-half-stroke"></i> Sezione G — Modalità di Valutazione Finale</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Sezione G — Modalità di Valutazione Finale</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
     <div class="grid2">
       <div>
@@ -664,7 +776,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
 
   <!-- NOTE + PATTO -->
-  <div class="sez-label"><i class="fa-solid fa-file-signature"></i> Note del Tutor · Bozza Patto di Servizio</div>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Note del Tutor · Bozza Patto di Servizio</span><span class="sez-toggle-ico">▲</span></div>
   <div class="grid2">
     <div class="card">
       <div class="card-title">Note del tutor (fase di accoglienza)</div>
@@ -681,11 +793,12 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
   </div>
 
+  <div id="a1-val-banner" class="val-banner"></div>
   <div class="agent-nav-footer">
-    <button class="btn btn-outline" onclick="showScreen('welcome')">← Dashboard</button>
+    <button class="btn btn-outline" onclick="showScreen('welcome')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Dashboard</button>
     <div class="flex gap8">
-      <button class="btn btn-a1" onclick="collectA1();showAlert('a1-alert','Dati salvati nella sessione.','ok')"><i class="fa-solid fa-floppy-disk"></i> Salva dati</button>
-      <button class="btn btn-a2" onclick="collectA1();showScreen('a2')">Fase 2: Emersione →</button>
+      <button class="btn btn-a1" onclick="collectA1();showAlert('a1-alert','Dati salvati nella sessione.','ok');updateSidebar()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> <span class="hbtn-lbl">Salva dati</span></button>
+      <button class="btn btn-a2" onclick="if(validateA1())showScreen('a2')">Fase 2: Emersione <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 </div>
@@ -1093,11 +1206,22 @@ function populateAll() {
 
 function updateSidebar() {
   const name = S.meta.name||'Sessione senza nome';
-  setVal('hdr-sess-name',name);
+  // Fix: use textContent for div element (not value)
+  const hdrName = el('hdr-sess-name');
+  if(hdrName) hdrName.innerHTML = '<span class="sess-dot '+(S.meta.modified?'saved':'unsaved')+'" id="sess-dot"></span>' + name;
   const si = el('sidebar-sess-info');
-  if(si) si.textContent = S.meta.modified
-    ? 'Salvata: '+new Date(S.meta.modified).toLocaleDateString('it-IT')
-    : (S.meta.created ? 'Creata: '+new Date(S.meta.created).toLocaleDateString('it-IT') : 'Non salvata');
+  if(si) {
+    const savedDate = S.meta.modified ? new Date(S.meta.modified).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : null;
+    const createdDate = S.meta.created ? new Date(S.meta.created).toLocaleDateString('it-IT') : null;
+    let info = savedDate
+      ? '✅ Salvata il '+savedDate
+      : (createdDate ? '⚠️ Non salvata · Creata: '+createdDate : '○ Nessuna sessione');
+    // Recommended action
+    collectA1();
+    if(!S.a1.vol.nome || !S.a1.ente.denominazione) info += '<br><span style="color:#f59e0b">→ Completa Fase 1</span>';
+    else if(!S.meta.modified) info += '<br><span style="color:#f59e0b">→ Salva la sessione</span>';
+    si.innerHTML = info;
+  }
   // update nav status dots
   updateNavStatus();
 }
@@ -1126,6 +1250,13 @@ function showScreen(id) {
   const nav = document.querySelector('.nav-item[data-a="'+id+'"]');
   if(nav) nav.classList.add('active');
   currentScreen = id;
+  // Scroll to top + focus on phase heading
+  const mainEl = el('main');
+  if(mainEl) mainEl.scrollTop = 0;
+  const hdr = screen && screen.querySelector('.agent-hdr, .ahtxt h2');
+  if(hdr) { hdr.setAttribute('tabindex','-1'); hdr.focus({preventScroll:true}); }
+  // Close sidebar on mobile
+  closeSidebar();
   if(id==='a4') renderA4Step(a4ActiveStep);
   if(id==='a5') { collectA5(); renderDocPreview(); }
 }
@@ -1286,6 +1417,98 @@ function calcOreAttivita() {
   if(el) el.value=tot>0?tot+'h':'';
 }
 // bind ore change
+
+// ── SIDEBAR MOBILE ──────────────────────────────────────────
+function toggleSidebar() {
+  const sb = el('sidebar'), ov = el('sidebar-overlay');
+  const open = sb.classList.toggle('open');
+  if(ov) ov.classList.toggle('visible', open);
+}
+function closeSidebar() {
+  const sb = el('sidebar'), ov = el('sidebar-overlay');
+  if(sb) sb.classList.remove('open');
+  if(ov) ov.classList.remove('visible');
+}
+
+// ── ACTIONS DROPDOWN ────────────────────────────────────────
+function toggleActionsMenu() {
+  el('actions-menu').classList.toggle('open');
+}
+function closeActionsMenu() {
+  el('actions-menu').classList.remove('open');
+}
+// Close on outside click
+document.addEventListener('click', function(e) {
+  const am = el('actions-menu'), ab = el('hbtn-actions');
+  if(am && ab && !ab.contains(e.target)) am.classList.remove('open');
+});
+
+// ── COLLAPSIBLE SECTIONS ────────────────────────────────────
+function toggleSez(label) {
+  const isCollapsed = label.classList.toggle('collapsed');
+  label.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+  let sib = label.nextElementSibling;
+  while(sib && !sib.classList.contains('sez-label') && !sib.classList.contains('agent-nav-footer') && !sib.classList.contains('val-banner')) {
+    sib.classList.toggle('sez-hidden', isCollapsed);
+    sib = sib.nextElementSibling;
+  }
+}
+// Keyboard support for sez-label
+document.addEventListener('keydown', function(e) {
+  if((e.key==='Enter'||e.key===' ') && e.target.classList.contains('sez-label')) {
+    e.preventDefault(); toggleSez(e.target);
+  }
+});
+
+// ── FORM VALIDATION ─────────────────────────────────────────
+function validateA1() {
+  collectA1();
+  const missing = [];
+  if(!S.a1.vol.nome) missing.push('Nome volontario');
+  if(!S.a1.vol.cognome) missing.push('Cognome volontario');
+  if(!S.a1.ente.denominazione) missing.push('Denominazione ente');
+  if(!S.a1.ente.tutor) missing.push('Tutor / Responsabile');
+  if(!S.a1.percorso.dataInizio) missing.push('Data inizio percorso');
+  // Highlight fields
+  ['a1-vol-nome','a1-vol-cognome','a1-ente-denominazione','a1-ente-tutor','a1-percorso-dataInizio'].forEach(id => {
+    const inp = el(id);
+    if(inp) inp.classList.toggle('invalid', !inp.value.trim());
+  });
+  const banner = el('a1-val-banner');
+  if(missing.length > 0) {
+    if(banner) { banner.className='val-banner vis'; banner.innerHTML='<strong>Campi obbligatori mancanti per passare alla Fase 2:</strong> '+missing.join(', ')+'. Completa questi campi prima di continuare.'; }
+    // Scroll to first invalid field
+    const first = document.querySelector('.frow input.invalid, .frow select.invalid');
+    if(first) first.scrollIntoView({behavior:'smooth',block:'center'});
+    return false;
+  }
+  if(banner) banner.className='val-banner';
+  return true;
+}
+// Clear invalid on input
+document.addEventListener('input', function(e) {
+  if(e.target.hasAttribute('required') && e.target.value.trim()) {
+    e.target.classList.remove('invalid');
+  }
+});
+
+// ── AI CONTEXTUAL CHIPS ─────────────────────────────────────
+function openAIChip(phase, prompt) {
+  // Find the AI chat panel in the current phase and pre-fill + send
+  showScreen(phase);
+  // Scroll to AI chat section
+  const chatInp = el('chatinp-'+phase);
+  if(chatInp) {
+    chatInp.value = typeof prompt === 'function' ? prompt() : prompt;
+    chatInp.scrollIntoView({behavior:'smooth', block:'center'});
+    chatInp.focus();
+  } else {
+    // If chat panel isn't rendered, open it
+    const chatBtn = document.querySelector('#screen-'+phase+' [onclick*="renderChatPanel"]');
+    if(chatBtn) { chatBtn.click(); setTimeout(()=>openAIChip(phase, prompt), 300); }
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('#a1-pa-tbody .pa-ore').forEach(e=>e.addEventListener('input',calcOreAttivita));
 });
@@ -1297,6 +1520,17 @@ function calcPresenza() {
   setVal('a1-percorso-presenzaPerc', perc+'%');
   const p75 = perc>=75;
   const ore60 = svolte>=60;
+  // Update live progress bars
+  const wrap = el('req-progress-wrap');
+  if(wrap) {
+    wrap.style.display = svolte>0 ? '' : 'none';
+    const oreBar = el('ore-bar-fill'), presBar = el('pres-bar-fill');
+    const oreVal = el('ore-stat-val'), presVal = el('pres-stat-val');
+    if(oreBar) { const pct=Math.min(100,svolte/60*100); oreBar.style.width=pct+'%'; oreBar.className='req-bar-fill'+(ore60?' ok':svolte>40?' warn':' danger'); }
+    if(oreVal) oreVal.textContent=svolte+' / 60 h';
+    if(presBar) { const pct=Math.min(100,perc); presBar.style.width=pct+'%'; presBar.className='req-bar-fill'+(p75?' ok':perc>50?' warn':' danger'); }
+    if(presVal) presVal.textContent=perc+'%';
+  }
   // 60h check
   let reqHtml='';
   if(svolte>0) {
