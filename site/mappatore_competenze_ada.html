@@ -27,7 +27,7 @@
   .step.active .num { background: var(--blu); color: white; }
   .step.done .num { background: var(--verde); color: white; }
   .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-  .panel-left { width: 380px; flex-shrink: 0; background: white; border-right: 1px solid var(--bordo); overflow-y: auto; display: flex; flex-direction: column; }
+  .panel-left { width: 420px; flex-shrink: 0; background: white; border-right: 1px solid var(--bordo); overflow-y: auto; display: flex; flex-direction: column; }
   .panel-right { flex: 1; overflow-y: auto; padding: 18px 22px; }
   .section { border-bottom: 1px solid var(--bordo); padding: 14px 16px; }
   .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--grigio); margin-bottom: 10px; }
@@ -178,7 +178,7 @@
 
 <header>
   <div>
-    <div class="logo">HubS <span>–</span> Agente 4</div>
+    <div class="logo">HubS <span>–</span> Mappatore Normativo</div>
     <div class="subtitle">Mappatore Normativo · Competenze → ADA · Atlante del Lavoro INAPP (feb. 2026)</div>
   </div>
   <div class="badge-agente" onclick="openAgente()" title="Apri Agente AI per l'emersione competenze">🤖 Agente Emersione</div>
@@ -200,7 +200,7 @@
     <input type="date" id="perc-inizio"><input type="date" id="perc-fine">
     <input type="text" id="perc-ore"><input type="text" id="perc-settore">
   </div>
-  <div class="panel-left" style="width:420px;overflow:hidden;">
+  <div class="panel-left" style="overflow:hidden;">
     <div style="flex:1;overflow-y:auto;padding:16px 16px 12px;display:flex;flex-direction:column;min-height:0;">
       <div class="section-title">📝 Descrizione delle attività svolte</div>
       <p style="font-size:13px;color:var(--grigio);margin-bottom:12px;line-height:1.6;">Descrivi concretamente cosa ha fatto il/la volontario/a: compiti svolti, con chi interagiva, strumenti usati, se coordinava altri. Più è dettagliata, più precisa sarà la mappatura.</p>
@@ -247,7 +247,7 @@
 
 <!-- SCREEN 2 -->
 <div class="screen" id="screen-2">
-  <div class="panel-left" style="width:420px;">
+  <div class="panel-left">
     <div class="tab-group">
       <div class="tab active" onclick="switchTab('digcomp')">DigComp</div>
       <div class="tab" onclick="switchTab('lifecomp')">LifeComp</div>
@@ -295,7 +295,7 @@
 
 <!-- SCREEN 3 -->
 <div class="screen" id="screen-3">
-  <div class="panel-left" style="width:290px;">
+  <div class="panel-left">
     <div class="section">
       <div class="section-title">📊 Stato mappatura</div>
       <div id="map-stats" style="font-size:12px;color:var(--grigio);">Seleziona competenze nel Passo 2.</div>
@@ -333,7 +333,7 @@
 
 <!-- SCREEN 4 -->
 <div class="screen" id="screen-4">
-  <div class="panel-left" style="width:260px;">
+  <div class="panel-left">
     <div class="section">
       <div class="section-title">📊 Stato export</div>
       <div id="export-stats" style="font-size:12px;color:var(--grigio);">Genera la mappatura prima.</div>
@@ -988,7 +988,7 @@ function generateExport(){
     <button class="btn btn-outline" onclick="downloadDocx()">📄 .docx</button>
     <button class="btn btn-outline" onclick="downloadPdf()">🖨️ PDF</button>
   </div>
-  <div style="margin-top:10px;font-size:10px;color:var(--grigio);">HubS-TransparentIA Agente 4 — Atlante del Lavoro INAPP (feb. 2026) — ${new Date().toLocaleDateString('it-IT')} — Firma tutor obbligatoria (Art. 5 DI 31/07/2025)</div>
+  <div style="margin-top:10px;font-size:10px;color:var(--grigio);">HubS-TransparentIA Mappatore Normativo — Atlante del Lavoro INAPP (feb. 2026) — ${new Date().toLocaleDateString('it-IT')} — Firma tutor obbligatoria (Art. 5 DI 31/07/2025)</div>
   </div>`;
   c.innerHTML=html;
   document.getElementById('export-stats').innerHTML=`<div style="font-size:12px;"><div>🗺️ <strong>${allMaps.length}</strong> ADA</div><div>✅ <strong>${val}</strong> validati</div>${nval>0?`<div style="color:var(--arancio);">⚠️ ${nval} da validare</div>`:''}</div>`;
@@ -1126,7 +1126,7 @@ ${d.desc?`<p style="font-size:9pt;margin-bottom:10pt;"><strong>Descrizione attiv
   </tr>
 </table>
 <div class="footer">
-  Generato da HubS-TransparentIA — Agente 4 Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · ${d.date}<br>
+  Generato da HubS-TransparentIA — Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · ${d.date}<br>
   Conforme all'Allegato A del D.I. 5 gennaio 2021 come richiesto dall'Art. 5, c. 1, lett. d) del D.I. 31 luglio 2025 · GDPR 2016/679
 </div>
 </body></html>`;
@@ -1213,7 +1213,7 @@ function downloadPdf(){
   </tr>
 </table>
 <div class="footer">
-  HubS-TransparentIA — Agente 4 Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${d.date}<br>
+  HubS-TransparentIA — Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${d.date}<br>
   Conforme Allegato A D.I. 5 gennaio 2021 · Art. 5 c. 1 lett. d) D.I. 31 luglio 2025 · GDPR 2016/679
 </div>
 <script>window.onload=function(){window.print();}<\/script>
@@ -1984,7 +1984,7 @@ async function downloadDocumentoTrasparenza(withAI) {
 
 <h2>SEZIONE 4 — RICOGNIZIONE NORMATIVA E ANCORAGGIO AL REPERTORIO ADA</h2>
 <p style="font-size:9pt;color:#1a3a6b;font-style:italic;margin-bottom:8pt;">
-  Competenze → ADA · Atlante del Lavoro e delle Qualificazioni INAPP · Generato da HubS-TransparentIA Agente 4
+  Competenze → ADA · Atlante del Lavoro e delle Qualificazioni INAPP · Generato da HubS-TransparentIA Mappatore Normativo
 </p>
 
 <h3>4.1 — Mappatura verso l'Atlante del Lavoro e delle Qualificazioni</h3>
@@ -2110,7 +2110,7 @@ ${withAI ? '' : '<div class="warn" style="margin-top:10pt;">ℹ️ Le colonne "D
 </table>
 
 <div class="footer">
-  Documento generato da HubS-TransparentIA — Agente 4 Mappatore Normativo · ${today}<br>
+  Documento generato da HubS-TransparentIA — Mappatore Normativo · ${today}<br>
   Conforme all'Allegato A del Decreto Interministeriale 5 gennaio 2021 — Art. 5, comma 1, lett. d) del DI 31 luglio 2025<br>
   Trattamento dati: Regolamento UE 2016/679 (GDPR) · INRETE Cooperativa Sociale — INAPP Atlante del Lavoro (feb. 2026)
 </div>
@@ -2304,7 +2304,7 @@ function downloadSchedeADA() {
         </tr>
       </table>
       <p style="font-size:7pt;color:#888;border-top:0.5pt solid #ccc;padding-top:5pt;margin-top:10pt;">
-        HubS-TransparentIA — Agente 4 Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${today}<br>
+        HubS-TransparentIA — Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${today}<br>
         Conforme Allegato A DI 5 gennaio 2021 · Art. 5 c.1 lett. d) DI 31 luglio 2025 · GDPR 2016/679
       </p>
     </div>
