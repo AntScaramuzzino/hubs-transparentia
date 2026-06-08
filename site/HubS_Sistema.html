@@ -3603,7 +3603,7 @@ function initChatSystem(){
     tb.id=agentId+'-atbar';
     var ac=AGENT_COLOR[agentId];
     tb.innerHTML='<button class="atabtn atabtn-act" id="'+agentId+'-atn-m" style="--atc:'+ac+'" onclick="showAgentTab(\''+agentId+'\',\'main\')">'+AGENT_MAIN_LBL[agentId]+'</button>'
-      +'<button class="atabtn" id="'+agentId+'-atn-c" style="--atc:'+ac+'" onclick="showAgentTab(\''+agentId+'\',\'ai\')">🤖 Assistente AI</button>';
+      +'<button class="atabtn" id="'+agentId+'-atn-c" style="--atc:'+ac+'" onclick="openAISidePanel(\''+agentId+'\',null)">🤖 Assistente AI</button>';
     if(footer){
       screen.insertBefore(tb,footer);
       screen.insertBefore(mp,footer);
