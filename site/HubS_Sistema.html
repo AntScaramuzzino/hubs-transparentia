@@ -188,6 +188,40 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   .ai-panel-side{top:0;width:100%;z-index:400}
   #main.ai-side-open{padding-right:0}
 }
+
+/* ── A4 STEPPER ── */
+.a4-stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 20px}
+.a4-step{min-height:64px;border:1px solid #d8dbe6;background:#fff;color:#394150;border-radius:8px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px;font-weight:700;text-align:left;
+  cursor:pointer;font-family:inherit;font-size:.83rem;transition:all .18s;position:relative}
+.a4-step:hover:not(.locked){filter:brightness(.97);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.a4-step-num{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;
+  background:#eef0f6;color:#4b5563;flex-shrink:0;font-size:.8rem;font-weight:800;transition:all .18s}
+.a4-step-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.a4-step-txt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a4-step-sub{font-size:.68rem;font-weight:500;opacity:.75;white-space:nowrap}
+/* Active */
+.a4-step.active{background:#5b2c82;border-color:#5b2c82;color:#fff;box-shadow:0 8px 20px rgba(91,44,130,.22)}
+.a4-step.active .a4-step-num{background:#fff;color:#5b2c82}
+/* Done */
+.a4-step.done{border-color:#2e7d4f;background:#f2fbf5;color:#1f5f3b}
+.a4-step.done .a4-step-num{background:#2e7d4f;color:#fff}
+/* Warning */
+.a4-step.warning{border-color:#d98b2b;background:#fff8ee;color:#7a4714}
+.a4-step.warning .a4-step-num{background:#d98b2b;color:#fff}
+/* Locked */
+.a4-step.locked{opacity:.45;cursor:not-allowed}
+/* Connector arrow on desktop */
+.a4-step:not(:last-child)::after{content:'›';position:absolute;right:-6px;top:50%;
+  transform:translateY(-50%);font-size:1rem;color:#c0c5d0;z-index:1;pointer-events:none}
+/* Microcopy */
+.a4-stepper-hint{font-size:.78rem;color:var(--sub);margin:-10px 0 18px;padding:8px 12px;
+  background:var(--grey);border-radius:6px;border-left:3px solid var(--c-a4)}
+@media(max-width:760px){
+  .a4-stepper{display:flex;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;gap:8px}
+  .a4-step{min-width:190px;scroll-snap-align:start;flex-shrink:0}
+  .a4-step::after{display:none}
+}
 /* ── MOBILE ── */
 @media(max-width:768px){
   #menu-btn{display:inline-flex}
@@ -1054,12 +1088,25 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
   <div id="a4-alert"></div>
   <div id="a4-steps">
-    <div class="tabs">
-      <button class="tab-btn active" style="--tc:var(--c-a4)" onclick="switchA4Step(1,this)">1. Seleziona competenze</button>
-      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(2,this)">2. Riepilogo</button>
-      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(3,this)">3. Valida mappatura</button>
-      <button class="tab-btn" style="--tc:var(--c-a4)" onclick="switchA4Step(4,this)">4. Export</button>
+    <div class="a4-stepper" id="a4-stepper" role="tablist" aria-label="Fasi ricognizione ADA">
+      <button class="a4-step active" id="a4st-1" role="tab" aria-selected="true" onclick="switchA4Step(1)">
+        <span class="a4-step-num" id="a4sn-1">1</span>
+        <span class="a4-step-txt"><span>Seleziona competenze</span><span class="a4-step-sub" id="a4ss-1">Scegli dal framework</span></span>
+      </button>
+      <button class="a4-step locked" id="a4st-2" role="tab" aria-selected="false" onclick="switchA4Step(2)">
+        <span class="a4-step-num" id="a4sn-2">2</span>
+        <span class="a4-step-txt"><span>Riepilogo ADA</span><span class="a4-step-sub" id="a4ss-2">In attesa</span></span>
+      </button>
+      <button class="a4-step locked" id="a4st-3" role="tab" aria-selected="false" onclick="switchA4Step(3)">
+        <span class="a4-step-num" id="a4sn-3">3</span>
+        <span class="a4-step-txt"><span>Valida mappatura</span><span class="a4-step-sub" id="a4ss-3">In attesa</span></span>
+      </button>
+      <button class="a4-step locked" id="a4st-4" role="tab" aria-selected="false" onclick="switchA4Step(4)">
+        <span class="a4-step-num" id="a4sn-4">4</span>
+        <span class="a4-step-txt"><span>Export</span><span class="a4-step-sub" id="a4ss-4">In attesa</span></span>
+      </button>
     </div>
+    <div class="a4-stepper-hint" id="a4-stepper-hint">Step 1 di 4 · Seleziona almeno una competenza per generare il riepilogo ADA.</div>
     <div id="a4-step-1" class="tab-pane active"></div>
     <div id="a4-step-2" class="tab-pane"></div>
     <div id="a4-step-3" class="tab-pane"></div>
@@ -1487,7 +1534,7 @@ function showScreen(id) {
   if(hdr) { hdr.setAttribute('tabindex','-1'); hdr.focus({preventScroll:true}); }
   // Close sidebar on mobile
   closeSidebar();
-  if(id==='a4') renderA4Step(a4ActiveStep);
+  if(id==='a4') { renderA4Step(a4ActiveStep); updateA4Stepper(); }
   if(id==='a5') { collectA5(); renderDocPreview(); checkA5Readiness(); }
 }
 
@@ -2620,17 +2667,71 @@ function escHtml(s) {
 // ============================================================
 // AGENTE 4 — MAPPATORE NORMATIVO
 // ============================================================
-function switchA4Step(n, btn) {
-  document.querySelectorAll('#a4-steps .tab-btn').forEach(b=>b.classList.remove('active'));
+function switchA4Step(n) {
+  // Block locked steps unless forced
+  const stepEl = el('a4st-'+n);
+  if(stepEl && stepEl.classList.contains('locked')) return;
   document.querySelectorAll('#a4-steps .tab-pane').forEach(p=>p.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  else {
-    const btns=document.querySelectorAll('#a4-steps .tab-btn');
-    if(btns[n-1]) btns[n-1].classList.add('active');
-  }
   el('a4-step-'+n).classList.add('active');
   a4ActiveStep=n;
   renderA4Step(n);
+  updateA4Stepper();
+}
+
+function updateA4Stepper() {
+  const sel  = Object.keys(S.a4.selections||{}).length;
+  const val  = Object.values(S.a4.mappings||{}).filter(m=>m.validated).length;
+  const cand = Object.keys(_getA4Candidates()).length;
+  const cur  = a4ActiveStep;
+
+  const steps = [
+    { n:1, label:'Seleziona competenze',
+      cls: cur===1?'active': sel>0?'done':'active',
+      sub: sel>0 ? sel+' compet. selezionate' : 'Scegli dal framework',
+      num: sel>0 && cur!==1 ? '✓' : '1' },
+    { n:2, label:'Riepilogo ADA',
+      cls: cur===2?'active': sel===0?'locked': cand>0?'done':'warning',
+      sub: sel===0?'In attesa': cand>0?(cand+' ADA candidate'):'Nessuna ADA trovata',
+      num: cur!==2 && cand>0 ? '✓' : '2' },
+    { n:3, label:'Valida mappatura',
+      cls: cur===3?'active': sel===0?'locked': val>0?'done':cand>0?'warning':'locked',
+      sub: sel===0?'In attesa': val>0?(val+' ADA validate'):cand>0?'Da validare':'Aggiungi selezioni',
+      num: cur!==3 && val>0 ? '✓' : '3' },
+    { n:4, label:'Export',
+      cls: cur===4?'active': val===0?'locked':'done',
+      sub: val===0?'In attesa': val+' ADA pronte',
+      num: cur!==4 && val>0 ? '✓' : '4' }
+  ];
+
+  const hints = [
+    'Step 1 di 4 · Seleziona almeno una competenza per generare il riepilogo ADA.',
+    'Step 2 di 4 · Rivedi le ADA candidate prima di passare alla validazione.',
+    'Step 3 di 4 · Valida ogni ADA proposta per includerla nel documento finale.',
+    'Step 4 di 4 · Esporta la mappatura validata nel Documento di Trasparenza.'
+  ];
+
+  steps.forEach(s => {
+    const btn = el('a4st-'+s.n);
+    const num = el('a4sn-'+s.n);
+    const sub = el('a4ss-'+s.n);
+    if(!btn) return;
+    btn.className = 'a4-step ' + s.cls;
+    btn.setAttribute('aria-selected', cur===s.n ? 'true' : 'false');
+    if(num) num.textContent = s.num;
+    if(sub) sub.textContent = s.sub;
+  });
+
+  const hint = el('a4-stepper-hint');
+  if(hint) hint.textContent = hints[cur-1] || hints[0];
+}
+
+function _getA4Candidates() {
+  const adaSet = {};
+  Object.keys(S.a4.selections||{}).forEach(cid=>{
+    (COMP_TO_ADA[cid]||[]).forEach(ak=>{ adaSet[ak]=true; });
+  });
+  Object.keys(S.a4.mappings||{}).forEach(ak=>{ adaSet[ak]=true; });
+  return adaSet;
 }
 
 function renderA4Step(n) {
@@ -2730,6 +2831,7 @@ function toggleA4Sel(id,name) {
   if(S.a4.selections[id]) delete S.a4.selections[id];
   else S.a4.selections[id]={livello:1,name:name};
   updateNavStatus();
+  updateA4Stepper();
 }
 
 function updateA4Level(id,n) {
@@ -2857,6 +2959,7 @@ function validateADA(ak) {
   S.a4.mappings[ak]={validated:true,livello:lvl,attivita:att,copertura,ra:ada.ra};
   renderA4Step3();
   updateNavStatus();
+  updateA4Stepper();
 }
 
 function removeADA(ak) {
