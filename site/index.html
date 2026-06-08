@@ -12,22 +12,23 @@
   --c-a3:#a04000; --c-a3l:#e67e22; --c-a3bg:#fef5e7;
   --c-a4:#4a235a; --c-a4l:#8e44ad; --c-a4bg:#f5eef8;
   --c-a5:#7b241c; --c-a5l:#c0392b; --c-a5bg:#fdedec;
-  --grey:#f1f3f6; --border:#dde1e7; --text:#1a1a2e; --sub:#6c757d;
-  --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.06);
+  --grey:#f1f3f7; --border:#d8dde6; --text:#12172e; --sub:#5c6470;
+  --radius:12px; --shadow:0 2px 6px rgba(0,0,0,.07),0 6px 18px rgba(0,0,0,.07);
+  --card-pad:22px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;font-size:15px;color:var(--text);background:#eef0f5;min-height:100vh;display:flex;flex-direction:column}
+body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--text);background:#e8ecf2;min-height:100vh;display:flex;flex-direction:column}
 a{color:inherit;text-decoration:none}
-h2{font-size:1.18rem;font-weight:700;margin-bottom:12px}
-h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
+h2{font-size:1.28rem;font-weight:700;margin-bottom:14px}
+h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 
 /* HEADER */
-#hdr{background:#1a1a2e;color:#fff;padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.35)}
-#hdr .logo{font-size:1.15rem;font-weight:800;letter-spacing:-0.5px;white-space:nowrap;display:flex;align-items:center;gap:8px}
-#hdr .logo i{color:#27ae60;font-size:.95rem}
+#hdr{background:linear-gradient(90deg,#12172e,#1e2a4a);color:#fff;padding:0 22px;height:64px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 14px rgba(0,0,0,.38)}
+#hdr .logo{font-size:1.22rem;font-weight:800;letter-spacing:-0.4px;white-space:nowrap;display:flex;align-items:center;gap:9px}
+#hdr .logo i{color:#2ecc71;font-size:1rem}
 #hdr .logo span{color:#27ae60}
-#hdr .sess-name{flex:1;font-size:.84rem;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#hdr .hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;padding:6px 13px;border-radius:6px;cursor:pointer;font-size:.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:all .15s;font-family:inherit}
+#hdr .sess-name{flex:1;font-size:.88rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hdr .hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 15px;border-radius:7px;cursor:pointer;font-size:.84rem;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;transition:all .15s;font-family:inherit;font-weight:600}
 #hdr .hbtn:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 #hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
 #hdr .hbtn.green:hover{background:#1e8449}
@@ -36,15 +37,15 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 #app{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-#sidebar{width:240px;min-width:240px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.nav-section{padding:14px 16px 5px;font-size:.68rem;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.1em}
-.nav-item{display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+#sidebar{width:268px;min-width:268px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.nav-section{padding:16px 18px 6px;font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.12em}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
 .nav-item:hover{background:var(--grey)}
 .nav-item.active{border-left-color:var(--ac,#333);background:var(--acbg,#f0f2f5)}
-.nav-item .nav-num{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:800;color:#fff;background:var(--ac,#888);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.nav-item .nav-num{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;color:#fff;background:var(--ac,#888);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .nav-item .nav-info{flex:1;min-width:0}
-.nav-item .nav-title{font-size:.83rem;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-.nav-item .nav-sub{font-size:.72rem;color:var(--sub);display:block;margin-top:1px}
+.nav-item .nav-title{font-size:.88rem;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.nav-item .nav-sub{font-size:.75rem;color:var(--sub);display:block;margin-top:2px}
 .nav-item .nav-status{font-size:.95rem;flex-shrink:0}
 .nav-item[data-a="a1"]{--ac:var(--c-a1);--acbg:var(--c-a1bg)}
 .nav-item[data-a="a2"]{--ac:var(--c-a2);--acbg:var(--c-a2bg)}
@@ -52,28 +53,28 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .nav-item[data-a="a4"]{--ac:var(--c-a4);--acbg:var(--c-a4bg)}
 .nav-item[data-a="a5"]{--ac:var(--c-a5);--acbg:var(--c-a5bg)}
 .nav-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
-#sidebar .sess-info{padding:12px 16px;margin-top:auto;border-top:1px solid var(--border);font-size:.76rem;color:var(--sub);line-height:1.5}
+#sidebar .sess-info{padding:14px 18px;margin-top:auto;border-top:1px solid var(--border);font-size:.79rem;color:var(--sub);line-height:1.6}
 
 /* MAIN */
-#main{flex:1;overflow-y:auto;padding:22px}
+#main{flex:1;overflow-y:auto;padding:26px}
 .screen{display:none}
 .screen.active{display:block}
 
 /* AGENT HEADER */
-.agent-hdr{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:18px 22px;border-radius:var(--radius);color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.15)}
+.agent-hdr{display:flex;align-items:center;gap:18px;margin-bottom:24px;padding:22px 26px;border-radius:var(--radius);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18)}
 .agent-hdr.a1{background:linear-gradient(135deg,var(--c-a1),var(--c-a1l))}
 .agent-hdr.a2{background:linear-gradient(135deg,var(--c-a2),var(--c-a2l))}
 .agent-hdr.a3{background:linear-gradient(135deg,var(--c-a3),var(--c-a3l))}
 .agent-hdr.a4{background:linear-gradient(135deg,var(--c-a4),var(--c-a4l))}
 .agent-hdr.a5{background:linear-gradient(135deg,var(--c-a5),var(--c-a5l))}
-.agent-hdr .ahnum{font-size:2.2rem;font-weight:800;opacity:.4;line-height:1;font-variant-numeric:tabular-nums}
-.agent-hdr .ahtxt h2{margin:0;font-size:1.15rem;font-weight:800}
-.agent-hdr .ahtxt p{font-size:.83rem;opacity:.88;margin-top:3px;line-height:1.4}
-.agent-hdr .ahicon{font-size:1.6rem;opacity:.85;flex-shrink:0}
+.agent-hdr .ahnum{font-size:2.6rem;font-weight:800;opacity:.35;line-height:1;font-variant-numeric:tabular-nums}
+.agent-hdr .ahtxt h2{margin:0;font-size:1.28rem;font-weight:800}
+.agent-hdr .ahtxt p{font-size:.88rem;opacity:.9;margin-top:5px;line-height:1.5}
+.agent-hdr .ahicon{font-size:1.9rem;opacity:.85;flex-shrink:0}
 
 /* CARDS */
-.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
-.card-title{font-size:.82rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:var(--card-pad);margin-bottom:18px;box-shadow:var(--shadow)}
+.card-title{font-size:.85rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .card-title i{color:var(--sub);font-size:.8rem}
 
 /* GRID */
@@ -81,19 +82,19 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 
 /* FORMS */
-.frow{margin-bottom:12px}
-.frow label{display:block;font-size:.8rem;font-weight:700;color:var(--sub);margin-bottom:5px}
-.frow input,.frow select,.frow textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:6px;font-size:.88rem;font-family:inherit;color:var(--text);transition:border-color .15s,box-shadow .15s;background:#fff}
+.frow{margin-bottom:14px}
+.frow label{display:block;font-size:.84rem;font-weight:700;color:var(--sub);margin-bottom:6px}
+.frow input,.frow select,.frow textarea{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:8px;font-size:.93rem;font-family:inherit;color:var(--text);transition:border-color .15s,box-shadow .15s;background:#fff}
 .frow input:focus,.frow select:focus,.frow textarea:focus{outline:none;border-color:#27ae60;box-shadow:0 0 0 3px rgba(39,174,96,.12)}
-.frow textarea{resize:vertical;min-height:72px}
-.frow .hint{font-size:.74rem;color:var(--sub);margin-top:4px}
+.frow textarea{resize:vertical;min-height:80px}
+.frow .hint{font-size:.78rem;color:var(--sub);margin-top:5px;line-height:1.4}
 .frow.inline{display:flex;gap:8px;align-items:flex-end}
 .frow.inline>*{flex:1}
 .frow.inline>.narrow{flex:0 0 90px}
 .required-mark{color:#e74c3c;margin-left:2px}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:.84rem;font-weight:700;font-family:inherit;transition:all .15s}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-size:.89rem;font-weight:700;font-family:inherit;transition:all .15s}
 .btn:hover{transform:translateY(-1px)}
 .btn-primary{background:#1a1a2e;color:#fff}.btn-primary:hover{background:#2c3e50}
 .btn-success{background:#27ae60;color:#fff}.btn-success:hover{background:#1e8449}
@@ -104,17 +105,17 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .btn-a5{background:var(--c-a5);color:#fff}.btn-a5:hover{background:#5b1917}
 .btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--grey)}
 .btn-danger{background:#e74c3c;color:#fff}.btn-danger:hover{background:#c0392b}
-.btn-sm{padding:5px 11px;font-size:.79rem}
+.btn-sm{padding:6px 13px;font-size:.82rem}
 
 /* ALERTS */
-.alert{padding:11px 14px;border-radius:8px;font-size:.84rem;margin-bottom:14px;border-left:4px solid;display:flex;align-items:flex-start;gap:9px}
+.alert{padding:13px 16px;border-radius:10px;font-size:.88rem;margin-bottom:16px;border-left:4px solid;display:flex;align-items:flex-start;gap:10px}
 .alert-ok{background:#eafaf1;border-color:#27ae60;color:#1b6b3a}
 .alert-warn{background:#fef9e7;border-color:#f39c12;color:#7d6608}
 .alert-err{background:#fdedec;border-color:#e74c3c;color:#7b241c}
 .alert-info{background:#eaf2fb;border-color:#2e86c1;color:#1a5276}
 
 /* BADGE */
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:.73rem;font-weight:700}
 .badge-ok{background:#eafaf1;color:#1b6b3a}
 .badge-warn{background:#fef9e7;color:#7d6608}
 .badge-err{background:#fdedec;color:#7b241c}
@@ -125,7 +126,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .level-sel{display:flex;gap:4px;flex-wrap:wrap}
 .level-sel label{cursor:pointer}
 .level-sel input[type=radio]{display:none}
-.level-sel input[type=radio]+span{display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border:2px solid var(--border);border-radius:5px;font-weight:700;font-size:.85rem;transition:all .15s}
+.level-sel input[type=radio]+span{display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;border:2px solid var(--border);border-radius:7px;font-weight:700;font-size:.88rem;transition:all .15s}
 .level-sel input[type=radio]:checked+span{color:#fff;border-color:var(--lc,#333);background:var(--lc,#333)}
 .level-sel.lc-a1 input[type=radio]:checked+span{--lc:var(--c-a1);background:var(--c-a1);border-color:var(--c-a1)}
 .level-sel.lc-a2 input[type=radio]:checked+span{background:var(--c-a2);border-color:var(--c-a2)}
@@ -134,17 +135,17 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 
 /* TABS */
 .tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px}
-.tab-btn{padding:9px 16px;border:none;background:none;cursor:pointer;font-size:.84rem;font-weight:700;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:color .15s;display:flex;align-items:center;gap:6px}
+.tab-btn{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:.88rem;font-weight:700;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:color .15s;display:flex;align-items:center;gap:7px}
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{color:var(--tc,#333);border-bottom-color:var(--tc,#333)}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* COMPETENCY CARD */
 .comp-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
-.comp-card-hdr{padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--grey)}
+.comp-card-hdr{padding:12px 16px;display:flex;align-items:center;gap:11px;cursor:pointer;background:var(--grey)}
 .comp-card-hdr:hover{background:#e8eaed}
 .comp-card-hdr .comp-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;background:var(--sub);flex-shrink:0}
-.comp-card-hdr .comp-name{font-weight:600;font-size:.85rem;flex:1}
+.comp-card-hdr .comp-name{font-weight:600;font-size:.9rem;flex:1}
 .comp-card-hdr .comp-area{font-size:.7rem;color:var(--sub);padding:2px 7px;background:#fff;border-radius:10px;border:1px solid var(--border)}
 .comp-card-body{padding:12px 14px;background:#fff;border-top:1px solid var(--border);display:none}
 .comp-card-body.open{display:block}
@@ -178,16 +179,16 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 
 /* ADA CARDS (A4) */
 .ada-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
-.ada-card-hdr{padding:10px 14px;display:flex;align-items:center;gap:10px;background:var(--grey)}
+.ada-card-hdr{padding:12px 16px;display:flex;align-items:center;gap:11px;background:var(--grey)}
 .ada-card-code{font-family:monospace;font-size:.8rem;font-weight:700;color:var(--c-a4);background:#fff;padding:2px 8px;border-radius:4px;border:1px solid var(--c-a4bg)}
-.ada-card-desc{flex:1;font-size:.85rem;font-weight:600}
+.ada-card-desc{flex:1;font-size:.9rem;font-weight:600}
 .ada-card-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700}
 .ada-l1{background:#dfe6e9;color:#2d3436}
 .ada-l2{background:#f5eef8;color:var(--c-a4)}
 .ada-card-body{padding:12px 14px;background:#fff;border-top:1px solid var(--border)}
 
 /* PROGRESSO */
-.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+.progress-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:5px}
 .progress-fill{height:100%;border-radius:3px;transition:width .3s;background:var(--pc,#27ae60)}
 
 /* DOC PREVIEW (A5) */
@@ -204,25 +205,25 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 #patto-preview .firma-line .firma-item{flex:1;border-top:1px solid #333;padding-top:4px;font-size:.75rem;color:#555}
 
 /* WELCOME */
-#screen-welcome{max-width:720px;margin:0 auto;padding:24px 0}
+#screen-welcome{max-width:780px;margin:0 auto;padding:28px 0}
 .welcome-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
-.welcome-agent{border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;background:#fff;border-top:4px solid var(--wc,#ccc);box-shadow:var(--shadow)}
+.welcome-agent{border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;background:#fff;border-top:5px solid var(--wc,#ccc);box-shadow:var(--shadow)}
 .welcome-agent:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
 .welcome-agent[data-a="a1"]{--wc:var(--c-a1)}
 .welcome-agent[data-a="a2"]{--wc:var(--c-a2)}
 .welcome-agent[data-a="a3"]{--wc:var(--c-a3)}
 .welcome-agent[data-a="a4"]{--wc:var(--c-a4)}
 .welcome-agent[data-a="a5"]{--wc:var(--c-a5)}
-.welcome-agent .wa-icon{font-size:1.4rem;margin-bottom:8px;display:block}
-.welcome-agent .wa-num{font-size:.7rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.07em}
-.welcome-agent .wa-name{font-size:.95rem;font-weight:800;margin:3px 0 5px;color:var(--text)}
-.welcome-agent .wa-desc{font-size:.78rem;color:var(--sub);line-height:1.5}
+.welcome-agent .wa-icon{font-size:1.7rem;margin-bottom:10px;display:block}
+.welcome-agent .wa-num{font-size:.74rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+.welcome-agent .wa-name{font-size:1.04rem;font-weight:800;margin:4px 0 7px;color:var(--text)}
+.welcome-agent .wa-desc{font-size:.84rem;color:var(--sub);line-height:1.55}
 
 /* CHECKBOX TOGGLE */
-.check-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
 .check-item:last-child{border:none}
 .check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;flex-shrink:0}
-.check-item label{font-size:.82rem;cursor:pointer}
+.check-item label{font-size:.87rem;cursor:pointer}
 
 /* COMPLINK */
 .comp-link-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
@@ -244,7 +245,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .obiettivi-list .obj-item input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:.82rem;font-family:inherit}
 
 /* STICKY NAV FOOTER */
-.agent-nav-footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:2px solid var(--border)}
+.agent-nav-footer{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:18px;border-top:2px solid var(--border)}
 
 /* UTIL */
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
@@ -255,6 +256,21 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .align-center{align-items:center}
 .spacer{flex:1}
 
+
+/* ═══ SEZ LABEL + CHECK-INLINE + PATTO TABLE ═══════════════════ */
+.sez-label{font-size:.73rem;font-weight:800;color:var(--c-a1);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 9px 2px;display:flex;align-items:center;gap:8px}
+.sez-label i{font-size:.7rem}
+.check-inline{display:inline-flex;align-items:center;gap:7px;font-size:.87rem;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;transition:background .12s}
+.check-inline:hover{background:var(--grey)}
+.check-inline input[type=checkbox],.check-inline input[type=radio]{width:15px;height:15px;cursor:pointer;accent-color:var(--c-a1);flex-shrink:0}
+.check-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
+.ptbl{width:100%;border-collapse:collapse;font-size:.87rem}
+.ptbl th{padding:7px 10px;background:var(--c-a1bg);color:var(--c-a1);font-size:.79rem;font-weight:700;text-align:left;border:1px solid var(--border)}
+.ptbl td{padding:5px 7px;border:1px solid var(--border);vertical-align:middle}
+.ptbl td input,.ptbl td select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-family:inherit;color:var(--text)}
+.ptbl td input:focus,.ptbl td select:focus{outline:none;border-color:var(--c-a1l);box-shadow:0 0 0 2px rgba(46,134,193,.12)}
+.ptbl tr:nth-child(even) td{background:#fafbfc}
+
 @media print{
   #hdr,#sidebar,#app .agent-nav-footer,#app .agent-hdr .ahnum{display:none}
   #main{padding:0}
@@ -263,7 +279,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 
 /* ═══ AGENT TABS + CHAT AI ═══════════════════════════════════ */
 .agent-tab-bar{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;margin-top:4px;flex-shrink:0}
-.atabtn{padding:10px 17px;border:none;background:none;cursor:pointer;font-size:.84rem;font-weight:700;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:color .15s,border-color .15s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.atabtn{padding:11px 19px;border:none;background:none;cursor:pointer;font-size:.88rem;font-weight:700;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:color .15s,border-color .15s;white-space:nowrap;display:flex;align-items:center;gap:7px}
 .atabtn:hover{color:var(--text)}
 .atabtn.atabtn-act{color:var(--atc,var(--text));border-bottom-color:var(--atc,var(--text))}
 .chat-panel{display:flex;flex-direction:column;height:70vh;min-height:400px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
@@ -272,7 +288,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 .chat-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--grey);flex-shrink:0}
 .chat-msg{display:flex;gap:9px;align-items:flex-start}
 .chat-msg.user{flex-direction:row-reverse}
-.msg-bubble{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 13px;max-width:86%;font-size:.86rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.msg-bubble{background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 15px;max-width:86%;font-size:.9rem;line-height:1.65;white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .chat-msg.user .msg-bubble{background:#dbeafe;border-color:#93c5fd}
 .msg-avatar{font-size:1.1rem;flex-shrink:0;margin-top:2px;line-height:1}
 .chat-thinking{text-align:center;color:var(--sub);font-size:.82rem;font-style:italic;padding:10px}
@@ -287,8 +303,9 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
   <a class="hbtn" href="/guida" target="_blank" style="text-decoration:none"><i class="fa-solid fa-book-open"></i> Guida</a>
   <button class="hbtn" onclick="openNewSession()"><i class="fa-solid fa-plus"></i> Nuova</button>
   <button class="hbtn" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica</button>
-  <button class="hbtn green" onclick="saveSession()"><i class="fa-solid fa-floppy-disk"></i> Salva sessione</button>
-  <input type="file" id="load-input" accept=".json" style="display:none" onchange="loadSession(event)">
+  <button class="hbtn" onclick="saveSession()"><i class="fa-solid fa-floppy-disk"></i> Salva JSON</button>
+  <button class="hbtn green" onclick="exportSessionPdf()"><i class="fa-regular fa-file-pdf"></i> Esporta PDF</button>
+  <input type="file" id="load-input" accept=".json,.pdf" style="display:none" onchange="loadSession(event)">
 </div>
 
 <div id="app">
@@ -349,9 +366,9 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
 <!-- WELCOME -->
 <div id="screen-welcome" class="screen active">
   <div style="max-width:720px;margin:0 auto">
-    <div style="background:linear-gradient(135deg,#1a1a2e,#2c3e6e);border-radius:14px;padding:28px 32px;margin-bottom:24px;color:#fff">
-      <div style="font-size:1.6rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:10px"><i class="fa-solid fa-network-wired" style="color:#27ae60;font-size:1.3rem"></i> HubS-TransparentIA</div>
-      <p style="color:#9CA3AF;font-size:.92rem;line-height:1.6">Sistema multi-agente AI per la messa in trasparenza delle competenze dei volontari — <strong style="color:#60A5FA">DI 31 luglio 2025</strong></p>
+    <div style="background:linear-gradient(135deg,#12172e 0%,#1c2d5e 60%,#1a4a7a 100%);border-radius:16px;padding:32px 36px;margin-bottom:28px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.22)">
+      <div style="font-size:1.75rem;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:12px"><i class="fa-solid fa-network-wired" style="color:#27ae60;font-size:1.3rem"></i> HubS-TransparentIA</div>
+      <p style="color:#94a3b8;font-size:.96rem;line-height:1.65">Sistema multi-agente AI per la messa in trasparenza delle competenze dei volontari — <strong style="color:#60A5FA">DI 31 luglio 2025</strong></p>
     </div>
     <div id="welcome-alert"></div>
     <div class="welcome-grid">
@@ -386,28 +403,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
         <div class="wa-desc">Produzione del Documento di Trasparenza: portfolio, Europass o documento interno — base per eventuale certificazione formale</div>
       </div>
     </div>
-
-    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-      <a href="/analisi-progetto" style="display:flex;flex-direction:column;gap:8px;padding:15px 16px;background:#fff;border:1px solid #FED7AA;border-top:4px solid #EA580C;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);text-decoration:none;transition:all .2s;color:#111827" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(0,0,0,.07)'">
-        <span style="font-size:1.3rem"><i class="fa-solid fa-magnifying-glass-chart" style="color:#EA580C"></i></span>
-        <div style="font-size:.65rem;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.07em">Strumento AI</div>
-        <div style="font-size:.9rem;font-weight:800;margin:2px 0 4px">Analisi Voce 5.3</div>
-        <div style="font-size:.76rem;color:#6B7280;line-height:1.5">Mappa le attività del progetto sulle ADA INAPP e genera la sezione 6D</div>
-      </a>
-      <a href="/mappatore" style="display:flex;flex-direction:column;gap:8px;padding:15px 16px;background:#fff;border:1px solid #BFDBFE;border-top:4px solid #2563EB;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);text-decoration:none;transition:all .2s;color:#111827" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(0,0,0,.07)'">
-        <span style="font-size:1.3rem"><i class="fa-solid fa-map-location-dot" style="color:#2563EB"></i></span>
-        <div style="font-size:.65rem;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.07em">Database interattivo</div>
-        <div style="font-size:.9rem;font-weight:800;margin:2px 0 4px">Mappatore ADA/RA</div>
-        <div style="font-size:.76rem;color:#6B7280;line-height:1.5">Sfoglia le ADA dell'Atlante INAPP con link alle schede di caso INAPP</div>
-      </a>
-      <a href="/mappatore-competenze" style="display:flex;flex-direction:column;gap:8px;padding:15px 16px;background:#fff;border:1px solid #E9D5FF;border-top:4px solid #7C3AED;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);text-decoration:none;transition:all .2s;color:#111827" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(0,0,0,.07)'">
-        <span style="font-size:1.3rem"><i class="fa-solid fa-diagram-project" style="color:#7C3AED"></i></span>
-        <div style="font-size:.65rem;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.07em">Database interattivo</div>
-        <div style="font-size:.9rem;font-weight:800;margin:2px 0 4px">Mappatore LifeComp / EntreComp</div>
-        <div style="font-size:.76rem;color:#6B7280;line-height:1.5">Esplora le competenze trasversali e il loro ancoraggio alle ADA dell'Atlante</div>
-      </a>
-    </div>
-    <div class="card mt16" style="margin-top:16px">
+    <div class="card mt16">
       <div class="card-title"><i class="fa-solid fa-play"></i> Avvio sessione</div>
       <div class="frow">
         <label>Nome sessione</label>
@@ -427,16 +423,18 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
     <div class="ahnum">01</div>
     <i class="fa-solid fa-compass ahicon"></i>
     <div class="ahtxt">
-      <h2>Avvio e Inquadramento del Percorso</h2>
-      <p>Raccolta dati volontario · Verifica requisiti DI 31/07/2025 · Bozza Patto di Servizio</p>
+      <h2>Avvio — Progetto Personalizzato (Modulo 02)</h2>
+      <p>Raccolta dati · Piano attività · Tutoraggio · Mappatura ADA preliminare · Patto di Servizio — Rif. Art. 5 DI 31/07/2025</p>
     </div>
   </div>
   <div id="a1-alert"></div>
+
+  <!-- SEZ. A -->
+  <div class="sez-label"><i class="fa-solid fa-circle-dot"></i> Sezione A — Parti del Progetto</div>
   <div class="grid2">
-    <!-- COLONNA SINISTRA: volontario + ente -->
     <div>
       <div class="card">
-        <div class="card-title">Dati del Volontario</div>
+        <div class="card-title"><i class="fa-solid fa-user"></i> Dati del Volontario</div>
         <div class="frow inline">
           <div><label>Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome"></div>
           <div><label>Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome"></div>
@@ -474,35 +472,33 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
           </select>
         </div>
       </div>
-
+    </div>
+    <div>
       <div class="card">
-        <div class="card-title">Ente di Accoglienza</div>
+        <div class="card-title"><i class="fa-solid fa-building"></i> Ente di Accoglienza</div>
         <div class="frow"><label>Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione"></div>
         <div class="frow inline">
           <div><label>Codice Fiscale ente</label><input type="text" id="a1-ente-cfEnte"></div>
           <div><label>Tipologia</label>
             <select id="a1-ente-tipo">
               <option value="">— seleziona —</option>
-              <option>APS</option>
-              <option>ODV</option>
+              <option>APS</option><option>ODV</option>
               <option>Cooperativa sociale</option>
-              <option>ETS altro</option>
-              <option>CSV</option>
+              <option>ETS altro</option><option>CSV</option>
             </select>
           </div>
         </div>
         <div class="frow"><label>Indirizzo sede legale</label><input type="text" id="a1-ente-indirizzo"></div>
         <div class="frow"><label>Rappresentante legale</label><input type="text" id="a1-ente-repLegale"></div>
         <div class="frow"><label>Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor"></div>
-        <div class="frow"><label>Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
+        <div class="frow inline">
+          <div><label>Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
+          <div><label>Data di sottoscrizione</label><input type="date" id="a1-dataRotte"></div>
+        </div>
       </div>
-    </div>
 
-    <!-- COLONNA DESTRA: percorso + requisiti -->
-    <div>
       <div class="card">
-        <div class="card-title">Dati del Percorso</div>
-        <div class="frow"><label>Descrizione attività svolta</label><textarea id="a1-percorso-attivita" rows="2" placeholder="Descrivi brevemente le attività di volontariato svolte..."></textarea></div>
+        <div class="card-title"><i class="fa-solid fa-calendar-days"></i> Dati del Percorso</div>
         <div class="frow"><label>Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
         <div class="frow"><label>Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
         <div class="frow inline">
@@ -518,7 +514,7 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
       </div>
 
       <div class="card">
-        <div class="card-title">Verifica Requisiti Minimi — Art. 5 DI 31/07/2025</div>
+        <div class="card-title"><i class="fa-solid fa-clipboard-check"></i> Verifica Requisiti — Art. 5 DI 31/07/2025</div>
         <div id="a1-req-60h-alert"></div>
         <div class="check-item"><input type="checkbox" id="a1-req-primaInfo"><label for="a1-req-primaInfo">Prima informazione fornita e firmata</label></div>
         <div class="check-item"><input type="checkbox" id="a1-req-progetto"><label for="a1-req-progetto">Progetto personalizzato firmato da entrambe le parti</label></div>
@@ -526,36 +522,164 @@ h3{font-size:1.02rem;font-weight:600;margin-bottom:8px}
         <div class="check-item"><input type="checkbox" id="a1-req-doc"><label for="a1-req-doc">Documento di Trasparenza predisposto (questo sistema)</label></div>
         <div id="a1-req-status" class="mt8"></div>
       </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <div class="card-title">Obiettivi di apprendimento iniziali</div>
-        <div class="obiettivi-list" id="a1-obiettivi-list">
-          <div class="obj-item"><input type="text" id="a1-obj-0" placeholder="Obiettivo 1..."></div>
-          <div class="obj-item"><input type="text" id="a1-obj-1" placeholder="Obiettivo 2..."></div>
-          <div class="obj-item"><input type="text" id="a1-obj-2" placeholder="Obiettivo 3..."></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Note del tutor (fase di accoglienza)</div>
-        <div class="frow mb0"><textarea id="a1-note" rows="3" placeholder="Osservazioni iniziali, motivazioni emerse, contesto..."></textarea></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Bozza Patto di Servizio</div>
-        <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
-          <button class="btn btn-a1" onclick="renderPattoPreview()">🔄 Aggiorna anteprima</button>
-          <button class="btn btn-a1" onclick="downloadPattoDocx()">📄 Scarica DOCX (Word)</button>
-          <button class="btn btn-outline" onclick="downloadPattoPdf()">🖨 Stampa / PDF</button>
-        </div>
-        <div id="patto-preview-container"></div>
+  <!-- SEZ. B -->
+  <div class="sez-label"><i class="fa-solid fa-bullseye"></i> Sezione B — Obiettivi del Percorso</div>
+  <div class="card">
+    <div class="frow">
+      <label>Obiettivo generale del volontariato</label>
+      <textarea id="a1-obiettivoGenerale" rows="2" placeholder="Descrivi l'obiettivo generale del percorso di volontariato..."></textarea>
+    </div>
+    <div class="card-title" style="margin-top:14px">Obiettivi specifici di apprendimento</div>
+    <div class="obiettivi-list" id="a1-obiettivi-list">
+      <div class="obj-item"><input type="text" id="a1-obj-0" placeholder="Obiettivo specifico 1..."></div>
+      <div class="obj-item"><input type="text" id="a1-obj-1" placeholder="Obiettivo specifico 2..."></div>
+      <div class="obj-item"><input type="text" id="a1-obj-2" placeholder="Obiettivo specifico 3..."></div>
+    </div>
+    <div class="frow mt12">
+      <label>Competenze chiave europee target</label>
+      <div class="check-wrap">
+        <label class="check-inline"><input type="checkbox" id="a1-ct-comm"> Comunicazione</label>
+        <label class="check-inline"><input type="checkbox" id="a1-ct-dig"> Digitale (DigComp)</label>
+        <label class="check-inline"><input type="checkbox" id="a1-ct-imparare"> Imparare ad imparare (LifeComp)</label>
+        <label class="check-inline"><input type="checkbox" id="a1-ct-sociali"> Competenze sociali e civiche</label>
+        <label class="check-inline"><input type="checkbox" id="a1-ct-spirito"> Spirito di iniziativa (EntreComp)</label>
+        <label class="check-inline"><input type="checkbox" id="a1-ct-cultura"> Consapevolezza culturale</label>
       </div>
     </div>
   </div>
+
+  <!-- SEZ. C -->
+  <div class="sez-label"><i class="fa-solid fa-list-check"></i> Sezione C — Piano delle Attività</div>
+  <div class="card">
+    <p class="text-sub" style="margin-bottom:12px">Totale ore ≥ 60 in 12 mesi. Presenza minima per Documento di Trasparenza: 75% — DM 115/2024 Art. 5.</p>
+    <table class="ptbl">
+      <thead><tr><th style="width:32px">N.</th><th>Attività</th><th style="width:200px">Area di competenza</th><th style="width:90px">Ore previste</th></tr></thead>
+      <tbody>
+        <tr><td style="text-align:center;color:var(--sub);font-weight:700">1</td><td><input id="a1-pa-att-0" placeholder="Descrizione attività..."></td><td><input id="a1-pa-area-0" placeholder="Area..."></td><td><input id="a1-pa-ore-0" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="text-align:center;color:var(--sub);font-weight:700">2</td><td><input id="a1-pa-att-1" placeholder="Descrizione attività..."></td><td><input id="a1-pa-area-1" placeholder="Area..."></td><td><input id="a1-pa-ore-1" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="text-align:center;color:var(--sub);font-weight:700">3</td><td><input id="a1-pa-att-2" placeholder="Descrizione attività..."></td><td><input id="a1-pa-area-2" placeholder="Area..."></td><td><input id="a1-pa-ore-2" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="text-align:center;color:var(--sub);font-weight:700">4</td><td><input id="a1-pa-att-3" placeholder="Descrizione attività..."></td><td><input id="a1-pa-area-3" placeholder="Area..."></td><td><input id="a1-pa-ore-3" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="text-align:center;color:var(--sub);font-weight:700">5</td><td><input id="a1-pa-att-4" placeholder="Descrizione attività..."></td><td><input id="a1-pa-area-4" placeholder="Area..."></td><td><input id="a1-pa-ore-4" type="number" min="0" placeholder="0"></td></tr>
+        <tr style="background:var(--c-a1bg)"><td colspan="3" style="text-align:right;font-weight:700;color:var(--c-a1);font-size:.82rem">TOTALE ORE</td><td><input id="a1-pa-totale" readonly style="background:transparent;font-weight:700;color:var(--c-a1)"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEZ. D -->
+  <div class="sez-label"><i class="fa-solid fa-calendar-week"></i> Sezione D — Calendario Indicativo</div>
+  <div class="card">
+    <table class="ptbl">
+      <thead><tr><th style="width:110px">Mese</th><th>Attività previste</th><th style="width:90px">Ore</th></tr></thead>
+      <tbody id="a1-cal-tbody">
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 1</td><td><input id="a1-cal-att-0" placeholder="..."></td><td><input id="a1-cal-ore-0" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 2</td><td><input id="a1-cal-att-1" placeholder="..."></td><td><input id="a1-cal-ore-1" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 3</td><td><input id="a1-cal-att-2" placeholder="..."></td><td><input id="a1-cal-ore-2" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 4</td><td><input id="a1-cal-att-3" placeholder="..."></td><td><input id="a1-cal-ore-3" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 5</td><td><input id="a1-cal-att-4" placeholder="..."></td><td><input id="a1-cal-ore-4" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 6</td><td><input id="a1-cal-att-5" placeholder="..."></td><td><input id="a1-cal-ore-5" type="number" min="0" placeholder="0"></td></tr>
+        <tr><td style="font-weight:600;color:var(--sub)">Mese 7–12</td><td><input id="a1-cal-att-6" placeholder="..."></td><td><input id="a1-cal-ore-6" type="number" min="0" placeholder="0"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEZ. E + F -->
+  <div class="sez-label"><i class="fa-solid fa-handshake"></i> Sezione E — Piano di Tutoraggio &nbsp;|&nbsp; <i class="fa-solid fa-map-pin"></i> Sezione F — Mappatura ADA Preliminare</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Piano di Tutoraggio</div>
+      <div class="frow">
+        <label>Frequenza dei colloqui</label>
+        <div class="check-wrap">
+          <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-mensile" value="mensile"> Mensile</label>
+          <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-bimestrale" value="bimestrale"> Bimestrale</label>
+          <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-bisogno" value="bisogno"> Al bisogno</label>
+        </div>
+      </div>
+      <div class="frow mt8">
+        <label>Modalità</label>
+        <div class="check-wrap">
+          <label class="check-inline"><input type="checkbox" id="a1-tm-presenza"> Colloquio individuale in presenza</label>
+          <label class="check-inline"><input type="checkbox" id="a1-tm-distanza"> Colloquio a distanza (video call)</label>
+          <label class="check-inline"><input type="checkbox" id="a1-tm-campo"> Osservazione sul campo</label>
+          <label class="check-inline"><input type="checkbox" id="a1-tm-diario"> Diario di bordo con feedback scritto</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mappatura ADA Preliminare <span class="badge badge-grey" style="margin-left:6px">Orientativa — da validare in Fase 4</span></div>
+      <table class="ptbl" style="margin-bottom:12px">
+        <thead><tr><th style="width:100px">Codice ADA</th><th>Descrizione ADA</th><th style="width:110px">Pertinenza</th></tr></thead>
+        <tbody>
+          <tr><td><input id="a1-ada-cod-0" placeholder="Es. ADA.18.01"></td><td><input id="a1-ada-des-0" placeholder="Titolo ADA..."></td><td><select id="a1-ada-per-0"><option value="">—</option><option>Alta</option><option>Media</option><option>Bassa</option></select></td></tr>
+          <tr><td><input id="a1-ada-cod-1" placeholder="Es. ADA.18.01"></td><td><input id="a1-ada-des-1" placeholder="Titolo ADA..."></td><td><select id="a1-ada-per-1"><option value="">—</option><option>Alta</option><option>Media</option><option>Bassa</option></select></td></tr>
+          <tr><td><input id="a1-ada-cod-2" placeholder="Es. ADA.18.01"></td><td><input id="a1-ada-des-2" placeholder="Titolo ADA..."></td><td><select id="a1-ada-per-2"><option value="">—</option><option>Alta</option><option>Media</option><option>Bassa</option></select></td></tr>
+        </tbody>
+      </table>
+      <div class="frow mb0">
+        <label>Framework europei pertinenti</label>
+        <div class="check-wrap">
+          <label class="check-inline"><input type="checkbox" id="a1-fw-digcomp"> DigComp 2.2</label>
+          <label class="check-inline"><input type="checkbox" id="a1-fw-lifecomp"> LifeComp</label>
+          <label class="check-inline"><input type="checkbox" id="a1-fw-entrecomp"> EntreComp</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEZ. G -->
+  <div class="sez-label"><i class="fa-solid fa-star-half-stroke"></i> Sezione G — Modalità di Valutazione Finale</div>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <div class="frow">
+          <label>Metodi di valutazione previsti</label>
+          <div class="check-wrap">
+            <label class="check-inline"><input type="checkbox" id="a1-vm-colloquio"> Colloquio finale di emersione (Learning Interview)</label>
+            <label class="check-inline"><input type="checkbox" id="a1-vm-autoval"> Autovalutazione finale delle competenze</label>
+            <label class="check-inline"><input type="checkbox" id="a1-vm-dossier"> Revisione del Dossier delle Evidenze</label>
+            <label class="check-inline"><input type="checkbox" id="a1-vm-documento"> Compilazione del Documento di Trasparenza</label>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="frow">
+          <label>Data prevista di conclusione</label>
+          <input type="date" id="a1-dataConclusioneStimata">
+        </div>
+        <div class="frow">
+          <label>Descrizione attività svolta (sintesi percorso)</label>
+          <textarea id="a1-percorso-attivita" rows="3" placeholder="Descrivi brevemente le attività principali del percorso..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTE + PATTO -->
+  <div class="sez-label"><i class="fa-solid fa-file-signature"></i> Note del Tutor · Bozza Patto di Servizio</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Note del tutor (fase di accoglienza)</div>
+      <div class="frow mb0"><textarea id="a1-note" rows="4" placeholder="Osservazioni iniziali, motivazioni emerse, contesto del volontario..."></textarea></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Bozza Patto di Servizio — Modulo 02</div>
+      <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-a1" onclick="renderPattoPreview()"><i class="fa-solid fa-rotate"></i> Aggiorna anteprima</button>
+        <button class="btn btn-a1" onclick="downloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
+        <button class="btn btn-outline" onclick="downloadPattoPdf()"><i class="fa-solid fa-print"></i> Stampa / PDF</button>
+      </div>
+      <div id="patto-preview-container"></div>
+    </div>
+  </div>
+
   <div class="agent-nav-footer">
     <button class="btn btn-outline" onclick="showScreen('welcome')">← Dashboard</button>
     <div class="flex gap8">
-      <button class="btn btn-a1" onclick="collectA1();alert('Dati salvati nella sessione')">💾 Salva dati</button>
+      <button class="btn btn-a1" onclick="collectA1();showAlert('a1-alert','Dati salvati nella sessione.','ok')"><i class="fa-solid fa-floppy-disk"></i> Salva dati</button>
       <button class="btn btn-a2" onclick="collectA1();showScreen('a2')">Fase 2: Emersione →</button>
     </div>
   </div>
@@ -799,7 +923,29 @@ const DEFAULT_SESSION = {
     ente:{denominazione:'',cfEnte:'',tipo:'',indirizzo:'',repLegale:'',tutor:'',codice:''},
     percorso:{dataInizio:'',dataFine:'',orePreviste:60,oreSvolte:0,settore:'',attivita:'',luogo:''},
     req:{primaInfo:false,progetto:false,tutoraggio:false,doc:false},
+    // Sez. B
+    dataRotte:'',
+    obiettivoGenerale:'',
     obiettivi:['','',''],
+    competenzeTarget:[],          // ['comm','dig','imparare','sociali','spirito','cultura']
+    // Sez. C
+    pianoAttivita:[{attivita:'',area:'',ore:''},{attivita:'',area:'',ore:''},{attivita:'',area:'',ore:''},{attivita:'',area:'',ore:''},{attivita:'',area:'',ore:''}],
+    // Sez. D
+    calendario:[
+      {mese:'Mese 1',attivita:'',ore:''},{mese:'Mese 2',attivita:'',ore:''},
+      {mese:'Mese 3',attivita:'',ore:''},{mese:'Mese 4',attivita:'',ore:''},
+      {mese:'Mese 5',attivita:'',ore:''},{mese:'Mese 6',attivita:'',ore:''},
+      {mese:'Mese 7–12',attivita:'',ore:''}
+    ],
+    // Sez. E
+    tutoraggioFreq:'',            // mensile|bimestrale|bisogno
+    tutoraggioModalita:[],        // presenza|distanza|campo|diario
+    // Sez. F
+    adaPrelim:[{codice:'',descrizione:'',pertinenza:''},{codice:'',descrizione:'',pertinenza:''},{codice:'',descrizione:'',pertinenza:''}],
+    frameworkEuropei:[],          // digcomp|lifecomp|entrecomp
+    // Sez. G
+    valutazioneMetodi:[],         // colloquio|autoval|dossier|documento
+    dataConclusioneStimata:'',
     note:'',patto:''
   },
   a2:{
@@ -881,19 +1027,42 @@ function triggerLoad() { el('load-input').click(); }
 
 function loadSession(event) {
   const file = event.target.files[0]; if(!file) return;
+  event.target.value = '';
+  if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+    _importSessionFromPdf(file); return;
+  }
   const reader = new FileReader();
   reader.onload = e => {
     try {
       S = JSON.parse(e.target.result);
       if(!S.meta) S.meta = {};
-      populateAll();
-      updateSidebar();
-      showScreen('a1');
+      populateAll(); updateSidebar(); showScreen('a1');
       showAlert('welcome-alert','Sessione caricata: <strong>'+(S.meta.name||'senza nome')+'</strong>','ok');
     } catch(err) { alert('Errore nel caricamento del file: '+err.message); }
   };
   reader.readAsText(file);
-  event.target.value='';
+}
+
+function _importSessionFromPdf(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const bytes = new Uint8Array(e.target.result);
+      const MARKER = '%%HubS-Session-Data\n';
+      const tailStart = Math.max(0, bytes.length - 262144); // last 256KB
+      const tail = new TextDecoder('utf-8', {fatal:false}).decode(bytes.slice(tailStart));
+      const mi = tail.lastIndexOf(MARKER);
+      if (mi < 0) throw new Error('Nessun dato sessione trovato nel PDF.\nUsa un file esportato da HubS-TransparentIA.');
+      const after = tail.slice(mi + MARKER.length);
+      const ei = after.indexOf('%%HubS-Session-End');
+      const jsonStr = (ei >= 0 ? after.slice(0, ei) : after).trim();
+      S = JSON.parse(jsonStr);
+      if (!S.meta) S.meta = {};
+      populateAll(); updateSidebar(); showScreen('a1');
+      showAlert('welcome-alert','Sessione importata da PDF: <strong>'+(S.meta.name||'senza nome')+'</strong>','ok');
+    } catch(err) { alert('Errore importazione PDF:\n'+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function collectAll() {
@@ -960,7 +1129,26 @@ function collectA1() {
   r.progetto=getVal('a1-req-progetto');
   r.tutoraggio=getVal('a1-req-tutoraggio');
   r.doc=getVal('a1-req-doc');
+  // Sez. A
+  S.a1.dataRotte=getVal('a1-dataRotte');
+  // Sez. B
+  S.a1.obiettivoGenerale=getVal('a1-obiettivoGenerale');
   S.a1.obiettivi=[getVal('a1-obj-0'),getVal('a1-obj-1'),getVal('a1-obj-2')];
+  S.a1.competenzeTarget=['comm','dig','imparare','sociali','spirito','cultura'].filter(c=>getVal('a1-ct-'+c));
+  // Sez. C
+  S.a1.pianoAttivita=Array.from({length:5},(_,i)=>({attivita:getVal('a1-pa-att-'+i),area:getVal('a1-pa-area-'+i),ore:getVal('a1-pa-ore-'+i)||''}));
+  // Sez. D
+  S.a1.calendario=Array.from({length:7},(_,i)=>({mese:['Mese 1','Mese 2','Mese 3','Mese 4','Mese 5','Mese 6','Mese 7–12'][i],attivita:getVal('a1-cal-att-'+i),ore:getVal('a1-cal-ore-'+i)||''}));
+  // Sez. E
+  const fq=document.querySelector('input[name="a1-tut-freq"]:checked');
+  S.a1.tutoraggioFreq=fq?fq.value:'';
+  S.a1.tutoraggioModalita=['presenza','distanza','campo','diario'].filter(m=>getVal('a1-tm-'+m));
+  // Sez. F
+  S.a1.adaPrelim=Array.from({length:3},(_,i)=>({codice:getVal('a1-ada-cod-'+i),descrizione:getVal('a1-ada-des-'+i),pertinenza:getVal('a1-ada-per-'+i)}));
+  S.a1.frameworkEuropei=['digcomp','lifecomp','entrecomp'].filter(f=>getVal('a1-fw-'+f));
+  // Sez. G
+  S.a1.valutazioneMetodi=['colloquio','autoval','dossier','documento'].filter(m=>getVal('a1-vm-'+m));
+  S.a1.dataConclusioneStimata=getVal('a1-dataConclusioneStimata');
   S.a1.note=getVal('a1-note');
   updateNavStatus();
 }
@@ -979,10 +1167,40 @@ function populateA1() {
   setVal('a1-req-progetto',r.progetto);
   setVal('a1-req-tutoraggio',r.tutoraggio);
   setVal('a1-req-doc',r.doc);
+  // Sez. A
+  setVal('a1-dataRotte',S.a1.dataRotte||'');
+  // Sez. B
+  setVal('a1-obiettivoGenerale',S.a1.obiettivoGenerale||'');
   (S.a1.obiettivi||['','','']).forEach((v,i)=>setVal('a1-obj-'+i,v));
+  (S.a1.competenzeTarget||[]).forEach(c=>setVal('a1-ct-'+c,true));
+  // Sez. C
+  (S.a1.pianoAttivita||[]).forEach((r,i)=>{setVal('a1-pa-att-'+i,r.attivita||'');setVal('a1-pa-area-'+i,r.area||'');setVal('a1-pa-ore-'+i,r.ore||'');});
+  calcOreAttivita();
+  // Sez. D
+  (S.a1.calendario||[]).forEach((r,i)=>{setVal('a1-cal-att-'+i,r.attivita||'');setVal('a1-cal-ore-'+i,r.ore||'');});
+  // Sez. E
+  if(S.a1.tutoraggioFreq){const rb=document.querySelector('input[name="a1-tut-freq"][value="'+S.a1.tutoraggioFreq+'"]');if(rb)rb.checked=true;}
+  (S.a1.tutoraggioModalita||[]).forEach(m=>setVal('a1-tm-'+m,true));
+  // Sez. F
+  (S.a1.adaPrelim||[]).forEach((r,i)=>{setVal('a1-ada-cod-'+i,r.codice||'');setVal('a1-ada-des-'+i,r.descrizione||'');setVal('a1-ada-per-'+i,r.pertinenza||'');});
+  (S.a1.frameworkEuropei||[]).forEach(f=>setVal('a1-fw-'+f,true));
+  // Sez. G
+  (S.a1.valutazioneMetodi||[]).forEach(m=>setVal('a1-vm-'+m,true));
+  setVal('a1-dataConclusioneStimata',S.a1.dataConclusioneStimata||'');
   setVal('a1-note',S.a1.note||'');
   calcPresenza();
 }
+
+function calcOreAttivita() {
+  let tot=0;
+  for(let i=0;i<5;i++){tot+=parseFloat(document.getElementById('a1-pa-ore-'+i)?.value||0);}
+  const el=document.getElementById('a1-pa-totale');
+  if(el) el.value=tot>0?tot+'h':'';
+}
+// bind ore change
+document.addEventListener('DOMContentLoaded',()=>{
+  for(let i=0;i<5;i++){const el=document.getElementById('a1-pa-ore-'+i);if(el)el.addEventListener('input',calcOreAttivita);}
+});
 
 function calcPresenza() {
   const prev=parseFloat(getVal('a1-percorso-orePreviste'))||0;
@@ -1021,73 +1239,97 @@ function renderPattoPreview() {
   const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
   const objs = (S.a1.obiettivi||[]).filter(Boolean);
   const objRows = objs.length
-    ? objs.map((o,i)=>`<tr><td style="text-align:center;width:30px">${i+1}</td><td>${o}</td></tr>`).join('')
-    : `<tr><td style="text-align:center">1</td><td style="color:#aaa">_____________________</td></tr>
-       <tr><td style="text-align:center">2</td><td style="color:#aaa">_____________________</td></tr>
-       <tr><td style="text-align:center">3</td><td style="color:#aaa">_____________________</td></tr>`;
+    ? objs.map((o,i)=>`<tr><td style="text-align:center;width:30px;background:#f9f9f9">${i+1}</td><td>${o}</td></tr>`).join('')
+    : `<tr><td style="text-align:center;background:#f9f9f9">1</td><td style="color:#aaa">_____________________</td></tr>
+       <tr><td style="text-align:center;background:#f9f9f9">2</td><td style="color:#aaa">_____________________</td></tr>
+       <tr><td style="text-align:center;background:#f9f9f9">3</td><td style="color:#aaa">_____________________</td></tr>`;
+  const CT_LABELS={comm:'Comunicazione',dig:'Competenza digitale (DigComp)',imparare:'Imparare ad imparare (LifeComp)',sociali:'Competenze sociali e civiche',spirito:'Spirito di iniziativa (EntreComp)',cultura:'Consapevolezza culturale'};
+  const ctHtml=(S.a1.competenzeTarget||[]).map(c=>`<tr><td>☑ ${CT_LABELS[c]||c}</td></tr>`).join('')||`<tr><td style="color:#aaa">— nessuna selezionata —</td></tr>`;
+  const paHtml=(S.a1.pianoAttivita||[]).filter(r=>r.attivita).map((r,i)=>`<tr><td style="text-align:center;background:#f9f9f9">${i+1}</td><td>${r.attivita}</td><td>${r.area||'—'}</td><td style="text-align:center">${r.ore||'—'}</td></tr>`).join('')||`<tr><td colspan="4" style="color:#aaa;text-align:center">Piano attività non compilato</td></tr>`;
+  const calHtml=(S.a1.calendario||[]).map(r=>`<tr><td style="background:#f9f9f9;font-weight:600">${r.mese}</td><td>${r.attivita||'—'}</td><td style="text-align:center">${r.ore||'—'}</td></tr>`).join('');
+  const FREQ={mensile:'Mensile',bimestrale:'Bimestrale',bisogno:'Al bisogno'};
+  const MOD={presenza:'Colloquio individuale in presenza',distanza:'Colloquio individuale a distanza (video call)',campo:'Osservazione sul campo',diario:'Diario di bordo con feedback scritto'};
+  const modHtml=(S.a1.tutoraggioModalita||[]).map(m=>`<tr><td>☑ ${MOD[m]||m}</td></tr>`).join('')||`<tr><td style="color:#aaa">— non specificata —</td></tr>`;
+  const adaHtml=(S.a1.adaPrelim||[]).filter(r=>r.codice||r.descrizione).map(r=>`<tr><td style="background:#f9f9f9">${r.codice||'—'}</td><td>${r.descrizione||'—'}</td><td style="text-align:center">${r.pertinenza||'—'}</td></tr>`).join('')||`<tr><td colspan="3" style="color:#aaa;text-align:center">— da compilare —</td></tr>`;
+  const fwHtml=(S.a1.frameworkEuropei||[]).map(f=>`☑ ${f.charAt(0).toUpperCase()+f.slice(1)}`).join(' &nbsp; ')||'—';
+  const VMET={colloquio:'Colloquio finale di emersione (Learning Interview)',autoval:'Autovalutazione finale delle competenze',dossier:'Revisione del Dossier delle Evidenze',documento:'Compilazione del Documento di Trasparenza'};
+  const vmHtml=(S.a1.valutazioneMetodi||[]).map(m=>`<tr><td>☑ ${VMET[m]||m}</td></tr>`).join('')||`<tr><td style="color:#aaa">— non specificata —</td></tr>`;
 
   const html=`<div id="patto-preview">
-    <h1>PROGETTO PERSONALIZZATO / PATTO DI SERVIZIO</h1>
-    <h2>HubS – Spazi di Innovazione Sociale<br>
-    <small style="font-size:.8rem">Rif. Art. 5 comma 1 lett. b) DI 31 luglio 2025</small></h2>
+    <h1>PROGETTO PERSONALIZZATO — PATTO DI SERVIZIO</h1>
+    <h2>HubS – Spazi di Innovazione Sociale — Modulo 02<br>
+    <small style="font-size:.78rem">Rif. Art. 5, comma 1, lett. b) — D.I. 31 luglio 2025</small></h2>
 
     <div class="doc-section">
-      <h3>1 — Dati del Volontario</h3>
+      <h3>Sezione A — Parti del Progetto</h3>
       <table><tbody>
-        <tr><td style="width:40%;background:#f9f9f9"><strong>Cognome e Nome</strong></td><td>${(v.cognome||'___')+' '+(v.nome||'___')}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Codice Fiscale</strong></td><td>${v.cf||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Residenza</strong></td><td>${v.residenza||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Titolo di studio</strong></td><td>${v.titoloStudio||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Situazione occupazionale</strong></td><td>${v.occupazione||'___'}</td></tr>
-      </tbody></table>
-    </div>
-
-    <div class="doc-section">
-      <h3>2 — Ente di Accoglienza</h3>
-      <table><tbody>
-        <tr><td style="width:40%;background:#f9f9f9"><strong>Denominazione</strong></td><td>${e.denominazione||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Tipologia</strong></td><td>${e.tipo||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Indirizzo</strong></td><td>${e.indirizzo||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Rappresentante legale</strong></td><td>${e.repLegale||'___'}</td></tr>
+        <tr><td style="width:42%;background:#f9f9f9"><strong>Ente di accoglienza</strong></td><td>${e.denominazione||'___'} (${e.tipo||'___'})</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Tutor / Responsabile</strong></td><td>${e.tutor||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Volontario/a</strong></td><td>${(v.cognome||'___')+' '+(v.nome||'___')}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Codice progetto HubS</strong></td><td>${e.codice||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data di sottoscrizione</strong></td><td>${S.a1.dataRotte||'___'}</td></tr>
       </tbody></table>
     </div>
 
     <div class="doc-section">
-      <h3>3 — Percorso Previsto</h3>
+      <h3>Sezione B — Obiettivi del Percorso</h3>
+      <p style="margin-bottom:6px"><strong>Obiettivo generale:</strong> ${S.a1.obiettivoGenerale||'___'}</p>
+      <p style="margin-bottom:4px;font-size:.78rem;font-weight:700">Obiettivi specifici di apprendimento:</p>
+      <table><tbody>${objRows}</tbody></table>
+      <p style="margin-top:8px;margin-bottom:4px;font-size:.78rem;font-weight:700">Competenze chiave europee target:</p>
+      <table><tbody>${ctHtml}</tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione C — Piano delle Attività</h3>
+      <p style="font-size:.75rem;color:#666;margin-bottom:6px">Totale ore ≥ 60 in 12 mesi. Presenza minima per Documento di Trasparenza: 75%</p>
+      <table><thead><tr><th style="width:30px">#</th><th>Attività</th><th>Area di competenza</th><th style="width:60px">Ore</th></tr></thead>
+      <tbody>${paHtml}</tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione D — Calendario Indicativo</h3>
+      <table><thead><tr><th style="width:80px">Mese</th><th>Attività previste</th><th style="width:50px">Ore</th></tr></thead>
+      <tbody>${calHtml}</tbody></table>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione E — Piano di Tutoraggio</h3>
       <table><tbody>
-        <tr><td style="width:40%;background:#f9f9f9"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Attività principali</strong></td><td>${p.attivita||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Luogo di svolgimento</strong></td><td>${p.luogo||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data fine prevista</strong></td><td>${p.dataFine||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Ore previste totali</strong></td><td>${p.orePreviste||60}h <small>(soglia minima: 60h su 12 mesi — Art. 5 DI 31/07/2025)</small></td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Presenza minima richiesta</strong></td><td>75%</td></tr>
+        <tr><td style="width:40%;background:#f9f9f9"><strong>Frequenza colloqui</strong></td><td>${FREQ[S.a1.tutoraggioFreq]||'___'}</td></tr>
       </tbody></table>
+      <p style="margin:8px 0 4px;font-size:.78rem;font-weight:700">Modalità:</p>
+      <table><tbody>${modHtml}</tbody></table>
     </div>
 
     <div class="doc-section">
-      <h3>4 — Obiettivi di Apprendimento</h3>
-      <table><thead><tr><th style="width:30px">#</th><th>Obiettivo</th></tr></thead><tbody>${objRows}</tbody></table>
+      <h3>Sezione F — Mappatura Normativa Preliminare</h3>
+      <p style="font-size:.75rem;color:#666;margin-bottom:6px">Identificazione orientativa delle ADA — da validare al termine del percorso</p>
+      <table><thead><tr><th>Codice ADA</th><th>Descrizione ADA</th><th>Pertinenza</th></tr></thead>
+      <tbody>${adaHtml}</tbody></table>
+      <p style="margin-top:8px"><strong>Framework europei pertinenti:</strong> ${fwHtml}</p>
     </div>
 
     <div class="doc-section">
-      <h3>5 — Impegni del Volontario</h3>
+      <h3>Sezione G — Modalità di Valutazione Finale</h3>
+      <table><tbody>${vmHtml}</tbody></table>
+      <p style="margin-top:6px"><strong>Data prevista di conclusione:</strong> ${S.a1.dataConclusioneStimata||'___'}</p>
+    </div>
+
+    <div class="doc-section">
+      <h3>Sezione H — Impegni del Volontario</h3>
       <table><tbody>
         <tr><td>Partecipare alle attività secondo il calendario concordato con l'ente</td></tr>
-        <tr><td>Raggiungere la soglia minima di presenze (75% delle ore previste)</td></tr>
+        <tr><td>Raggiungere la soglia minima di presenze (75% delle ore previste — DM 115/2024)</td></tr>
         <tr><td>Partecipare ai colloqui di tutoraggio previsti (min. 3 nell'arco del percorso)</td></tr>
-        <tr><td>Collaborare alla costruzione del Dossier delle Evidenze (Agente 3)</td></tr>
-        <tr><td>Partecipare al processo di autovalutazione delle competenze (Agente 2)</td></tr>
+        <tr><td>Collaborare alla costruzione del Dossier delle Evidenze (Fase 3)</td></tr>
+        <tr><td>Partecipare al processo di autovalutazione delle competenze (Fase 2)</td></tr>
         <tr><td>Comunicare tempestivamente eventuali impedimenti o variazioni al tutor</td></tr>
       </tbody></table>
     </div>
 
     <div class="doc-section">
-      <h3>6 — Impegni dell'Ente di Accoglienza</h3>
+      <h3>Sezione H — Impegni dell'Ente di Accoglienza</h3>
       <table><tbody>
         <tr><td>Garantire un accompagnamento tutor qualificato per tutta la durata del percorso</td></tr>
         <tr><td>Fornire le condizioni necessarie allo sviluppo delle competenze previste</td></tr>
@@ -1098,12 +1340,13 @@ function renderPattoPreview() {
     </div>
 
     <div class="doc-section">
-      <h3>7 — Firme</h3>
-      <p style="font-size:.78rem;color:#666;margin-bottom:10px">Il presente Patto di Servizio è stato letto, compreso e sottoscritto dai soggetti indicati. Documento generato da HubS-TransparentIA — ${today()}</p>
+      <h3>Sezione H — Firme e Sottoscrizione</h3>
+      <p style="font-size:.75rem;color:#666;margin-bottom:10px">Il presente Progetto Personalizzato è stato letto, compreso e sottoscritto. Conservare in originale firmato nel fascicolo del volontario.</p>
+      <p style="font-size:.75rem;color:#666;margin-bottom:10px">Generato con HubS-TransparentIA — ${today()}</p>
       <div class="firma-line">
-        <div class="firma-item">Volontario/a: ${(v.nome||'')+' '+(v.cognome||'')}<br><br>Data: _______________</div>
-        <div class="firma-item">Tutor: ${e.tutor||'_______________'}<br><br>Data: _______________</div>
-        <div class="firma-item">Rappresentante legale: ${e.repLegale||'_______________'}<br><br>Data: _______________</div>
+        <div class="firma-item">Volontario/a<br><br><br>Data: _______________</div>
+        <div class="firma-item">Tutor: ${e.tutor||'_______________'}<br><br><br>Data: _______________</div>
+        <div class="firma-item">Rappresentante legale: ${e.repLegale||'_______________'}<br><br><br>Data: _______________</div>
       </div>
     </div>
   </div>`;
@@ -1154,7 +1397,22 @@ function downloadPattoPdf() {
       .firma-line{display:flex;gap:24pt;margin-top:20pt}
       .firma-item{flex:1;border-top:1px solid #333;padding-top:4pt;font-size:8pt;color:#333}
       @page{size:A4;margin:15mm}
-      @media print{@page{size:A4;margin:15mm}}
+      
+/* ═══ SEZ LABEL + CHECK-INLINE + PATTO TABLE ═══════════════════ */
+.sez-label{font-size:.73rem;font-weight:800;color:var(--c-a1);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 9px 2px;display:flex;align-items:center;gap:8px}
+.sez-label i{font-size:.7rem}
+.check-inline{display:inline-flex;align-items:center;gap:7px;font-size:.87rem;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;transition:background .12s}
+.check-inline:hover{background:var(--grey)}
+.check-inline input[type=checkbox],.check-inline input[type=radio]{width:15px;height:15px;cursor:pointer;accent-color:var(--c-a1);flex-shrink:0}
+.check-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
+.ptbl{width:100%;border-collapse:collapse;font-size:.87rem}
+.ptbl th{padding:7px 10px;background:var(--c-a1bg);color:var(--c-a1);font-size:.79rem;font-weight:700;text-align:left;border:1px solid var(--border)}
+.ptbl td{padding:5px 7px;border:1px solid var(--border);vertical-align:middle}
+.ptbl td input,.ptbl td select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-family:inherit;color:var(--text)}
+.ptbl td input:focus,.ptbl td select:focus{outline:none;border-color:var(--c-a1l);box-shadow:0 0 0 2px rgba(46,134,193,.12)}
+.ptbl tr:nth-child(even) td{background:#fafbfc}
+
+@media print{@page{size:A4;margin:15mm}}
     </style></head>
     <body>${preview.innerHTML}
     <script>window.onload=()=>{window.print();}<\/script>
@@ -2044,12 +2302,226 @@ function downloadPdf() {
       h2{font-size:10pt;text-align:center;color:#555;margin-bottom:12pt}
       h3{font-size:9pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin:12pt 0 6pt}
       @page{size:A4;margin:15mm}
-      @media print{@page{size:A4;margin:15mm}}
+      
+/* ═══ SEZ LABEL + CHECK-INLINE + PATTO TABLE ═══════════════════ */
+.sez-label{font-size:.73rem;font-weight:800;color:var(--c-a1);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 9px 2px;display:flex;align-items:center;gap:8px}
+.sez-label i{font-size:.7rem}
+.check-inline{display:inline-flex;align-items:center;gap:7px;font-size:.87rem;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;transition:background .12s}
+.check-inline:hover{background:var(--grey)}
+.check-inline input[type=checkbox],.check-inline input[type=radio]{width:15px;height:15px;cursor:pointer;accent-color:var(--c-a1);flex-shrink:0}
+.check-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
+.ptbl{width:100%;border-collapse:collapse;font-size:.87rem}
+.ptbl th{padding:7px 10px;background:var(--c-a1bg);color:var(--c-a1);font-size:.79rem;font-weight:700;text-align:left;border:1px solid var(--border)}
+.ptbl td{padding:5px 7px;border:1px solid var(--border);vertical-align:middle}
+.ptbl td input,.ptbl td select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-family:inherit;color:var(--text)}
+.ptbl td input:focus,.ptbl td select:focus{outline:none;border-color:var(--c-a1l);box-shadow:0 0 0 2px rgba(46,134,193,.12)}
+.ptbl tr:nth-child(even) td{background:#fafbfc}
+
+@media print{@page{size:A4;margin:15mm}}
     </style></head>
     <body>${preview.innerHTML}
     <script>window.onload=()=>{window.print();}<\/script>
     </body></html>`);
   w.document.close();
+}
+
+// ============================================================
+// PDF EXPORT — Pattern B+A (pdf-lib + JSON appended)
+// ============================================================
+let _PDFLib = null;
+async function _loadPdfLib() {
+  if (_PDFLib) return _PDFLib;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+    s.onload = () => { _PDFLib = window.PDFLib; res(_PDFLib); };
+    s.onerror = () => rej(new Error('Impossibile caricare pdf-lib. Verifica la connessione.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function exportSessionPdf() {
+  collectAll();
+  S.meta.modified = new Date().toISOString();
+  S.meta.schemaVersion = 'hubs-transparentia/1.0';
+  S.meta.elmCompatible = true;
+
+  const btnEl = document.querySelector('button[onclick="exportSessionPdf()"]');
+  if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '⏳ Generazione...'; }
+
+  try {
+    const { PDFDocument, StandardFonts, rgb } = await _loadPdfLib();
+    const doc = await PDFDocument.create();
+    doc.setTitle('Documento di Trasparenza — HubS-TransparentIA');
+    doc.setCreator('HubS-TransparentIA v2.0');
+    doc.setCreationDate(new Date());
+
+    const fR = await doc.embedFont(StandardFonts.Helvetica);
+    const fB = await doc.embedFont(StandardFonts.HelveticaBold);
+    const fI = await doc.embedFont(StandardFonts.HelveticaOblique);
+
+    const W=595, H=842, ML=45, MR=45, MT=50, MB=50, CW=505;
+    const C=(r,g,b)=>rgb(r,g,b);
+    const DARK=C(.08,.08,.12), BLUE=C(.10,.32,.46), GREEN=C(.11,.42,.23),
+          ORANGE=C(.63,.25,.00), PURPLE=C(.29,.14,.35), RED=C(.50,.10,.10),
+          SUB=C(.45,.45,.50), MID=C(.78,.78,.82), WHITE=C(1,1,1);
+
+    const pages=[];
+    const np=()=>{ const p=doc.addPage([W,H]); pages.push(p); return p; };
+
+    const wrap=(txt,font,sz,maxW)=>{
+      const words=String(txt||'').split(' '), ls=[]; let ln='';
+      for(const w of words){ const t=ln?ln+' '+w:w; if(font.widthOfTextAtSize(t,sz)>maxW&&ln){ls.push(ln);ln=w;}else ln=t; }
+      if(ln)ls.push(ln); return ls.length?ls:[''];
+    };
+    const tx=(page,text,x,y,{f=fR,sz=9,col=DARK,maxW=CW}={})=>{
+      const lh=sz*1.45;
+      for(const l of wrap(text,f,sz,maxW)){page.drawText(l,{x,y,size:sz,font:f,color:col});y-=lh;}
+      return y;
+    };
+    const sH=(page,y,title,col=BLUE)=>{
+      page.drawRectangle({x:ML,y:y-3,width:CW,height:17,color:col});
+      page.drawText(title.toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
+      return y-23;
+    };
+    const tr=(page,y,cells,{hdr=false,alt=false,rH=16}={})=>{
+      let x=ML;
+      const bg=hdr?C(.88,.91,.95):alt?C(.965,.965,.97):WHITE;
+      for(const {t='',w} of cells){
+        page.drawRectangle({x,y:y-rH,width:w,height:rH,color:bg,borderColor:MID,borderWidth:.4});
+        let txt=String(t||'—'), f2=hdr?fB:fR, sz=7.5;
+        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'…';
+        page.drawText(txt,{x:x+3,y:y-rH+5,size:sz,font:f2,color:hdr?BLUE:DARK});
+        x+=w;
+      }
+      return y-rH;
+    };
+    const cur={page:null,y:0};
+    const nsp=(needed=50)=>{ if(cur.y<MB+needed){cur.page=np();cur.y=H-MT;} };
+
+    const EUL={eu1:'Comunicazione in lingua madre',eu2:'Comunicazione in lingue straniere',
+      eu3:'Competenza matematica/scientifica',eu4:'Competenza digitale (DigComp)',
+      eu5:'Imparare a imparare',eu6:'Competenze sociali e civiche',
+      eu7:'Spirito di iniziativa (EntreComp)',eu8:'Consapevolezza culturale (LifeComp)'};
+    const LVL=['—','Base (1)','Intermedio (2)','Avanzato (3)','Esperto (4)'];
+
+    // ── COVER ──────────────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.page.drawRectangle({x:0,y:H-90,width:W,height:90,color:BLUE});
+    cur.page.drawText('HubS-TransparentIA',{x:ML,y:H-42,size:22,font:fB,color:WHITE});
+    cur.page.drawText('Documento di Trasparenza delle Competenze — SCU',{x:ML,y:H-64,size:10,font:fR,color:C(.78,.90,1)});
+    cur.page.drawText('Conforme Allegato A — D.I. 5 gennaio 2021 | ELM-compatibile',{x:ML,y:H-78,size:8,font:fI,color:C(.65,.80,.95)});
+    cur.y=H-110;
+    const vn=[S.a1?.vol?.nome,S.a1?.vol?.cognome].filter(Boolean).join(' ')||'Volontario';
+    cur.y=tx(cur.page,vn,ML,cur.y,{f:fB,sz:18,col:DARK}); cur.y-=8;
+    for(const [k,v] of [
+      ['Ente',S.a1?.ente?.denominazione],['Progetto',S.meta?.name],
+      ['Settore',S.a1?.percorso?.settore],
+      ['Periodo',[S.a1?.percorso?.dataInizio,S.a1?.percorso?.dataFine].filter(Boolean).join(' – ')],
+      ['Tutor',S.a1?.ente?.tutor],
+    ]){
+      cur.page.drawText(k+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
+      cur.y=tx(cur.page,v||'—',ML+58,cur.y,{sz:8,maxW:CW-58}); cur.y-=2;
+    }
+    cur.y-=12;
+    cur.page.drawLine({start:{x:ML,y:cur.y},end:{x:W-MR,y:cur.y},thickness:.5,color:MID});
+    cur.y-=16;
+    cur.y=tx(cur.page,'Questo PDF contiene i dati strutturati della sessione (JSON ELM-compatibile). Per importare: trascina in HubS-TransparentIA → Carica.',ML,cur.y,{sz:8,font:fI,col:SUB,maxW:CW});
+    cur.y-=10;
+    cur.y=tx(cur.page,'Generato il '+new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})+' con HubS-TransparentIA',ML,cur.y,{sz:8,font:fI,col:SUB});
+
+    // ── ENTE + VOLONTARIO + PERCORSO ──────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'1 · Ente di accoglienza'); cur.y-=3;
+    const eR=[['Denominazione',S.a1?.ente?.denominazione],['Tipo',S.a1?.ente?.tipo],['Codice fiscale',S.a1?.ente?.cfEnte],['Indirizzo',S.a1?.ente?.indirizzo],['Rappresentante legale',S.a1?.ente?.repLegale],['Tutor referente',S.a1?.ente?.tutor],['Codice Helios',S.a1?.ente?.codice]];
+    for(let i=0;i<eR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:eR[i][0],w:160},{t:eR[i][1],w:CW-160}],{alt:i%2===1});}
+    cur.y-=14;
+    cur.y=sH(cur.page,cur.y,'2 · Dati del volontario'); cur.y-=3;
+    const vol=S.a1?.vol||{};
+    const vR=[['Nome e cognome',[vol.nome,vol.cognome].filter(Boolean).join(' ')],['CF',vol.cf],['Nato il',vol.dob],['Luogo nascita',vol.luogoNascita],['Residenza',vol.residenza],['Titolo di studio',vol.titoloStudio]];
+    for(let i=0;i<vR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:vR[i][0],w:160},{t:vR[i][1],w:CW-160}],{alt:i%2===1});}
+    cur.y-=14;
+    cur.y=sH(cur.page,cur.y,'3 · Percorso di servizio civile',GREEN); cur.y-=3;
+    const per=S.a1?.percorso||{};
+    const pR=[['Settore',per.settore],['Data inizio',per.dataInizio],['Data fine',per.dataFine],['Ore previste',String(per.orePreviste||'—')],['Ore svolte',String(per.oreSvolte||'—')],['Sede',per.luogo]];
+    for(let i=0;i<pR.length;i++){nsp(18);cur.y=tr(cur.page,cur.y,[{t:pR[i][0],w:160},{t:pR[i][1],w:CW-160}],{alt:i%2===1});}
+    if(per.attivita){cur.y-=8;cur.page.drawText('Descrizione attività:',{x:ML,y:cur.y,size:8,font:fB,color:BLUE});cur.y-=13;cur.y=tx(cur.page,per.attivita,ML+4,cur.y,{sz:8.5,maxW:CW-8});}
+
+    // ── COMPETENZE ────────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'4 · Competenze chiave EU8',GREEN); cur.y-=3;
+    cur.y=tr(cur.page,cur.y,[{t:'Competenza',w:220},{t:'Livello',w:80},{t:'Note',w:CW-300}],{hdr:true});
+    let ri=0;
+    for(const [code,lbl] of Object.entries(EUL)){const v=S.a2?.eu?.[code]||{};if(!v.livello)continue;nsp(18);cur.y=tr(cur.page,cur.y,[{t:lbl,w:220},{t:LVL[v.livello]||'',w:80},{t:v.note||'',w:CW-300}],{alt:ri%2===1});ri++;}
+    cur.y-=14;
+    nsp(50); cur.y=sH(cur.page,cur.y,'4b · Competenze digitali DigComp 2.2',GREEN); cur.y-=3;
+    cur.y=tr(cur.page,cur.y,[{t:'Codice',w:60},{t:'Competenza',w:220},{t:'Livello',w:70},{t:'Note',w:CW-350}],{hdr:true});
+    ri=0;
+    for(const [code,v] of Object.entries(S.a2?.dc||{})){if(!v.livello)continue;nsp(18);cur.y=tr(cur.page,cur.y,[{t:code,w:60},{t:code,w:220},{t:LVL[v.livello]||'',w:70},{t:v.note||'',w:CW-350}],{alt:ri%2===1});ri++;}
+
+    // ── EVIDENZE + ADA ────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'5 · Evidenze e dossier',ORANGE); cur.y-=3;
+    const evs=S.a3?.evidenze||[];
+    if(!evs.length){cur.y=tx(cur.page,'Nessuna evidenza registrata.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{
+      cur.y=tr(cur.page,cur.y,[{t:'#',w:22},{t:'Tipo',w:85},{t:'Descrizione',w:190},{t:'Competenza',w:120},{t:'Data',w:CW-417}],{hdr:true});
+      for(let i=0;i<evs.length;i++){const ev=evs[i];nsp(18);cur.y=tr(cur.page,cur.y,[{t:String(i+1),w:22},{t:ev.tipo,w:85},{t:ev.descrizione,w:190},{t:ev.competenza,w:120},{t:ev.data,w:CW-417}],{alt:i%2===1});}
+    }
+    cur.y-=14;
+    nsp(60); cur.y=sH(cur.page,cur.y,'6 · Mappatura ADA — Atlante del Lavoro INAPP',PURPLE); cur.y-=3;
+    const sels=Object.keys(S.a4?.selections||{}).filter(k=>S.a4.selections[k]);
+    if(!sels.length){cur.y=tx(cur.page,'Nessuna ADA mappata.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{
+      cur.y=tr(cur.page,cur.y,[{t:'Codice ADA',w:130},{t:'Titolo / Descrizione',w:CW-130}],{hdr:true});
+      for(let i=0;i<sels.length;i++){nsp(18);const m=S.a4?.mappings?.[sels[i]]||{};cur.y=tr(cur.page,cur.y,[{t:sels[i],w:130},{t:m.titolo||sels[i],w:CW-130}],{alt:i%2===1});}
+    }
+    cur.y-=14;
+    nsp(60); cur.y=sH(cur.page,cur.y,'7 · Obiettivi di apprendimento',RED); cur.y-=3;
+    const obs=(S.a1?.obiettivi||[]).filter(Boolean);
+    if(!obs.length){cur.y=tx(cur.page,'Nessun obiettivo registrato.',ML+4,cur.y,{sz:8.5,col:SUB});}
+    else{for(let i=0;i<obs.length;i++){nsp(18);cur.page.drawText(String(i+1)+'.',{x:ML+4,y:cur.y,size:8.5,font:fB,color:DARK});cur.y=tx(cur.page,obs[i],ML+18,cur.y+1,{sz:8.5,maxW:CW-20});cur.y-=3;}}
+
+    // ── NOTE + FIRME ──────────────────────────────────────────
+    cur.page=np(); cur.y=H-MT;
+    cur.y=sH(cur.page,cur.y,'8 · Note conclusive del tutor',RED); cur.y-=8;
+    cur.y=tx(cur.page,S.a5?.notetutor||'Nessuna nota inserita.',ML+4,cur.y,{sz:9,maxW:CW-8,col:S.a5?.notetutor?DARK:SUB});
+    cur.y-=30;
+    cur.y=sH(cur.page,cur.y,'9 · Firme e dichiarazioni',BLUE); cur.y-=28;
+    for(const fl of ['Il Volontario','Il Tutor','Il Responsabile dell\'Ente']){
+      cur.page.drawText(fl,{x:ML+10,y:cur.y,size:9,font:fB,color:DARK}); cur.y-=22;
+      cur.page.drawLine({start:{x:ML+10,y:cur.y},end:{x:ML+150,y:cur.y},thickness:.5,color:MID});
+      cur.page.drawText('firma e data',{x:ML+10,y:cur.y-10,size:7,font:fI,color:SUB}); cur.y-=40;
+    }
+    cur.y-=10;
+    cur.page.drawText('Documento generato con HubS-TransparentIA — Conforme D.I. 5 gennaio 2021 Allegato A',{x:ML,y:cur.y,size:7.5,font:fI,color:SUB});
+
+    // ── FOOTERS ──────────────────────────────────────────────
+    pages.forEach((pg,i)=>{
+      pg.drawLine({start:{x:ML,y:MB-5},end:{x:W-MR,y:MB-5},thickness:.5,color:MID});
+      pg.drawText('HubS-TransparentIA — Messa in trasparenza competenze SCU',{x:ML,y:MB-16,size:7,font:fI,color:SUB});
+      pg.drawText((i+1)+' / '+pages.length,{x:W-MR-22,y:MB-16,size:7,font:fR,color:SUB});
+    });
+
+    // ── COMBINA PDF + JSON ────────────────────────────────────
+    const pdfBytes = await doc.save();
+    const jsonPayload = '\n%%HubS-Session-Data\n' + JSON.stringify(S) + '\n%%HubS-Session-End\n';
+    const jBytes = new TextEncoder().encode(jsonPayload);
+    const combined = new Uint8Array(pdfBytes.length + jBytes.length);
+    combined.set(pdfBytes); combined.set(jBytes, pdfBytes.length);
+
+    const tag=([S.a1?.vol?.cognome,S.a1?.vol?.nome].filter(Boolean).join('_')||S.meta?.name||'sessione').replace(/[^a-zA-Z0-9_]/g,'').slice(0,30);
+    const blob=new Blob([combined],{type:'application/pdf'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`HubS_${tag}.pdf`; a.click();
+    URL.revokeObjectURL(a.href);
+    updateSidebar();
+
+  } catch(err) {
+    alert('Errore generazione PDF:\n'+err.message);
+  } finally {
+    if(btnEl){btnEl.disabled=false;btnEl.innerHTML='<i class="fa-regular fa-file-pdf"></i> Esporta PDF';}
+  }
 }
 
 // ============================================================
