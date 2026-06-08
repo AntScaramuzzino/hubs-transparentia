@@ -3624,6 +3624,22 @@ function mdToHtml(text){
   // bold / italic
   text=text.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
   text=text.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  // tables (must run before paragraph conversion)
+  text=text.replace(/((?:^\|.+\|\n?)+)/gm,function(_,block){
+    var rows=block.trim().split('\n').filter(function(r){return r.trim();});
+    var out='<div style="overflow-x:auto;margin:8px 0"><table style="border-collapse:collapse;width:100%;font-size:.8rem">';
+    var isHead=true;
+    rows.forEach(function(row){
+      if(/^\|[-:\s|]+$/.test(row)){isHead=false;return;} // separator row
+      var cells=row.replace(/^\|/,'').replace(/\|$/,'').split('|').map(function(c){return c.trim();});
+      if(isHead){
+        out+='<tr>'+cells.map(function(c){return '<th style="border:1px solid #d1d5db;padding:5px 10px;background:#f3f4f6;font-weight:700;text-align:left">'+c+'</th>';}).join('')+'</tr>';
+      } else {
+        out+='<tr>'+cells.map(function(c){return '<td style="border:1px solid #d1d5db;padding:5px 10px">'+c+'</td>';}).join('')+'</tr>';
+      }
+    });
+    return out+'</table></div>';
+  });
   // bullet lists
   text=text.replace(/((?:^[\-*] .+\n?)+)/gm,function(_,block){
     var items=block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^[\-*] /,'')+'</li>';});
