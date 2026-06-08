@@ -1730,7 +1730,7 @@ async function downloadDocumentoTrasparenza(withAI) {
     }
     const sel = isSelected(row.id);
     const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || '<em style="color:#888;">(come si è manifestata nell'esperienza)</em>') : '<span style="color:#aaa;">—</span>';
+    const nota = sel ? (descCell(row.id) || `<em style="color:#888;">(come si è manifestata nell'esperienza)</em>`) : `<span style="color:#aaa;">—</span>`;
     lcRows += `<tr style="${bg}">
       <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
       <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
@@ -1747,7 +1747,7 @@ async function downloadDocumentoTrasparenza(withAI) {
     }
     const sel = isSelected(row.id);
     const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || '<em style="color:#888;">(come si è manifestata nell'esperienza)</em>') : '<span style="color:#aaa;">—</span>';
+    const nota = sel ? (descCell(row.id) || `<em style="color:#888;">(come si è manifestata nell'esperienza)</em>`) : `<span style="color:#aaa;">—</span>`;
     ecRows += `<tr style="${bg}">
       <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
       <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
