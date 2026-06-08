@@ -414,6 +414,27 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <button class="btn btn-outline" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica sessione (.json)</button>
       </div>
     </div>
+
+    <div class="card mt16">
+      <div class="card-title"><i class="fa-solid fa-toolbox"></i> Strumenti collegati</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:10px">
+        <a href="/mappatore_competenze_ada.html" target="_blank" style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;background:#f8faff;border-top:4px solid #2563eb;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow='none'">
+          <span style="font-size:1.4rem">🗺️</span>
+          <strong style="font-size:.93rem;color:#1e3a6e">Mappatore ADA</strong>
+          <span style="font-size:.8rem;color:#64748b">Competenze → ADA INAPP · Agente 4 esteso · Atlante del Lavoro</span>
+        </a>
+        <a href="/mappatore_lifecomp_entrecomp.html" target="_blank" style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;background:#f8fff8;border-top:4px solid #16a34a;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow='none'">
+          <span style="font-size:1.4rem">🌱</span>
+          <strong style="font-size:.93rem;color:#14532d">Mappatore LifeComp / EntreComp</strong>
+          <span style="font-size:.8rem;color:#64748b">Framework europei · Competenze trasversali EU8</span>
+        </a>
+        <a href="/analisi_progetto.html" target="_blank" style="display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;background:#fffaf8;border-top:4px solid #ea580c;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow='none'">
+          <span style="font-size:1.4rem">📊</span>
+          <strong style="font-size:.93rem;color:#7c2d12">Analisi Progetto</strong>
+          <span style="font-size:.8rem;color:#64748b">Mappatura 5.3 → ADA · Analisi attività di progetto</span>
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1329,7 +1350,7 @@ function renderPattoPreview() {
     </div>
 
     <div class="doc-section">
-      <h3>Sezione H — Impegni dell'Ente di Accoglienza</h3>
+      <h3>Sezione I — Impegni dell'Ente di Accoglienza</h3>
       <table><tbody>
         <tr><td>Garantire un accompagnamento tutor qualificato per tutta la durata del percorso</td></tr>
         <tr><td>Fornire le condizioni necessarie allo sviluppo delle competenze previste</td></tr>
@@ -2369,8 +2390,15 @@ async function exportSessionPdf() {
     const pages=[];
     const np=()=>{ const p=doc.addPage([W,H]); pages.push(p); return p; };
 
+    // Normalizza caratteri fuori WinAnsiEncoding (pdf-lib usa font standard con encoding Latin-1)
+    const safe=(s)=>String(s||'')
+      .replace(/→/g,'->').replace(/←/g,'<-').replace(/↑/g,'^').replace(/↓/g,'v')
+      .replace(/–/g,'-').replace(/—/g,'--').replace(/…/g,'...').replace(/•/g,'*')
+      .replace(/[""]/g,'"').replace(/['']/g,"'")
+      .replace(/[^\x00-\xFF]/g,'?');  // fallback: rimpiazza ogni altro char non-Latin1
+
     const wrap=(txt,font,sz,maxW)=>{
-      const words=String(txt||'').split(' '), ls=[]; let ln='';
+      const words=safe(txt).split(' '), ls=[]; let ln='';
       for(const w of words){ const t=ln?ln+' '+w:w; if(font.widthOfTextAtSize(t,sz)>maxW&&ln){ls.push(ln);ln=w;}else ln=t; }
       if(ln)ls.push(ln); return ls.length?ls:[''];
     };
@@ -2381,7 +2409,7 @@ async function exportSessionPdf() {
     };
     const sH=(page,y,title,col=BLUE)=>{
       page.drawRectangle({x:ML,y:y-3,width:CW,height:17,color:col});
-      page.drawText(title.toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
+      page.drawText(safe(title).toUpperCase(),{x:ML+6,y:y+1,size:7.5,font:fB,color:WHITE});
       return y-23;
     };
     const tr=(page,y,cells,{hdr=false,alt=false,rH=16}={})=>{
@@ -2389,8 +2417,8 @@ async function exportSessionPdf() {
       const bg=hdr?C(.88,.91,.95):alt?C(.965,.965,.97):WHITE;
       for(const {t='',w} of cells){
         page.drawRectangle({x,y:y-rH,width:w,height:rH,color:bg,borderColor:MID,borderWidth:.4});
-        let txt=String(t||'—'), f2=hdr?fB:fR, sz=7.5;
-        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'…';
+        let txt=safe(t||'—'), f2=hdr?fB:fR, sz=7.5;
+        while(f2.widthOfTextAtSize(txt,sz)>w-7&&txt.length>3)txt=txt.slice(0,-4)+'...';
         page.drawText(txt,{x:x+3,y:y-rH+5,size:sz,font:f2,color:hdr?BLUE:DARK});
         x+=w;
       }
@@ -2420,7 +2448,7 @@ async function exportSessionPdf() {
       ['Periodo',[S.a1?.percorso?.dataInizio,S.a1?.percorso?.dataFine].filter(Boolean).join(' – ')],
       ['Tutor',S.a1?.ente?.tutor],
     ]){
-      cur.page.drawText(k+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
+      cur.page.drawText(safe(k)+':',{x:ML,y:cur.y,size:8,font:fB,color:SUB});
       cur.y=tx(cur.page,v||'—',ML+58,cur.y,{sz:8,maxW:CW-58}); cur.y-=2;
     }
     cur.y-=12;
