@@ -162,6 +162,32 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .a4-step-guide .a4sg-stats{display:flex;gap:16px;flex-wrap:wrap}
 .a4sg-stat{font-size:.78rem;font-weight:700;color:var(--text)}
 .a4sg-stat span{color:var(--c-a4)}
+
+/* ── AI INLINE SPLIT PANEL ── */
+.ai-panel-side{
+  position:fixed;right:0;top:88px;bottom:0;width:360px;z-index:250;
+  background:#fff;border-left:2px solid var(--border);
+  box-shadow:-6px 0 24px rgba(0,0,0,.13);
+  transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow:hidden
+}
+.ai-panel-side.open{transform:translateX(0)}
+.ai-panel-hdr{
+  padding:11px 14px;background:var(--c-a2);color:#fff;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-shrink:0;font-weight:700;font-size:.88rem
+}
+.ai-panel-hdr button{background:rgba(255,255,255,.2);border:none;color:#fff;
+  border-radius:5px;padding:4px 10px;cursor:pointer;font-weight:700;font-family:inherit;font-size:.8rem}
+.ai-panel-hdr button:hover{background:rgba(255,255,255,.35)}
+.ai-panel-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.ai-panel-body .chat-panel{height:100%;border:none;border-radius:0;box-shadow:none}
+/* Nudge main content when panel is open */
+#main.ai-side-open{padding-right:376px}
+@media(max-width:768px){
+  .ai-panel-side{top:0;width:100%;z-index:400}
+  #main.ai-side-open{padding-right:0}
+}
 /* ── MOBILE ── */
 @media(max-width:768px){
   #menu-btn{display:inline-flex}
@@ -480,6 +506,14 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 </div>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<!-- AI SIDE PANEL -->
+<div class="ai-panel-side" id="ai-panel-side">
+  <div class="ai-panel-hdr">
+    <span>🤖 Assistente AI</span>
+    <button onclick="closeAISidePanel()">✕ Chiudi</button>
+  </div>
+  <div class="ai-panel-body" id="ai-panel-body"></div>
+</div>
 <div id="app">
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -626,10 +660,10 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
   </div>
   <div class="ai-chips" style="margin-bottom:16px">
-    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci 3 obiettivi specifici di apprendimento per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci obiettivi"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggerisci obiettivi</button>
-    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Genera una bozza di piano di tutoraggio mensile per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: bozza tutoraggio"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Bozza tutoraggio</button>
-    <button class="ai-chip" onclick="openAIChip('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci le ADA più pertinenti (con codice e titolo) per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci ADA"><i class="fa-solid fa-map" aria-hidden="true"></i> Suggerisci ADA</button>
-    <button class="ai-chip" onclick="openAIChip('a1', function(){ var nome=el('a1-vol-nome'),cog=el('a1-vol-cognome'),ente=el('a1-ente-denominazione'),tutor=el('a1-ente-tutor'),data=el('a1-percorso-dataInizio'); var miss=[]; if(!nome||!nome.value)miss.push('Nome volontario'); if(!cog||!cog.value)miss.push('Cognome volontario'); if(!ente||!ente.value)miss.push('Denominazione ente'); if(!tutor||!tutor.value)miss.push('Tutor'); if(!data||!data.value)miss.push('Data inizio'); return miss.length?'Nella Fase 1 mancano questi campi: '+miss.join(', ')+'. Spiega brevemente perché sono importanti e cosa inserire in ciascuno.':'La Fase 1 sembra completa. Suggerisci 3 elementi aggiuntivi che migliorerebbero la qualità del documento di trasparenza.'; })" title="AI: verifica completezza"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verifica completezza</button>
+    <button class="ai-chip" onclick="openAISidePanel('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci 3 obiettivi specifici di apprendimento per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci obiettivi"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggerisci obiettivi</button>
+    <button class="ai-chip" onclick="openAISidePanel('a1', function(){ var s=el('a1-percorso-settore'); return 'Genera una bozza di piano di tutoraggio mensile per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: bozza tutoraggio"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Bozza tutoraggio</button>
+    <button class="ai-chip" onclick="openAISidePanel('a1', function(){ var s=el('a1-percorso-settore'); return 'Suggerisci le ADA più pertinenti (con codice e titolo) per un volontario nel settore: '+(s&&s.value||'(settore non specificato)'); })" title="AI: suggerisci ADA"><i class="fa-solid fa-map" aria-hidden="true"></i> Suggerisci ADA</button>
+    <button class="ai-chip" onclick="openAISidePanel('a1', function(){ var nome=el('a1-vol-nome'),cog=el('a1-vol-cognome'),ente=el('a1-ente-denominazione'),tutor=el('a1-ente-tutor'),data=el('a1-percorso-dataInizio'); var miss=[]; if(!nome||!nome.value)miss.push('Nome volontario'); if(!cog||!cog.value)miss.push('Cognome volontario'); if(!ente||!ente.value)miss.push('Denominazione ente'); if(!tutor||!tutor.value)miss.push('Tutor'); if(!data||!data.value)miss.push('Data inizio'); return miss.length?'Nella Fase 1 mancano questi campi: '+miss.join(', ')+'. Spiega brevemente perché sono importanti e cosa inserire in ciascuno.':'La Fase 1 sembra completa. Suggerisci 3 elementi aggiuntivi che migliorerebbero la qualità del documento di trasparenza.'; })" title="AI: verifica completezza"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Verifica completezza</button>
   </div>
   <div id="a1-alert"></div>
 
@@ -742,7 +776,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
     <div class="card-title" style="margin-top:14px">Obiettivi specifici di apprendimento</div>
     <div id="a1-obiettivi-list"></div>
-    <button class="btn btn-outline" style="margin-top:8px;font-size:.8rem;padding:5px 14px" onclick="addObiettivo()"><i class="fa-solid fa-plus"></i> Aggiungi obiettivo</button>
+    <p id="a1-obj-note" style="font-size:.74rem;color:var(--c-a1);margin:6px 0 4px;font-weight:600">* I primi 3 obiettivi sono obbligatori</p>
+    <button class="btn btn-outline" style="margin-top:4px;font-size:.8rem;padding:5px 14px" onclick="addObiettivo()"><i class="fa-solid fa-plus"></i> Aggiungi obiettivo</button>
     <div class="frow mt12">
       <label>Competenze chiave europee target</label>
       <div class="check-wrap">
@@ -1541,16 +1576,22 @@ function renderObiettiviList(vals) {
   const list = document.getElementById('a1-obiettivi-list');
   if(!list) return;
   list.innerHTML = '';
-  const arr = (vals&&vals.length) ? vals : [''];
+  // Always at least 3 slots
+  let arr = (vals&&vals.length) ? vals.slice() : [];
+  while(arr.length < 3) arr.push('');
   arr.forEach((v,i) => {
+    const required = i < 3;
     const div = document.createElement('div');
     div.className = 'obj-item';
     div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px';
-    div.innerHTML = `<span style="min-width:18px;text-align:right;font-size:.78rem;color:var(--sub);font-weight:700">${i+1}.</span>
-      <input class="obj-input" type="text" style="flex:1" placeholder="Obiettivo specifico ${i+1}..." value="${v.replace(/"/g,'&quot;')}">
-      <button type="button" onclick="removeObiettivo(this)" style="border:none;background:none;color:var(--sub);cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;line-height:1" title="Rimuovi"><i class="fa-solid fa-xmark"></i></button>`;
+    div.innerHTML = `<span style="min-width:18px;text-align:right;font-size:.78rem;color:${required?'var(--c-a1)':'var(--sub)'};font-weight:700">${i+1}${required?'*':''}.</span>
+      <input class="obj-input" type="text" style="flex:1" placeholder="Obiettivo specifico ${i+1}${required?' (obbligatorio)':''}..." value="${v.replace(/"/g,'&quot;')}" ${required?'required aria-required="true"':''} oninput="if(this.value.trim())this.classList.remove('invalid');">
+      <button type="button" onclick="removeObiettivo(this)" style="border:none;background:none;color:var(--sub);cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;line-height:1" title="${required?'I primi 3 obiettivi sono obbligatori — cancella il testo per lasciare vuoto':'Rimuovi'}"><i class="fa-solid fa-xmark"></i></button>`;
     list.appendChild(div);
   });
+  // Show required note
+  const note = document.getElementById('a1-obj-note');
+  if(note) note.style.display = '';
 }
 function addObiettivo() {
   const list = document.getElementById('a1-obiettivi-list');
@@ -1566,7 +1607,7 @@ function addObiettivo() {
 }
 function removeObiettivo(btn) {
   const list = document.getElementById('a1-obiettivi-list');
-  if(list.children.length <= 1) { btn.closest('.obj-item').querySelector('input').value=''; return; }
+  if(list.children.length <= 3) { btn.closest('.obj-item').querySelector('input').value=''; return; } // min 3 required
   btn.closest('.obj-item').remove();
   list.querySelectorAll('.obj-item').forEach((d,i)=>{
     d.querySelector('span').textContent=(i+1)+'.';
@@ -1624,6 +1665,7 @@ function closeSidebar() {
   if(sb) sb.classList.remove('open');
   if(ov) ov.classList.remove('visible');
 }
+// (AI side panel has its own close)
 
 // ── ACTIONS DROPDOWN ────────────────────────────────────────
 function toggleActionsMenu() {
@@ -1664,6 +1706,11 @@ function validateA1() {
   if(!S.a1.ente.denominazione) missing.push('Denominazione ente');
   if(!S.a1.ente.tutor) missing.push('Tutor / Responsabile');
   if(!S.a1.percorso.dataInizio) missing.push('Data inizio percorso');
+  // Check obiettivi
+  const objInputs = document.querySelectorAll('#a1-obiettivi-list .obj-input');
+  let objFilled = 0;
+  objInputs.forEach((inp,i) => { if(inp.value.trim()) objFilled++; else if(i<3) inp.classList.add('invalid'); });
+  if(objFilled < 3) missing.push('Almeno 3 obiettivi specifici di apprendimento');
   // Highlight fields
   ['a1-vol-nome','a1-vol-cognome','a1-ente-denominazione','a1-ente-tutor','a1-percorso-dataInizio'].forEach(id => {
     const inp = el(id);
@@ -1904,6 +1951,76 @@ function getEvidenzaScoreLabel(ev) {
   if(s==='es-strong') return '💚 Evidenza forte — tutti o quasi i criteri eQval soddisfatti';
   if(s==='es-weak') return '🟡 Evidenza parziale — richiede integrazione o ulteriore validazione';
   return '🔴 Evidenza incompleta — compilare la valutazione eQval (' + vals.length + '/5 criteri)';
+}
+
+
+// ── AI SIDE PANEL ────────────────────────────────────────────
+function openAISidePanel(agentId, promptText) {
+  const panel = el('ai-panel-side');
+  const body  = el('ai-panel-body');
+  if(!panel || !body) return;
+
+  // Render chat panel if needed or if agent changed
+  if(!body.innerHTML.trim() || body.dataset.agent !== agentId) {
+    body.innerHTML = renderChatPanel(agentId);
+    body.dataset.agent = agentId;
+  }
+
+  // Show panel + push main content
+  panel.classList.add('open');
+  const mainEl = el('main');
+  if(mainEl) mainEl.classList.add('ai-side-open');
+
+  // Pre-fill and auto-send
+  const text = typeof promptText === 'function' ? promptText() : promptText;
+  if(text) {
+    setTimeout(function() {
+      const inp = el('chatinp-' + agentId);
+      if(inp) {
+        inp.value = text;
+        sendAIChat(agentId);
+      }
+    }, 80);
+  }
+}
+
+function closeAISidePanel() {
+  const panel = el('ai-panel-side');
+  const mainEl = el('main');
+  if(panel) panel.classList.remove('open');
+  if(mainEl) mainEl.classList.remove('ai-side-open');
+}
+
+// ── COMP CHIP DISPATCHER ────────────────────────────────────
+function fireCompChip(compId, type, group) {
+  // Look up item in all frameworks
+  const allItems = [].concat(EU8, DIGCOMP, LIFECOMP, ENTRECOMP);
+  const item = allItems.find(function(x){ return x.id === compId; });
+  if(!item) return;
+
+  var noteEl = el(group + '_' + compId + '_note');
+  var note   = noteEl ? noteEl.value.trim() : '';
+  var nome   = item.nome;
+
+  var prompts = {
+    domanda:  'Sei un esperto di metodologia Youthpass e apprendimento non formale. ' +
+              'Formulami 3 domande guida specifiche e stimolanti per condurre un colloquio ' +
+              'di emersione competenziale sulla competenza: "' + nome + '". ' +
+              'Le domande devono essere aperte, ancorate all\'esperienza concreta del volontario.',
+    livello:  note
+                ? 'Analizza queste note di colloquio e suggerisci il livello di padronanza ' +
+                  '(1=Base, 2=Parziale, 3=Autonomia, 4=Esperto) per la competenza "' + nome + '". ' +
+                  'Motiva la tua valutazione con riferimenti specifici al testo. Note: ' + note
+                : 'Descrivi i criteri osservabili per distinguere il livello 1, 2, 3 e 4 ' +
+                  'della competenza "' + nome + '" in un contesto di volontariato SCU.',
+    riassumi: note
+                ? 'Riassumi in 2-3 frasi queste note per la competenza "' + nome + '", in linguaggio formale adatto al Documento di Trasparenza. Suggerisci anche 2-3 evidenze documentali. Note: ' + note
+                : 'Quali evidenze documentali concrete (tipologia, formato, fonte) attestano ' +
+                  'meglio la competenza "' + nome + '" per un volontario SCU?'
+  };
+
+  var prompt = prompts[type] || prompts.domanda;
+  openAISidePanel('a2', prompt);
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2191,9 +2308,9 @@ function buildCompCard(item, group, stored) {
       </div>`:''}
       ${lvlHtml}
       ${!isSkip ? `<div class="comp-ai-chips">
-        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){return 'Aiutami a formulare una domanda Youthpass specifica per: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-question-circle" aria-hidden="true"></i> Domanda guida</button>
-        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){var el2=document.getElementById('${group}_${item.id}_note');var n=el2&&el2.value;return n?'Analizza queste note di colloquio e suggerisci il livello di padronanza (1-4) per la competenza '+${JSON.stringify(item.nome)}+': '+n:'Descrivi i criteri per valutare il livello 1-4 della competenza: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Suggerisci livello</button>
-        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();openAIChip('a2',function(){var el2=document.getElementById('${group}_${item.id}_note');var n=el2&&el2.value;return n?'Riassumi in 2-3 frasi queste note di colloquio per la competenza '+${JSON.stringify(item.nome)}+': '+n:'Cosa sono le evidenze documentali utili per attestare la competenza: '+${JSON.stringify(item.nome)};})"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Riassumi / Evidenze</button>
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();fireCompChip('${item.id}','domanda','${group}')"><i class="fa-solid fa-question-circle" aria-hidden="true"></i> Domanda guida</button>
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();fireCompChip('${item.id}','livello','${group}')"><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Suggerisci livello</button>
+        <button class="ai-chip" style="font-size:.72rem" onclick="event.stopPropagation();fireCompChip('${item.id}','riassumi','${group}')"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Riassumi / Evidenze</button>
       </div>` : ''}
     </div>
   </div>`;
