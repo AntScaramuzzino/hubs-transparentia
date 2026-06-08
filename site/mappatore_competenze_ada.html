@@ -767,6 +767,8 @@ function renderMappingCards() {
     const card = document.createElement('div');
     card.className = 'ada-card' + (map.validated ? ' validated' : '');
 
+    const schedaUrl = ada?.scheda || null;
+
     let lvlBtns = '';
     for (let i=1;i<=4;i++) lvlBtns += `<button class="lvl-btn ${map.livello===i?'active':''}" onclick="setMapLevel('${ak}',${i})">${i}</button>`;
 
@@ -790,7 +792,6 @@ function renderMappingCards() {
       </div>`;
     }).join('');
 
-    const schedaUrl = ada?.scheda || null;
     const schedaBtn = schedaUrl
       ? `<a class="scheda-link" href="${schedaUrl}" target="_blank">📋 Scheda di Caso INAPP</a>`
       : `<a class="scheda-link scheda-online" href="https://atlantelavoro.inapp.org" target="_blank">🔗 Cerca su Atlante INAPP</a>`;
