@@ -1706,7 +1706,7 @@ function collectAll() {
 }
 
 function populateAll() {
-  populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); renderDocPreview(); renderPattoPreview();
+  populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); populateA5(); renderDocPreview(); renderPattoPreview();
 }
 
 function syncSessionName() {
@@ -2650,7 +2650,10 @@ function _wTc(text, opts) {
     ?`<w:r><w:rPr>${bold}${sz}</w:rPr><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
     :`<w:r><w:rPr>${bold}${sz}</w:rPr><w:br/><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
   ).join('');
-  return `<w:tc>${tcPr}<w:p>${runs}</w:p></w:tc>`;
+  return `<w:tc>${tcPr}<w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>${runs}</w:p></w:tc>`;
+}
+function _wCellMar() { // margini interni delle celle (respiro del testo)
+  return '<w:tblCellMar><w:top w:w="80" w:type="dxa"/><w:left w:w="110" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="110" w:type="dxa"/></w:tblCellMar>';
 }
 function _wGrid(cols) { // cols = pesi relativi delle colonne; tblGrid è obbligatorio per ISO 29500 (Word ripara i file senza)
   const TOT=9638; const sum=cols.reduce((a,b)=>a+b,0);
@@ -2658,12 +2661,12 @@ function _wGrid(cols) { // cols = pesi relativi delle colonne; tblGrid è obblig
 }
 function _wKVTable(rows) {
   const trs=rows.map(([k,v])=>`<w:tr>${_wTc(k,{bold:true,fill:'F5F5F5',w:2000})}${_wTc(v,{w:3000})}</w:tr>`).join('');
-  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/></w:tblPr>${_wGrid([2,3])}${trs}</w:tbl>`;
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid([2,3])}${trs}</w:tbl>`;
 }
 function _wDataTable(hdrs, rows) {
   const hTr=`<w:tr>${hdrs.map(h=>_wTc(h,{header:true})).join('')}</w:tr>`;
   const bTrs=rows.map(row=>`<w:tr>${row.map((c,i)=>_wTc(c||'—')).join('')}</w:tr>`).join('');
-  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/></w:tblPr>${_wGrid(hdrs.map(()=>1))}${hTr}${bTrs}</w:tbl>`;
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid(hdrs.map(()=>1))}${hTr}${bTrs}</w:tbl>`;
 }
 function _wSigTable(tutor, vol, luogo, data) {
   const sigCol=(label,name)=>
@@ -2674,7 +2677,7 @@ function _wSigTable(tutor, vol, luogo, data) {
     `<w:t xml:space="preserve">______________________</w:t></w:r></w:p>`+
     `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="444444"/></w:rPr>`+
     `<w:t xml:space="preserve">${_x(name)}</w:t></w:r></w:p></w:tc>`;
-  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/></w:tblPr>`+
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>`+
     `${_wGrid([1,1])}`+
     `<w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:gridSpan w:val="2"/>${_wTcBorders()}</w:tcPr>`+
     `<w:p><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>`+
@@ -3672,7 +3675,13 @@ function collectA4() {
 // AGENTE 5 — REDATTORE DI TRASPARENZA
 // ============================================================
 function collectA5() {
+  if(!S.a5) S.a5={notetutor:'',dataChiusura:''};
   S.a5.notetutor=getVal('a5-notetutor');
+}
+
+function populateA5() {
+  if(!S.a5) S.a5={notetutor:'',dataChiusura:''};
+  const t=el('a5-notetutor'); if(t) t.value=S.a5.notetutor||'';
 }
 
 function renderDocPreview() {
