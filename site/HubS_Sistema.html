@@ -27,7 +27,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 #hdr .logo{font-size:1.22rem;font-weight:800;letter-spacing:-0.4px;white-space:nowrap;display:flex;align-items:center;gap:9px}
 #hdr .logo i{color:#2ecc71;font-size:1rem}
 #hdr .logo span{color:#27ae60}
-#hdr .sess-name{flex:1;font-size:.88rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hdr .sess-name{font-size:.88rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.hdr-phase-crumb{flex:1;font-size:.78rem;color:rgba(255,255,255,.38);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px}
 #hdr .hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 15px;border-radius:7px;cursor:pointer;font-size:.84rem;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;transition:all .15s;font-family:inherit;font-weight:600}
 #hdr .hbtn:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 #hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
@@ -632,6 +633,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <button id="menu-btn" onclick="toggleSidebar()" aria-label="Apri menu navigazione"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
   <div class="logo"><i class="fa-solid fa-network-wired" aria-hidden="true"></i>HubS<span>·</span>TransparentIA</div>
   <div class="sess-name" id="hdr-sess-name"><span class="sess-dot" id="sess-dot"></span>Nessuna sessione</div>
+  <span class="hdr-phase-crumb" id="hdr-phase-crumb" aria-hidden="true"></span>
   <div class="hbtn-group">
     <div class="hbtn-actions" id="hbtn-actions">
       <button class="hbtn" onclick="toggleActionsMenu()" aria-label="Azioni sessione" aria-haspopup="true">
@@ -639,8 +641,6 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <span class="hbtn-lbl">Azioni</span>
       </button>
       <div class="actions-menu" id="actions-menu" role="menu">
-        <a href="/guida" target="_blank" role="menuitem"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Guida</a>
-        <hr>
         <button onclick="closeActionsMenu();openNewSession()" role="menuitem"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nuova sessione</button>
         <button onclick="closeActionsMenu();triggerLoad()" role="menuitem"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Carica (.json/.pdf)</button>
         <hr>
@@ -670,10 +670,6 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         </button>
       </div>
     </div>
-    <button class="hbtn green" onclick="exportSessionPdf()" aria-label="Esporta PDF">
-      <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
-      <span class="hbtn-lbl">PDF</span>
-    </button>
   </div>
   <input type="file" id="load-input" accept=".json,.pdf" style="display:none" onchange="loadSession(event)">
 </div>
@@ -715,6 +711,17 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 <div id="app">
 <!-- SIDEBAR -->
 <nav id="sidebar">
+  <!-- Home + utility (sempre in cima) -->
+  <div class="nav-item" role="button" tabindex="0" onclick="showScreen('welcome')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('welcome');}">
+    <div class="nav-num" style="background:#475569"><i class="fa-solid fa-house" style="font-size:.65rem"></i></div>
+    <div class="nav-info"><span class="nav-title">Dashboard</span></div>
+  </div>
+  <a class="nav-item" href="/guida" target="_blank" style="text-decoration:none">
+    <div class="nav-num" style="background:#0d9488"><i class="fa-solid fa-book-open" style="font-size:.65rem"></i></div>
+    <div class="nav-info"><span class="nav-title">Guida <span style="font-size:.68rem;opacity:.55">↗</span></span></div>
+  </a>
+  <hr class="nav-divider">
+  <!-- Fasi processo -->
   <div class="nav-section">Processo</div>
   <div class="nav-item" data-a="a1" role="button" tabindex="0" onclick="showScreen('a1')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('a1');}">
     <div class="nav-num">1</div>
@@ -761,15 +768,6 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <span class="nav-status" id="ns-a5" style="display:none">○</span>
     <span class="nav-badge empty" id="nb-a5"></span>
   </div>
-  <hr class="nav-divider">
-  <div class="nav-item" role="button" tabindex="0" onclick="showScreen('welcome')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showScreen('welcome');}">
-    <div class="nav-num" style="background:#6c757d"><i class="fa-solid fa-house" style="font-size:.65rem"></i></div>
-    <div class="nav-info"><span class="nav-title">Dashboard</span></div>
-  </div>
-  <a class="nav-item" href="/guida" target="_blank" style="text-decoration:none">
-    <div class="nav-num" style="background:#0d9488"><i class="fa-solid fa-book-open" style="font-size:.65rem"></i></div>
-    <div class="nav-info"><span class="nav-title">Guida</span></div>
-  </a>
   <div class="sess-info" id="sidebar-sess-info">Sessione non salvata</div>
 </nav>
 
@@ -1776,6 +1774,10 @@ function showScreen(id) {
   if(nav) nav.classList.add('active');
   currentScreen = id;
   if(['a1','a2','a3','a4','a5'].includes(id)) currentAgentId = id;
+  // Update header breadcrumb
+  const CRUMB_LABELS = {a1:'Fase 1 · Avvio',a2:'Fase 2 · Emersione',a3:'Fase 3 · Istruttoria',a4:'Fase 4 · Ricognizione',a5:'Fase 5 · Formalizzazione'};
+  const crumb = el('hdr-phase-crumb');
+  if(crumb) crumb.textContent = CRUMB_LABELS[id] ? ('› ' + CRUMB_LABELS[id]) : '';
   // Scroll to top + focus on phase heading
   const mainEl = el('main');
   if(mainEl) mainEl.scrollTop = 0;
