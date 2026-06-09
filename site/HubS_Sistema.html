@@ -2979,6 +2979,25 @@ function selectEvidenza(id) {
       }).join('')}
     </div>
 
+    <div class="ai-chips" style="margin:14px 0 4px">
+      <button class="ai-chip" onclick="event.stopPropagation();openAISidePanel('a3',function(){
+        var titolo=(el('ef-titolo')||{}).value||'';
+        var desc=(el('ef-descrizione')||{}).value||'';
+        var att=(el('ef-attivita')||{}).value||'';
+        var tipo=(el('ef-tipo')||{}).value||'';
+        return 'Valuta questa evidenza secondo i 5 criteri eQval Standard 17 (Validità, Attualità, Pertinenza, Sufficienza, Autenticità) e fornisci un giudizio motivato per ciascuno.\\nEvidenza: tipo='+tipo+', titolo='+titolo+', descrizione='+desc+', attività svolta='+att;
+      })" title="AI: valuta con eQval"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Valuta eQval</button>
+      <button class="ai-chip" onclick="event.stopPropagation();openAISidePanel('a3',function(){
+        var desc=(el('ef-descrizione')||{}).value||'';
+        var autore=(el('ef-autore')||{}).value||'';
+        var tipo=(el('ef-tipo')||{}).value||'';
+        return 'Aiutami a classificare questa evidenza nella Matrice FVA Valore × Pertinenza (DM 30/06/2015).\\nTipo: '+tipo+', prodotta da: '+autore+', descrizione: '+desc+'.\\nSuggerisci Valore (Alto/Medio/Basso) e Pertinenza (Alta/Media/Bassa) con motivazione, e indica il quadrante risultante (Forte / Utile / Debole / Da integrare).';
+      })" title="AI: classifica FVA"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i> Classifica FVA</button>
+      <button class="ai-chip" onclick="event.stopPropagation();openAISidePanel('a3',function(){
+        var evs=S.a3.evidenze.map(function(e){return (e.tipo||'?')+(e.fvaQuadrante?' ['+e.fvaQuadrante+']':'');}).join(', ');
+        return 'Il dossier contiene queste evidenze: '+evs+'.\\nQuali tipologie di evidenze complementari rafforzerebbero maggiormente il dossier? Tieni conto dei quadranti FVA già coperti e della soglia raccomandata (≥ Utile).';
+      })" title="AI: suggerisci evidenze complementari"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Suggerisci integrazioni</button>
+    </div>
     <div class="frow mt12"><label for="ef-note">Note / azioni correttive</label>
       <textarea id="ef-note" rows="2">${escHtml(ev.note)}</textarea></div>
     <div class="frow inline">
@@ -3991,6 +4010,14 @@ function buildAIContext(agentId){
   if(['a3','a4','a5'].includes(agentId)){
     var acc=S.a3.evidenze.filter(function(ev){return ev.esito==='accettata';}).length;
     ctx+='\nEvidenze: '+S.a3.evidenze.length+' totali, '+acc+' accettate';
+    if(agentId==='a3' && S.a3.evidenze.length>0){
+      var evSum=S.a3.evidenze.map(function(ev){
+        var fva=ev.fvaQuadrante?'FVA='+ev.fvaQuadrante:'FVA=n/d';
+        var esito=ev.esito||'n/a';
+        return (ev.tipo||'?')+' ['+fva+', esito='+esito+']';
+      });
+      ctx+='\nDettaglio evidenze: '+evSum.join(' | ');
+    }
   }
   if(['a4','a5'].includes(agentId)){
     var sels=Object.keys(S.a4.selections);
