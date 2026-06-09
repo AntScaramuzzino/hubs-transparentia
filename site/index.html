@@ -32,6 +32,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 #hdr .hbtn:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 #hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
 #hdr .hbtn.green:hover{background:#1e8449}
+#hdr .hbtn.saved-flash{background:rgba(74,222,128,.35)!important;border-color:#4ade80!important;transition:none}
 
 /* ── HAMBURGER (desktop hidden) ── */
 #menu-btn{display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:7px;cursor:pointer;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-family:inherit}
@@ -609,10 +610,12 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <button onclick="closeActionsMenu();openNewSession()" role="menuitem"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nuova sessione</button>
         <button onclick="closeActionsMenu();triggerLoad()" role="menuitem"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Carica (.json/.pdf)</button>
         <hr>
+        <button onclick="closeActionsMenu();saveSession()" role="menuitem"><i class="fa-solid fa-file-export" aria-hidden="true"></i> Salva JSON (file)</button>
+        <hr>
         <button onclick="closeActionsMenu();hubsClearLocalData()" role="menuitem" style="color:#e74c3c"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Cancella dati locali (browser)</button>
       </div>
     </div>
-    <button class="hbtn" onclick="saveSession()" aria-label="Salva sessione come JSON" id="btn-save">
+    <button class="hbtn" onclick="hubsSaveLocal()" aria-label="Salva nel browser" id="btn-save" title="Salva nel browser">
       <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
       <span class="hbtn-lbl">Salva</span>
     </button>
@@ -808,8 +811,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-user"></i> Dati del Volontario</div>
         <div class="frow inline">
-          <div><label for="a1-vol-nome">Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome" required aria-required="true" aria-label="Nome volontario"></div>
-          <div><label for="a1-vol-cognome">Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome" required aria-required="true" aria-label="Cognome volontario"></div>
+          <div><label for="a1-vol-nome">Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome" required aria-required="true" aria-label="Nome volontario" oninput="syncSessionName()"></div>
+          <div><label for="a1-vol-cognome">Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome" required aria-required="true" aria-label="Cognome volontario" oninput="syncSessionName()"></div>
         </div>
         <div class="frow inline">
           <div><label for="a1-vol-dob">Data di nascita</label><input type="date" id="a1-vol-dob"></div>
@@ -1305,7 +1308,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="agent-nav-footer">
     <button class="btn btn-outline" onclick="showScreen('a4')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 4</button>
     <div class="flex gap8">
-      <button class="btn btn-a5" onclick="saveSession()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva sessione</button>
+      <button class="btn btn-a5" onclick="hubsSaveLocal()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva</button>
       <button class="btn btn-success" onclick="guardedDownloadDocx()"><i class="fa-regular fa-file-word" aria-hidden="true"></i> Esporta DOCX</button>
     </div>
   </div>
@@ -1590,6 +1593,18 @@ function collectAll() {
 
 function populateAll() {
   populateA1(); populateA2(); renderEvidenze(); renderA4Step(1); renderDocPreview(); renderPattoPreview();
+}
+
+function syncSessionName() {
+  const nome    = (el('a1-vol-nome')    ? el('a1-vol-nome').value    : '').trim();
+  const cognome = (el('a1-vol-cognome') ? el('a1-vol-cognome').value : '').trim();
+  const derived = [cognome, nome].filter(Boolean).join(' ');
+  if (derived) {
+    S.meta.name = derived;
+    const wsn = el('ws-name');
+    if (wsn && wsn.value !== derived) wsn.value = derived;
+    updateSidebar();
+  }
 }
 
 function updateSidebar() {
@@ -4518,6 +4533,20 @@ async function vcVerifyPasted() {
       lastSerialized = '';
       alert('Dati locali eliminati.');
     } catch(e) { alert('Impossibile eliminare: ' + e.message); }
+  };
+
+  // Exposed: click-to-save-local (called by the "Salva" header button)
+  window.hubsSaveLocal = function() {
+    autosave('manual');
+    paintStatus('autosaved');
+    var dot = document.getElementById('sess-dot');
+    if (dot) { dot.style.background = '#4ade80'; dot.title = 'Salvato nel browser'; }
+    // Brief flash feedback on button
+    var btn = document.getElementById('btn-save');
+    if (btn) {
+      btn.classList.add('saved-flash');
+      setTimeout(function(){ btn.classList.remove('saved-flash'); }, 1200);
+    }
   };
 
   if (typeof window.saveSession === 'function') {
