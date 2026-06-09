@@ -1338,7 +1338,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       </div>
     </div>
     <div class="flex gap8" style="margin-top:12px;flex-wrap:wrap">
-      <button class="btn btn-a5 btn-sm" onclick="vcSignAndDownload()" id="btn-vc-sign"><i class="fa-solid fa-signature" aria-hidden="true"></i> Firma e scarica VC</button>
+      <button class="btn btn-a5 btn-sm" onclick="vcSignAndDownload()" id="btn-vc-sign"><i class="fa-solid fa-download" aria-hidden="true"></i> Scarica VC</button>
       <button class="btn btn-outline btn-sm" onclick="vcOpenVerifier()"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Verifica VC</button>
     </div>
     <div id="vc-alert" style="margin-top:8px"></div>
@@ -4363,40 +4363,18 @@ function vcBuild() {
 // ── Sign VC via /api/sign (Ed25519 server-side) and download JSON ──
 async function vcSignAndDownload() {
   try {
-    el('vc-alert').innerHTML = '<div class="alert alert-ok">Firma in corso&#8230;</div>';
+    el('vc-alert').innerHTML = '<div class="alert alert-ok">Generazione VC in corso&#8230;</div>';
     const vc = vcBuild();
-    const payload = _cj(vc);
 
-    const resp = await fetch('/api/sign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload })
-    });
-    if (!resp.ok) {
-      const err = await resp.json().catch(function(){ return {}; });
-      throw new Error(err.error || 'Errore server HTTP ' + resp.status);
-    }
-    const { signature, keyId } = await resp.json();
-
-    const signed = Object.assign({}, vc, {
-      proof: {
-        type: 'Ed25519Signature2020',
-        created: new Date().toISOString(),
-        verificationMethod: keyId || VC_KEY_ID,
-        proofPurpose: 'assertionMethod',
-        proofValue: signature
-      }
-    });
-
-    const blob = new Blob([JSON.stringify(signed, null, 2)], { type:'application/ld+json' });
+    const blob = new Blob([JSON.stringify(vc, null, 2)], { type:'application/ld+json' });
     const a = document.createElement('a');
     const nome = ((S.a1||{})['vol-nome']||'vc').replace(/\s+/g,'_').toLowerCase();
     a.href = URL.createObjectURL(blob);
     a.download = 'hubs_vc_' + nome + '_' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
-    el('vc-alert').innerHTML = '<div class="alert alert-ok">&#10003; Credenziale firmata e scaricata.</div>';
+    el('vc-alert').innerHTML = '<div class="alert alert-ok">&#10003; Credenziale scaricata (non firmata).</div>';
   } catch(e) {
-    el('vc-alert').innerHTML = '<div class="alert alert-err">Errore firma: ' + escHtml(e.message) + '</div>';
+    el('vc-alert').innerHTML = '<div class="alert alert-err">Errore: ' + escHtml(e.message) + '</div>';
   }
 }
 
