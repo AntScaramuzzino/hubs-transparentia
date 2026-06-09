@@ -385,6 +385,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:var(--card-pad);margin-bottom:18px;box-shadow:var(--shadow)}
 .card-title{font-size:.85rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .card-title i{color:var(--sub);font-size:.8rem}
+.card.card-info{background:#eafaf1;border-color:#a7f3d0}
+.card.card-info p{font-size:.82rem;color:#1b6b3a}
 
 /* GRID */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -963,6 +965,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <!-- SEZ. B -->
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Sezione B — Obiettivi del Percorso</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
+    <div class="card-title"><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Obiettivi del Percorso</div>
     <div class="frow">
       <label for="a1-obiettivoGenerale">Obiettivo generale del volontariato</label>
       <textarea id="a1-obiettivoGenerale" rows="2" placeholder="Descrivi l'obiettivo generale del percorso di volontariato..."></textarea>
@@ -987,6 +990,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <!-- SEZ. C -->
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-list-check" aria-hidden="true"></i> Sezione C — Piano delle Attività</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
+    <div class="card-title"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Piano delle Attività</div>
     <p class="text-sub" style="margin-bottom:12px">Totale ore ≥ 60 in 12 mesi. Presenza minima per Documento di Trasparenza: 75% — DM 115/2024 Art. 5.</p>
     <div class="ptbl-wrap"><table class="ptbl">
       <thead><tr><th style="width:32px">N.</th><th>Attività</th><th style="width:200px">Area di competenza</th><th style="width:90px">Ore previste</th></tr></thead>
@@ -999,6 +1003,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <!-- SEZ. D -->
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-calendar-week" aria-hidden="true"></i> Sezione D — Calendario Indicativo</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
+    <div class="card-title"><i class="fa-solid fa-calendar-week" aria-hidden="true"></i> Calendario Indicativo</div>
     <div class="ptbl-wrap"><table class="ptbl">
       <thead><tr><th style="width:110px">Mese</th><th>Attività previste</th><th style="width:90px">Ore</th></tr></thead>
       <tbody id="a1-cal-tbody">
@@ -1017,7 +1022,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-handshake" aria-hidden="true"></i> Sez. E — Tutoraggio &nbsp;|&nbsp; <i class="fa-solid fa-map-pin" aria-hidden="true"></i> Sez. F — ADA Preliminare</span><span class="sez-toggle-ico">▲</span></div>
   <div class="grid2">
     <div class="card">
-      <div class="card-title">Piano di Tutoraggio</div>
+      <div class="card-title"><i class="fa-solid fa-comments" aria-hidden="true"></i> Piano di Tutoraggio</div>
       <div class="frow">
         <span id="lbl-tut-freq" class="group-label">Frequenza dei colloqui</span>
         <div class="check-wrap" role="radiogroup" aria-labelledby="lbl-tut-freq">
@@ -1038,7 +1043,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
 
     <div class="card">
-      <div class="card-title">Mappatura ADA Preliminare <span class="badge badge-grey" style="margin-left:6px">Orientativa — da validare in Fase 4</span></div>
+      <div class="card-title"><i class="fa-solid fa-map" aria-hidden="true"></i> Mappatura ADA Preliminare <span class="badge badge-grey" style="margin-left:6px">Orientativa — da validare in Fase 4</span></div>
       <table class="ptbl" style="margin-bottom:12px">
         <thead><tr><th style="width:100px">Codice ADA</th><th>Descrizione ADA</th><th style="width:110px">Pertinenza</th></tr></thead>
         <tbody>
@@ -1061,6 +1066,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <!-- SEZ. G -->
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Sezione G — Modalità di Valutazione Finale</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
+    <div class="card-title"><i class="fa-solid fa-star-half-stroke" aria-hidden="true"></i> Modalità di Valutazione Finale</div>
     <div class="grid2">
       <div>
         <div class="frow">
@@ -1090,11 +1096,11 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Note del Tutor · Bozza Patto di Servizio</span><span class="sez-toggle-ico">▲</span></div>
   <div class="grid2">
     <div class="card">
-      <div class="card-title">Note del tutor (fase di accoglienza)</div>
+      <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del tutor (fase di accoglienza)</div>
       <div class="frow mb0"><textarea id="a1-note" rows="4" placeholder="Osservazioni iniziali, motivazioni emerse, contesto del volontario..."></textarea></div>
     </div>
     <div class="card">
-      <div class="card-title">Bozza Patto di Servizio — Modulo 02</div>
+      <div class="card-title"><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Bozza Patto di Servizio — Modulo 02</div>
       <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
         <button class="btn btn-a1" onclick="renderPattoPreview()"><i class="fa-solid fa-rotate"></i> Aggiorna anteprima</button>
         <button class="btn btn-a1" onclick="downloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
@@ -1124,8 +1130,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <p>Domande guida Youthpass · Autovalutazione EU8 · DigComp · LifeComp · EntreComp</p>
     </div>
   </div>
-  <div class="card" style="background:#eafaf1;border-color:#27ae60">
-    <p style="font-size:.82rem;color:#1b6b3a">💡 <strong>Come usare questo agente:</strong> Per ciascuna competenza, espandi il pannello, usa le <em>domande guida</em> per condurre il colloquio Youthpass con il volontario, prendi note nel campo apposito e seleziona il livello di padronanza osservato (1–4).</p>
+  <div class="card card-info">
+    <p>💡 <strong>Come usare questo agente:</strong> Per ciascuna competenza, espandi il pannello, usa le <em>domande guida</em> per condurre il colloquio Youthpass con il volontario, prendi note nel campo apposito e seleziona il livello di padronanza osservato (1–4).</p>
     <div class="ai-chips" style="margin-top:10px">
       <button class="ai-chip" onclick="openAISidePanel('a2',function(){var s=el('a1-percorso-settore');return 'Sei un esperto di metodologia Youthpass. Spiega brevemente come condurre un colloquio di emersione biografico-competenziale con un volontario nel settore: '+(s&&s.value||'(settore non specificato)')+'. Dai 3 consigli pratici.';})"><i class="fa-solid fa-comments" aria-hidden="true"></i> Come condurre il colloquio</button>
       <button class="ai-chip" onclick="openAISidePanel('a2',function(){var s=el('a1-percorso-settore');var nome=el('a1-vol-nome');return 'Suggerisci 5 domande aperte Youthpass per far emergere le competenze di un volontario nel settore: '+(s&&s.value||'(settore non specificato)')+'. Le domande devono aiutare a riflettere sull'esperienza vissuta.';})"><i class="fa-solid fa-question-circle" aria-hidden="true"></i> Domande di apertura</button>
@@ -1176,7 +1182,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div id="a2-tab-entrecomp" class="tab-pane"></div>
   <div id="a2-tab-riflessione" class="tab-pane">
     <div class="card">
-      <div class="card-title">Riflessione globale sull'esperienza (Learning Outcomes)</div>
+      <div class="card-title"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Riflessione globale sull'esperienza (Learning Outcomes)</div>
       <div class="frow">
         <label for="a2-rifl-top0">Le 3 cose più importanti imparate durante il percorso</label>
         <div class="obiettivi-list">
@@ -1357,7 +1363,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div id="a1-req-status" class="mt8"></div>
   </div>
   <div class="card">
-    <div class="card-title">Note del tutor (documento finale)</div>
+    <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del tutor (documento finale)</div>
     <div class="frow mb0"><textarea id="a5-notetutor" rows="3" placeholder="Osservazioni conclusive sull'esperienza e sullo sviluppo del volontario..."></textarea></div>
   </div>
   <div id="doc-preview-container"></div>
