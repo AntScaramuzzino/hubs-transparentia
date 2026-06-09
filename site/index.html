@@ -634,6 +634,16 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="logo"><i class="fa-solid fa-network-wired" aria-hidden="true"></i>HubS<span>·</span>TransparentIA</div>
   <div class="sess-name" id="hdr-sess-name"><span class="sess-dot" id="sess-dot"></span>Nessuna sessione</div>
   <span class="hdr-phase-crumb" id="hdr-phase-crumb" aria-hidden="true"></span>
+  <div class="flex gap8" style="margin-left:auto">
+    <button class="hbtn" onclick="saveSession()" title="Salva file JSON della sessione" aria-label="Salva JSON">
+      <i class="fa-solid fa-file-export" aria-hidden="true"></i>
+      <span class="hbtn-lbl">Salva JSON</span>
+    </button>
+    <button class="hbtn green" onclick="exportSessionPdf()" title="Esporta PDF della sessione" aria-label="Salva PDF">
+      <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
+      <span class="hbtn-lbl">Salva PDF</span>
+    </button>
+  </div>
   <div class="hbtn-group">
     <div class="hbtn-actions" id="hbtn-actions">
       <button class="hbtn" onclick="toggleActionsMenu()" aria-label="Azioni sessione" aria-haspopup="true">
