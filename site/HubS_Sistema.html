@@ -816,13 +816,18 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
     <div class="card mt16">
       <div class="card-title"><i class="fa-solid fa-play"></i> Avvio sessione</div>
+      <div class="frow inline">
+        <div><label for="ws-vol-nome">Nome volontario</label><input type="text" id="ws-vol-nome" placeholder="Mario" oninput="syncWsName()" autocomplete="given-name"></div>
+        <div><label for="ws-vol-cognome">Cognome volontario</label><input type="text" id="ws-vol-cognome" placeholder="Rossi" oninput="syncWsName()" autocomplete="family-name"></div>
+      </div>
       <div class="frow">
-        <label for="ws-name">Nome sessione</label>
-        <input type="text" id="ws-name" placeholder="Es. Mario Rossi — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
+        <label for="ws-name">Nome sessione <span style="font-size:.75rem;color:var(--sub);font-weight:400">(si compila automaticamente)</span></label>
+        <input type="text" id="ws-name" placeholder="Es. Rossi Mario — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
       </div>
       <div class="flex gap8 wrap">
         <button class="btn btn-success" onclick="startSession()"><i class="fa-solid fa-play"></i> Avvia nuova sessione</button>
-        <button class="btn btn-outline" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica sessione (.json)</button>
+        <button class="btn btn-outline" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica JSON</button>
+        <button class="btn btn-outline" onclick="triggerLoad()" style="color:#c0392b;border-color:#e8b0a8"><i class="fa-regular fa-file-pdf"></i> Importa PDF</button>
       </div>
     </div>
 
@@ -1585,10 +1590,37 @@ function openNewSession() {
   showScreen('a1');
 }
 
+function syncWsName() {
+  const nome    = (el('ws-vol-nome')    ? el('ws-vol-nome').value    : '').trim();
+  const cognome = (el('ws-vol-cognome') ? el('ws-vol-cognome').value : '').trim();
+  const derived = [cognome, nome].filter(Boolean).join(' ');
+  if (derived) {
+    const wsn = el('ws-name');
+    if (wsn) wsn.value = derived;
+    S.meta.name = derived;
+    updateSidebar();
+  }
+}
+
 function startSession() {
   const n = el('ws-name');
   S.meta.name = (n && n.value) ? n.value : 'Sessione ' + today();
   S.meta.created = S.meta.created || new Date().toISOString();
+  // Pre-popola Nome e Cognome in Fase A1 dai campi Dashboard
+  const wsNome    = el('ws-vol-nome');
+  const wsCognome = el('ws-vol-cognome');
+  if (wsNome && wsNome.value.trim()) {
+    S.a1 = S.a1 || {};
+    S.a1.vol = S.a1.vol || {};
+    S.a1.vol.nome = wsNome.value.trim();
+    const f = el('a1-vol-nome'); if (f) f.value = wsNome.value.trim();
+  }
+  if (wsCognome && wsCognome.value.trim()) {
+    S.a1 = S.a1 || {};
+    S.a1.vol = S.a1.vol || {};
+    S.a1.vol.cognome = wsCognome.value.trim();
+    const f = el('a1-vol-cognome'); if (f) f.value = wsCognome.value.trim();
+  }
   updateSidebar();
   renderObiettiviList(['','','']);
   renderPianoAttivita(Array(5).fill({attivita:'',area:'',ore:''}));
