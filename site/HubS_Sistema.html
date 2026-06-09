@@ -2596,29 +2596,229 @@ function renderPattoPreview() {
   el('patto-preview-container').innerHTML=html;
 }
 
-function downloadPattoDocx() {
-  collectA1(); renderPattoPreview();
-  const preview=el('patto-preview'); if(!preview) return;
-  const name=((S.a1.vol.cognome||'')+'_'+(S.a1.vol.nome||'volontario')).replace(/\s/g,'_');
-  const htmlContent=`<!DOCTYPE html><html><head><meta charset="utf-8">
-    <style>
-      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
-      table{border-collapse:collapse;width:100%}
-      td,th{border:1px solid #ccc;padding:4pt 6pt;font-size:9pt}
-      th{background:#eeeeee;font-weight:bold}
-      h1{font-size:14pt;text-align:center}h2{font-size:12pt;text-align:center}
-      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
-      .firma-line{display:flex;gap:24pt;margin-top:20pt}
-      .firma-item{flex:1;border-top:1px solid #333;padding-top:4pt;font-size:9pt}
-    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
-</style></head>
-    <body>${preview.innerHTML}</body></html>`;
-  const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`HubS_PattoDiServizio_${name}_${new Date().toISOString().slice(0,10)}.docx`;
-  a.click();
+
+// ============================================================
+// OOXML DOCX GENERATOR — JSZip + raw XML (no HTML conversion)
+// ============================================================
+async function _loadJSZip() {
+  if (window.JSZip) return window.JSZip;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => res(window.JSZip);
+    s.onerror = () => rej(new Error('Impossibile caricare JSZip'));
+    document.head.appendChild(s);
+  });
 }
+function _x(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _wH(text, level) {
+  const sz={1:32,2:26,3:22}[level]||20;
+  const center=(level<=2)?'<w:jc w:val="center"/>':'';
+  const border=(level===3)?'<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="2" w:color="333333"/></w:pBdr>':'';
+  const sp={1:'before="240" after="120"',2:'before="160" after="80"',3:'before="140" after="60"'}[level]||'before="100" after="60"';
+  return `<w:p><w:pPr>${border}<w:spacing ${sp}/>${center}</w:pPr><w:r><w:rPr><w:b/><w:bCs/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
+}
+function _wP(text, opts) {
+  const o=opts||{};
+  const b=o.bold?'<w:b/><w:bCs/>':'';
+  const i=o.italic?'<w:i/>':'';
+  const sz=o.sz?`<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>`:'' ;
+  const col=o.color?`<w:color w:val="${o.color}"/>`:'';
+  const al=o.align?`<w:jc w:val="${o.align}"/>`:'';
+  const sp=o.spacing?`<w:spacing ${o.spacing}/>`:'';
+  const pBdr=o.topBorder?'<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="DDDDDD"/></w:pBdr>':'';
+  return `<w:p><w:pPr>${pBdr}${al}${sp}</w:pPr><w:r><w:rPr>${b}${i}${sz}${col}</w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
+}
+function _wBr() { return '<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>'; }
+function _wTcBorders() {
+  return '<w:tcBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/></w:tcBorders>';
+}
+function _wTc(text, opts) {
+  const o=opts||{};
+  const fill=o.header?'EEEEEE':(o.fill||'FFFFFF');
+  const w=o.w?`<w:tcW w:w="${o.w}" w:type="pct"/>`:'';
+  const vAlign=o.vAlign?`<w:vAlign w:val="${o.vAlign}"/>`:'';
+  const tcPr=`<w:tcPr>${w}<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>${_wTcBorders()}${vAlign}</w:tcPr>`;
+  const bold=(o.header||o.bold)?'<w:b/><w:bCs/>':'';
+  const sz=`<w:sz w:val="${o.sz||18}"/><w:szCs w:val="${o.sz||18}"/>`;
+  const lines=String(text||'—').split('\n');
+  const runs=lines.map((l,i)=>i===0
+    ?`<w:r><w:rPr>${bold}${sz}</w:rPr><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
+    :`<w:r><w:rPr>${bold}${sz}</w:rPr><w:br/><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
+  ).join('');
+  return `<w:tc>${tcPr}<w:p>${runs}</w:p></w:tc>`;
+}
+function _wKVTable(rows) {
+  const trs=rows.map(([k,v])=>`<w:tr>${_wTc(k,{bold:true,fill:'F5F5F5',w:2000})}${_wTc(v,{w:3000})}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblStyle w:val="TableGrid"/></w:tblPr>${trs}</w:tbl>`;
+}
+function _wDataTable(hdrs, rows) {
+  const hTr=`<w:tr>${hdrs.map(h=>_wTc(h,{header:true})).join('')}</w:tr>`;
+  const bTrs=rows.map(row=>`<w:tr>${row.map((c,i)=>_wTc(c||'—')).join('')}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblStyle w:val="TableGrid"/></w:tblPr>${hTr}${bTrs}</w:tbl>`;
+}
+function _wSigTable(tutor, vol, luogo, data) {
+  const sigCol=(label,name)=>
+    `<w:tc><w:tcPr><w:tcW w:w="2500" w:type="pct"/>${_wTcBorders()}</w:tcPr>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="888888"/></w:rPr>`+
+    `<w:t xml:space="preserve">${_x(label)}</w:t></w:r></w:p>`+
+    `<w:p><w:pPr><w:spacing w:before="400"/></w:pPr><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>`+
+    `<w:t xml:space="preserve">______________________</w:t></w:r></w:p>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="444444"/></w:rPr>`+
+    `<w:t xml:space="preserve">${_x(name)}</w:t></w:r></w:p></w:tc>`;
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/></w:tblPr>`+
+    `<w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>${_wTcBorders()}</w:tcPr>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>`+
+    `<w:t xml:space="preserve">Luogo e data: ${_x(luogo)}, ${_x(data)}</w:t></w:r></w:p></w:tc></w:tr>`+
+    `<w:tr>${sigCol('Responsabile / Tutor:',tutor)}${sigCol('Volontario/a:',vol)}</w:tr></w:tbl>`;
+}
+async function _assembleDocx(bodyXml, title) {
+  const JSZip = await _loadJSZip();
+  const z = new JSZip();
+  z.file('[Content_Types].xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+    '<Default Extension="xml" ContentType="application/xml"/>'+
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+    '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
+    '</Types>');
+  z.file('_rels/.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+    '</Relationships>');
+  z.file('word/_rels/document.xml.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+    '</Relationships>');
+  z.file('word/styles.xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+    '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>'+
+    '<w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:rPrDefault></w:docDefaults>'+
+    '<w:style w:type="table" w:styleId="TableGrid"><w:name w:val="Table Grid"/>'+
+    '<w:tblPr><w:tblBorders>'+
+    '<w:top w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:left w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:right w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:insideH w:val="single" w:sz="4" w:color="CCCCCC"/>'+
+    '<w:insideV w:val="single" w:sz="4" w:color="CCCCCC"/>'+
+    '</w:tblBorders></w:tblPr></w:style></w:styles>');
+  z.file('word/document.xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+    `<w:body>${bodyXml}`+
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'+
+    '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+
+    '</w:body></w:document>');
+  return z.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+
+
+async function downloadPattoDocx() {
+  collectA1();
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+  const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
+  const dataOggi=today();
+  const FREQ={mensile:'Mensile',bimestrale:'Bimestrale',bisogno:'Al bisogno'};
+  const MOD={presenza:'Colloquio individuale in presenza',distanza:'Colloquio a distanza (video call)',campo:'Osservazione sul campo',diario:'Diario di bordo con feedback scritto'};
+  const CT_LABELS={comm:'Comunicazione',dig:'Competenza digitale (DigComp)',imparare:'Imparare ad imparare (LifeComp)',sociali:'Competenze sociali e civiche',spirito:'Spirito di iniziativa (EntreComp)',cultura:'Consapevolezza culturale'};
+  const VMET={colloquio:'Colloquio finale di emersione',autoval:'Autovalutazione finale',dossier:'Revisione Dossier Evidenze',documento:'Compilazione Documento di Trasparenza'};
+
+  let b='';
+  b+=_wH('PROGETTO PERSONALIZZATO — PATTO DI SERVIZIO',1);
+  b+=_wH('HubS – Spazi di Innovazione Sociale — Modulo 02',2);
+  b+=_wP('Rif. Art. 5, comma 1, lett. b) — D.I. 31 luglio 2025',{italic:true,sz:16,color:'666666',align:'center'});
+  b+=_wBr();
+
+  b+=_wH('Sezione A — Parti del Progetto',3);
+  b+=_wKVTable([
+    ['Ente di accoglienza', (e.denominazione||'___')+' ('+(e.tipo||'___')+')'],
+    ['Tutor / Responsabile', e.tutor||'___'],
+    ['Volontario/a', (v.cognome||'___')+' '+(v.nome||'___')],
+    ['Codice progetto HubS', e.codice||'___'],
+    ['Data di sottoscrizione', fmtDate(S.a1.dataRotte)||'___'],
+  ]);
+  b+=_wBr();
+
+  b+=_wH('Sezione B — Obiettivi del Percorso',3);
+  b+=_wP('Obiettivo generale: '+(S.a1.obiettivoGenerale||'___'),{bold:true});
+  const objs=(S.a1.obiettivi||[]).filter(Boolean);
+  if(objs.length) b+=_wDataTable(['#','Obiettivo specifico'],objs.map((o,i)=>[(i+1).toString(),o]));
+  const cts=(S.a1.competenzeTarget||[]);
+  if(cts.length) {
+    b+=_wP('Competenze chiave europee target:',{bold:true,sz:18});
+    b+=_wDataTable(['Competenza'],cts.map(c=>[(CT_LABELS[c]||c)]));
+  }
+  b+=_wBr();
+
+  b+=_wH('Sezione C — Piano delle Attività',3);
+  b+=_wP('Totale ore ≥ 60 in 12 mesi. Presenza minima: 75%',{italic:true,sz:16,color:'666666'});
+  const pa=(S.a1.pianoAttivita||[]).filter(r=>r.attivita);
+  b+=_wDataTable(['#','Attività','Area di competenza','Ore'],
+    pa.length?pa.map((r,i)=>[(i+1).toString(),r.attivita,r.area||'—',String(r.ore||'—')]):
+    [['—','Piano attività non compilato','','']]);
+  b+=_wBr();
+
+  const cal=S.a1.calendario||[];
+  if(cal.length){
+    b+=_wH('Sezione D — Calendario Indicativo',3);
+    b+=_wDataTable(['Mese','Attività previste','Ore'],cal.map(r=>[r.mese,r.attivita||'—',String(r.ore||'—')]));
+    b+=_wBr();
+  }
+
+  b+=_wH('Sezione E — Piano di Tutoraggio',3);
+  b+=_wKVTable([['Frequenza colloqui', FREQ[S.a1.tutoraggioFreq]||'___']]);
+  const mods=(S.a1.tutoraggioModalita||[]);
+  if(mods.length) b+=_wDataTable(['Modalità'],mods.map(m=>[(MOD[m]||m)]));
+  b+=_wBr();
+
+  const ada=(S.a1.adaPrelim||[]).filter(r=>r.codice||r.descrizione);
+  b+=_wH('Sezione F — Mappatura Normativa Preliminare',3);
+  b+=_wP('Identificazione orientativa delle ADA — da validare al termine del percorso',{italic:true,sz:16,color:'666666'});
+  b+=_wDataTable(['Codice ADA','Descrizione ADA','Pertinenza'],
+    ada.length?ada.map(r=>[r.codice||'—',r.descrizione||'—',r.pertinenza||'—']):
+    [['—','Da compilare','—']]);
+  b+=_wBr();
+
+  b+=_wH('Sezione G — Modalità di Valutazione Finale',3);
+  const vm=(S.a1.valutazioneMetodi||[]);
+  if(vm.length) b+=_wDataTable(['Metodo di valutazione'],vm.map(m=>[(VMET[m]||m)]));
+  b+=_wKVTable([['Data prevista conclusione', fmtDate(S.a1.dataConclusioneStimata)||'___']]);
+  b+=_wBr();
+
+  b+=_wH('Sezione H — Impegni del Volontario',3);
+  b+=_wDataTable(['Impegno'],[
+    ['Partecipare alle attività secondo il calendario concordato con l\'ente'],
+    ['Raggiungere la soglia minima di presenze (75% delle ore previste)'],
+    ['Partecipare ai colloqui di tutoraggio previsti (min. 3)'],
+    ['Collaborare alla costruzione del Dossier delle Evidenze (Fase 3)'],
+    ['Partecipare al processo di autovalutazione delle competenze (Fase 2)'],
+    ['Comunicare tempestivamente eventuali impedimenti o variazioni al tutor'],
+  ]);
+  b+=_wBr();
+
+  b+=_wH('Sezione I — Dichiarazioni e Firme',3);
+  b+=_wP('Le parti dichiarano di aver preso visione del presente progetto personalizzato e di accettarne i contenuti ai sensi del D.I. 31 luglio 2025.',{sz:18});
+  b+=_wBr();
+  b+=_wSigTable(e.tutor||'___',(v.nome||'')+ ' '+(v.cognome||'___'),p.luogo||e.indirizzo||'___',dataOggi);
+  b+=_wBr();
+  b+=_wP('Documento generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
+
+  try {
+    const blob=await _assembleDocx(b,'Patto di Servizio');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`HubS_PattoDiServizio_${name}_${dataOggi}.docx`;
+    a.click();
+  } catch(err) {
+    alert('Errore generazione DOCX: '+err.message);
+  }
+}
+
 
 function downloadPattoPdf() {
   collectA1(); renderPattoPreview();
@@ -3671,189 +3871,96 @@ function renderDocPreview() {
   el('doc-preview-container').innerHTML=html;
 }
 
-function downloadDocx() {
+async function downloadDocx() {
   collectA5();
   const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
   const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
   const dataOggi=today();
+  const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
+  const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
 
   const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
-  let s41rows=''; let rowN=0;
+  const s41rows=[];
+  let rowN=0;
   validated.forEach(([ak,m])=>{
     const ada=ADA_DB[ak]; if(!ada) return;
     (ada.ra||[]).forEach((ra,ri)=>{
       rowN++;
-      const cov=m.copertura?m.copertura[ri]:'';
-      s41rows+=`<tr><td style="text-align:center">${rowN}</td><td>${m.attivita||p.attivita||''}</td><td>${ada.code}</td><td>${ada.desc}</td><td>${ra.code}</td><td>${ra.desc}</td><td style="text-align:center">${m.livello||'—'}</td><td>${cov||'—'}</td></tr>`;
+      s41rows.push([String(rowN),m.attivita||p.attivita||'',ada.code,ada.desc,ra.code,ra.desc,m.livello||'—',(m.copertura&&m.copertura[ri])||'—']);
     });
   });
-  if(!s41rows) s41rows='<tr><td colspan="8" style="text-align:center;color:#999">Sezione vuota — completare la Fase 4</td></tr>';
 
-  let s42rows='';
-  DIGCOMP.forEach(dc=>{
-    const a2d=S.a2.dc[dc.id]||{livello:0,note:''};
-    const m=S.a4.mappings[dc.ada]||{};
-    s42rows+=`<tr><td>${dc.area}</td><td>${dc.nome}</td><td>${dc.ada}</td><td style="text-align:center">${a2d.livello||m.livello||'—'}</td><td>${a2d.note||''}</td></tr>`;
-  });
+  const s42rows=DIGCOMP.map(dc=>{const a2d=S.a2.dc[dc.id]||{};const m=S.a4.mappings[dc.ada]||{};return[dc.area,dc.nome,dc.ada,String(a2d.livello||m.livello||'—'),a2d.note||''];});
+  const s43rows=LIFECOMP.map(lc=>{const a2l=S.a2.lc[lc.id]||{};return[lc.area,lc.nome,a2l.note||'',String(a2l.livello||'—')];});
+  const s44rows=ENTRECOMP.map(ec=>{const a2e=S.a2.ec[ec.id]||{};return[ec.area,ec.nome,a2e.note||'',String(a2e.livello||'—')];});
+  const s5rows=S.a3.evidenze.filter(ev=>ev.inclusa!==false).map((ev,i)=>[String(i+1),ev.tipo||'—',ev.titolo||'—',fmtDate(ev.data)||'—',ev.fvaQuadrante||'—',ev.esito==='accettata'?'Sì':ev.esito==='riserva'?'(±)':'—']);
 
-  let s43rows='';
-  LIFECOMP.forEach(lc=>{
-    const a2l=S.a2.lc[lc.id]||{livello:0,note:''};
-    s43rows+=`<tr><td>${lc.area}</td><td>${lc.nome}</td><td>${a2l.note||''}</td><td style="text-align:center">${a2l.livello||'—'}</td></tr>`;
-  });
+  let b='';
+  b+=_wH('DOCUMENTO DI TRASPARENZA',1);
+  b+=_wH('HubS – Spazi di Innovazione Sociale',2);
+  b+=_wP('Messa in trasparenza delle competenze acquisite in contesti non formali e informali',{italic:true,sz:16,color:'666666',align:'center'});
+  b+=_wP('Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021',{italic:true,sz:16,color:'666666',align:'center'});
+  b+=_wBr();
 
-  let s44rows='';
-  ENTRECOMP.forEach(ec=>{
-    const a2e=S.a2.ec[ec.id]||{livello:0,note:''};
-    s44rows+=`<tr><td>${ec.area}</td><td>${ec.nome}</td><td>${a2e.note||''}</td><td style="text-align:center">${a2e.livello||'—'}</td></tr>`;
-  });
+  b+=_wH('Sezione 1 — Ente di Accoglienza',3);
+  b+=_wKVTable([['Denominazione ente',e.denominazione||'___'],['Codice fiscale',e.cfEnte||'___'],['Tipologia ente',e.tipo||'___'],['Indirizzo sede legale',e.indirizzo||'___'],['Rappresentante legale',e.repLegale||'___'],['Tutor / Responsabile',e.tutor||'___'],['Codice progetto HubS',e.codice||'___']]);
+  b+=_wBr();
 
-  let s5rows='';
-  S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
-    s5rows+=`<tr><td style="text-align:center">${i+1}</td><td>${ev.tipo||'—'}</td><td>${ev.titolo||'—'}</td><td>${fmtDate(ev.data)||'—'}</td><td style="text-align:center">${ev.fvaQuadrante||'—'}</td><td style="text-align:center">${ev.esito==='accettata'?'SI':ev.esito==='riserva'?'(+/-)':'—'}</td></tr>`;
-  });
-  if(!s5rows) s5rows='<tr><td colspan="6" style="text-align:center;color:#999">Nessuna evidenza registrata nella Fase 3</td></tr>';
+  b+=_wH('Sezione 2 — Dati del Volontario',3);
+  b+=_wKVTable([['Cognome',v.cognome||'___'],['Nome',v.nome||'___'],['Data di nascita',fmtDate(v.dob)],['Luogo di nascita',v.luogoNascita||'___'],['Codice fiscale',v.cf||'___'],['Cittadinanza',v.cittadinanza||'___'],['Titolo di studio',v.titoloStudio||'___'],['Situazione occupazionale',v.occupazione||'___']]);
+  b+=_wBr();
 
-  const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
-  const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
+  b+=_wH('Sezione 3 — Dati del Percorso',3);
+  b+=_wKVTable([['Descrizione attività svolta',p.attivita||'___'],['Settore di attività',p.settore||'___'],['Data inizio',fmtDate(p.dataInizio)],['Data fine',fmtDate(p.dataFine)],['Ore totali previste',String(p.orePreviste||'___')],['Ore totali svolte',String(p.oreSvolte||'___')],['Percentuale di presenza',percNum+'%'],['Soglia minima 75% raggiunta',percNum>=75?'Sì':'No'],['Luogo di svolgimento',p.luogo||'___']]);
+  b+=_wBr();
 
-  const htmlContent=`<!DOCTYPE html><html><head><meta charset="utf-8">
-    <style>
-      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;color:#000}
-      table{border-collapse:collapse;width:100%;margin-bottom:10pt}
-      td,th{border:1px solid #999;padding:4pt 6pt;font-size:9pt;vertical-align:top}
-      th{background:#eeeeee;font-weight:bold;font-size:8.5pt;text-align:left}
-      h1{font-size:14pt;text-align:center;margin-bottom:4pt}
-      h2{font-size:11pt;text-align:center;color:#555;margin-bottom:8pt}
-      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin:14pt 0 6pt}
-      p{font-size:10pt;margin:4pt 0 8pt}
-      small{font-size:8pt;color:#666}
-      .footer{font-size:8pt;color:#999;text-align:center;margin-top:20pt;border-top:1pt solid #ddd;padding-top:8pt}
-    </style></head>
-    <body>
-    <h1>DOCUMENTO DI TRASPARENZA</h1>
-    <h2>HubS – Spazi di Innovazione Sociale<br>
-    <small>Messa in trasparenza delle competenze acquisite in contesti non formali e informali<br>
-    Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021</small></h2>
+  b+=_wH('Sezione 4.1 — Mappatura verso l\'Atlante del Lavoro INAPP',3);
+  b+=_wP('Conforme Allegato A — DI 5 gennaio 2021. Livelli: 1=Esecutivo · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise',{italic:true,sz:16,color:'666666'});
+  b+=_wDataTable(['N.','Attività svolta','ADA Codice','ADA Descrizione','RA Codice','RA Descrizione','Livello','Copertura RA'],
+    s41rows.length?s41rows:[['—','Completare la Fase 4','','','','','','']]);
+  b+=_wBr();
 
-    <h3>Sezione 1 — Ente di Accoglienza</h3>
-    <table><tbody>
-      <tr><td style="width:40%;background:#f5f5f5"><strong>Denominazione ente</strong></td><td>${e.denominazione||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Codice fiscale</strong></td><td>${e.cfEnte||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Tipologia ente</strong></td><td>${e.tipo||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Indirizzo sede legale</strong></td><td>${e.indirizzo||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Rappresentante legale</strong></td><td>${e.repLegale||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Tutor / Responsabile accompagnamento</strong></td><td>${e.tutor||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Codice progetto HubS</strong></td><td>${e.codice||'___'}</td></tr>
-    </tbody></table>
+  b+=_wH('Sezione 4.2 — Competenza Digitale — DigComp 2.2',3);
+  b+=_wDataTable(['Area DigComp','Competenza','ADA rif.','Livello','Note'],s42rows);
+  b+=_wBr();
 
-    <h3>Sezione 2 — Dati del Volontario</h3>
-    <table><tbody>
-      <tr><td style="width:40%;background:#f5f5f5"><strong>Cognome</strong></td><td>${v.cognome||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Nome</strong></td><td>${v.nome||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data di nascita</strong></td><td>${fmtDate(v.dob)}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Codice fiscale</strong></td><td>${v.cf||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Cittadinanza</strong></td><td>${v.cittadinanza||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Titolo di studio</strong></td><td>${v.titoloStudio||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Situazione occupazionale</strong></td><td>${v.occupazione||'___'}</td></tr>
-    </tbody></table>
+  b+=_wH('Sezione 4.3 — Competenza Personale e Sociale — LifeComp',3);
+  b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
+  b+=_wDataTable(['Area LifeComp','Competenza','Descrizione manifestazione','Livello'],s43rows);
+  b+=_wBr();
 
-    <h3>Sezione 3 — Dati del Percorso</h3>
-    <table><tbody>
-      <tr><td style="width:40%;background:#f5f5f5"><strong>Descrizione attività svolta</strong></td><td>${p.attivita||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data inizio</strong></td><td>${fmtDate(p.dataInizio)}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data fine</strong></td><td>${fmtDate(p.dataFine)}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Ore totali previste</strong></td><td>${p.orePreviste||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Ore totali svolte</strong></td><td>${p.oreSvolte||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Percentuale di presenza</strong></td><td>${percNum}%</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Soglia minima 75% raggiunta</strong></td><td>${percNum>=75?'Si':'No'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Luogo di svolgimento</strong></td><td>${p.luogo||'___'}</td></tr>
-    </tbody></table>
+  b+=_wH('Sezione 4.4 — Competenza Imprenditoriale — EntreComp',3);
+  b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
+  b+=_wDataTable(['Area EntreComp','Competenza','Descrizione manifestazione','Livello'],s44rows);
+  b+=_wBr();
 
-    <h3>Sezione 4.1 — Mappatura verso l'Atlante del Lavoro INAPP</h3>
-    <p style="font-size:8.5pt;color:#666;font-style:italic">Conforme Allegato A — DI 5 gennaio 2021. Scala livelli: 1=Esecutivo · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise</p>
-    <table>
-      <thead><tr>
-        <th>N.</th><th>Attivita svolta</th><th>ADA Codice</th><th>ADA Descrizione</th>
-        <th>RA Codice</th><th>RA Descrizione</th><th>Livello (1-4)</th><th>Copertura RA</th>
-      </tr></thead>
-      <tbody>${s41rows}</tbody>
-    </table>
+  b+=_wH('Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)',3);
+  b+=_wDataTable(['N.','Tipo','Descrizione','Data','Quadrante FVA','Validazione'],
+    s5rows.length?s5rows:[['—','Nessuna evidenza registrata','','','','']]);
+  b+=_wBr();
 
-    <h3>Sezione 4.2 — Competenza Digitale — DigComp 2.2</h3>
-    <table>
-      <thead><tr><th>Area DigComp</th><th>Competenza specifica</th><th>ADA di riferimento</th><th>Livello (1-4)</th><th>Note / esempio</th></tr></thead>
-      <tbody>${s42rows}</tbody>
-    </table>
+  b+=_wH('Sezione 6 — Note del Tutor',3);
+  b+=_wP(S.a5.notetutor||'___',{sz:18});
+  b+=_wBr();
 
-    <h3>Sezione 4.3 — Competenza Personale e Sociale — LifeComp</h3>
-    <p style="font-size:8.5pt;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
-    <table>
-      <thead><tr><th>Area LifeComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1-4)</th></tr></thead>
-      <tbody>${s43rows}</tbody>
-    </table>
+  b+=_wH('Sezione 7 — Dichiarazioni e Firme',3);
+  b+=_wP('Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.',{sz:18});
+  b+=_wBr();
+  b+=_wSigTable(e.tutor||'___',(v.nome||'')+' '+(v.cognome||'___'),p.luogo||'___',dataOggi);
+  b+=_wBr();
+  b+=_wP('Documento conforme Allegato A DI 5 gennaio 2021 — Art. 5 DI 31 luglio 2025 — GDPR 2016/679/UE — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
 
-    <h3>Sezione 4.4 — Competenza Imprenditoriale — EntreComp</h3>
-    <p style="font-size:8.5pt;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
-    <table>
-      <thead><tr><th>Area EntreComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1-4)</th></tr></thead>
-      <tbody>${s44rows}</tbody>
-    </table>
-
-    <h3>Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)</h3>
-    <table>
-      <thead><tr><th>N.</th><th>Tipo di evidenza</th><th>Descrizione</th><th>Data</th><th>Quadrante FVA</th><th>Validazione tutor</th></tr></thead>
-      <tbody>${s5rows}</tbody>
-    </table>
-
-    <h3>Sezione 6 — Note del Tutor</h3>
-    <p style="border:1pt solid #ccc;padding:6pt;min-height:40pt">${S.a5.notetutor||'___'}</p>
-
-    <h3>Sezione 7 — Dichiarazioni e Firme</h3>
-    <p style="font-size:9pt">Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.</p>
-    <table>
-      <thead><tr><th></th><th>Responsabile accompagnamento (Tutor)</th><th>Volontario/a</th></tr></thead>
-      <tbody>
-        <tr><td style="background:#f5f5f5"><strong>Nome e cognome</strong></td><td>${e.tutor||'___'}</td><td>${v.nome||''} ${v.cognome||'___'}</td></tr>
-        <tr><td style="background:#f5f5f5"><strong>Ente</strong></td><td>${e.denominazione||'___'}</td><td></td></tr>
-        <tr><td style="background:#f5f5f5"><strong>Luogo e data</strong></td><td>${p.luogo||'___'}, ${dataOggi}</td><td></td></tr>
-        <tr><td style="background:#f5f5f5"><strong>Firma</strong></td><td style="height:35pt"></td><td style="height:35pt"></td></tr>
-      </tbody>
-    </table>
-
-    <p class="footer">Documento conforme all'Allegato A del Decreto Interministeriale 5 gennaio 2021, come richiesto dall'Art. 5, comma 1, lett. d) del DI 31 luglio 2025.<br>
-    Trattamento dati ai sensi del Regolamento UE 2016/679 (GDPR) — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · ${dataOggi}</p>
-    </body></html>`;
-
-  if(window.htmlDocx) {
-    const blob=window.htmlDocx.asBlob(htmlContent);
+  try {
+    const blob=await _assembleDocx(b,'Documento di Trasparenza');
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
     a.click();
-  } else {
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js';
-    s.onload=function(){
-      const blob=window.htmlDocx.asBlob(htmlContent);
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
-      a.click();
-    };
-    s.onerror=function(){
-      // fallback: plain download
-      const blob=new Blob([htmlContent],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
-      a.click();
-    };
-    document.head.appendChild(s);
+  } catch(err) {
+    alert('Errore generazione DOCX: '+err.message);
   }
 }
+
 
 function downloadPdf() {
   collectA5(); renderDocPreview();
