@@ -208,6 +208,37 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   .ai-panel-side{top:0;width:100%;z-index:400;border-left:none}
   #main.ai-side-open{padding-right:0}
 }
+/* ── AI FAB (floating action button) ── */
+.ai-fab{
+  position:fixed;right:20px;bottom:84px;z-index:249;
+  display:flex;align-items:center;gap:9px;
+  padding:11px 18px 11px 14px;
+  background:linear-gradient(135deg,#1e1b4b 0%,#312e81 55%,#4338ca 100%);
+  color:#fff;border:none;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:.83rem;font-weight:700;letter-spacing:.01em;
+  box-shadow:0 4px 18px rgba(67,56,202,.45),0 1.5px 4px rgba(0,0,0,.18);
+  transition:opacity .22s,transform .22s,box-shadow .18s;
+  white-space:nowrap;user-select:none
+}
+.ai-fab:hover{box-shadow:0 6px 24px rgba(67,56,202,.6),0 2px 6px rgba(0,0,0,.22);transform:translateY(-2px)}
+.ai-fab:active{transform:translateY(0);box-shadow:0 3px 12px rgba(67,56,202,.4)}
+.ai-fab .fab-icon{
+  width:26px;height:26px;border-radius:50%;
+  background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);
+  display:grid;place-items:center;font-size:.95rem;flex-shrink:0
+}
+.ai-fab .fab-pulse{
+  position:absolute;top:7px;right:16px;width:7px;height:7px;
+  border-radius:50%;background:#a5f3fc;
+  box-shadow:0 0 0 0 rgba(165,243,252,.7);
+  animation:fab-pulse 2.2s ease-in-out infinite
+}
+@keyframes fab-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(165,243,252,.65)}
+  50%{box-shadow:0 0 0 6px rgba(165,243,252,.0)}
+}
+.ai-fab.ai-fab-hidden{opacity:0;pointer-events:none;transform:translateY(8px) scale(.94)}
+@media(max-width:768px){.ai-fab{bottom:72px;right:12px}}
 
 /* ── A4 STEPPER ── */
 .a4-stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 20px}
@@ -611,6 +642,12 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   </div>
   <div class="ai-panel-body" id="ai-panel-body"></div>
 </div>
+<!-- AI FAB -->
+<button class="ai-fab" id="ai-fab" onclick="openAISidePanel(currentAgentId||'a1',null)" title="Apri Assistente AI">
+  <span class="fab-pulse"></span>
+  <span class="fab-icon">🤖</span>
+  <span>Assistente AI</span>
+</button>
 <div id="app">
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -1653,6 +1690,7 @@ function showScreen(id) {
   const nav = document.querySelector('.nav-item[data-a="'+id+'"]');
   if(nav) nav.classList.add('active');
   currentScreen = id;
+  if(['a1','a2','a3','a4','a5'].includes(id)) currentAgentId = id;
   // Scroll to top + focus on phase heading
   const mainEl = el('main');
   if(mainEl) mainEl.scrollTop = 0;
@@ -2155,9 +2193,12 @@ function getEvidenzaScoreLabel(ev) {
 
 
 // ── AI SIDE PANEL ────────────────────────────────────────────
+var currentAgentId = 'a1';
 function openAISidePanel(agentId, promptText) {
+  currentAgentId = agentId || currentAgentId;
   const panel = el('ai-panel-side');
   const body  = el('ai-panel-body');
+  const fab   = el('ai-fab');
   if(!panel || !body) return;
 
   // Render chat panel if needed or if agent changed
@@ -2175,10 +2216,11 @@ function openAISidePanel(agentId, promptText) {
     fillEl.style.width = info.pct;
     fillEl.style.background = info.color;
   }
-  // Show panel + push main content
+  // Show panel + push main content; hide FAB
   panel.classList.add('open');
   const mainEl = el('main');
   if(mainEl) mainEl.classList.add('ai-side-open');
+  if(fab) fab.classList.add('ai-fab-hidden');
 
   // Pre-fill and auto-send
   const text = typeof promptText === 'function' ? promptText() : promptText;
@@ -2196,8 +2238,10 @@ function openAISidePanel(agentId, promptText) {
 function closeAISidePanel() {
   const panel = el('ai-panel-side');
   const mainEl = el('main');
+  const fab = el('ai-fab');
   if(panel) panel.classList.remove('open');
   if(mainEl) mainEl.classList.remove('ai-side-open');
+  if(fab) fab.classList.remove('ai-fab-hidden');
 }
 
 // ── COMP CHIP DISPATCHER ────────────────────────────────────
