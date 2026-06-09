@@ -222,6 +222,21 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   .a4-step{min-width:190px;scroll-snap-align:start;flex-shrink:0}
   .a4-step::after{display:none}
 }
+
+/* ── VERIFIABLE CREDENTIAL PANEL ── */
+.vc-panel{border-left:3px solid var(--c-a5)}
+.vc-key-box{background:var(--grey);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:.78rem;margin:8px 0}
+.vc-key-box code{word-break:break-all;font-family:monospace;font-size:.72rem;color:#5b2c82;display:block;margin-top:4px}
+.vc-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:.73rem;font-weight:700}
+.vc-badge.ok{background:#e8f8ee;color:#1a6b3a;border:1px solid #a8d5ba}
+.vc-badge.warn{background:#fff3cd;color:#7a4714;border:1px solid #ffc107}
+.vc-badge.none{background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db}
+.vc-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px}
+.vc-modal-box{background:#fff;border-radius:10px;padding:22px;width:100%;max-width:580px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.vc-modal-box h3{margin:0 0 12px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.vc-result{padding:12px 14px;border-radius:8px;margin-top:10px;font-size:.81rem;line-height:1.5}
+.vc-result.ok{background:#e8f8ee;border:1px solid #a8d5ba;color:#1a6b3a}
+.vc-result.fail{background:#fef2f2;border:1px solid #fca5a5;color:#7f1d1d}
 /* ── MOBILE ── */
 @media(max-width:768px){
   #menu-btn{display:inline-flex}
@@ -1149,6 +1164,26 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <div class="readiness-row"><span class="readiness-icon r-warn" id="a5r-note">⚠</span><span class="readiness-lbl">Note tutor</span><span class="readiness-detail" id="a5rd-note">Facoltative ma raccomandate</span></div>
     </div>
   </div>
+  <!-- A5 VC PANEL -->
+  <div class="card vc-panel" id="a5-vc-panel">
+    <div class="card-title">🔐 Verifiable Credential — W3C VC 1.1 · did:key · ECDSA P-256</div>
+    <p style="font-size:.8rem;color:var(--sub);margin:0 0 10px">Firma il Documento di Trasparenza come Credenziale Verificabile JSON-LD. La firma ECDSA P-256 permette a chiunque di verificare l&#39;autore senza registri centralizzati.</p>
+    <div id="vc-key-status-box">
+      <span class="vc-badge none" id="vc-key-badge">&#9888; Nessuna chiave configurata</span>
+      <div class="vc-key-box" id="vc-did-box" style="display:none">
+        <strong>DID del firmatario (did:key)</strong>
+        <code id="vc-did-display"></code>
+      </div>
+    </div>
+    <div class="flex gap8" style="margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="vcGenerateKey()"><i class="fa-solid fa-key" aria-hidden="true"></i> Genera chiavi</button>
+      <button class="btn btn-outline btn-sm" onclick="vcExportPrivKey()" id="btn-vc-export-key" style="display:none"><i class="fa-solid fa-download" aria-hidden="true"></i> Esporta chiave privata</button>
+      <button class="btn btn-outline btn-sm" onclick="vcImportKeyUI()"><i class="fa-solid fa-upload" aria-hidden="true"></i> Importa chiave</button>
+      <button class="btn btn-a5 btn-sm" onclick="vcSignAndDownload()" id="btn-vc-sign" style="display:none"><i class="fa-solid fa-signature" aria-hidden="true"></i> Firma e scarica VC</button>
+      <button class="btn btn-outline btn-sm" onclick="vcOpenVerifier()"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Verifica VC</button>
+    </div>
+    <div id="vc-alert" style="margin-top:8px"></div>
+  </div>
   <!-- EXPORT ACTIONS -->
   <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap;align-items:center">
     <button class="btn btn-a5 fw" onclick="guardedDownloadDocx()" id="btn-docx-export" style="flex:1">
@@ -1187,6 +1222,33 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <button class="btn btn-a5" onclick="saveSession()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva sessione</button>
       <button class="btn btn-success" onclick="guardedDownloadDocx()"><i class="fa-regular fa-file-word" aria-hidden="true"></i> Esporta DOCX</button>
     </div>
+  </div>
+</div>
+
+<!-- VC VERIFIER MODAL -->
+<div class="vc-modal" id="vc-modal-verify" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="vc-modal-box">
+    <h3>&#128269; Verifica Credenziale JSON-LD</h3>
+    <p style="font-size:.8rem;color:var(--sub);margin:0 0 10px">Incolla il JSON della Verifiable Credential per verificarne la firma crittografica.</p>
+    <textarea id="vc-verify-input" rows="9" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:.73rem;font-family:monospace;box-sizing:border-box;resize:vertical" placeholder='{&#10;  "@context": [...],&#10;  "id": "urn:uuid:...",&#10;  "proof": { "type": "EcdsaSecp256r1Signature2019", ... }&#10;}'></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn btn-a5" onclick="vcVerifyPasted()">Verifica firma</button>
+      <button class="btn btn-outline" onclick="el('vc-modal-verify').style.display='none'">Chiudi</button>
+    </div>
+    <div id="vc-verify-result"></div>
+  </div>
+</div>
+<!-- VC IMPORT KEY MODAL -->
+<div class="vc-modal" id="vc-modal-import" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="vc-modal-box">
+    <h3>&#128229; Importa chiave privata (JWK)</h3>
+    <p style="font-size:.8rem;color:var(--sub);margin:0 0 10px">Incolla il contenuto del file JWK precedentemente esportato.</p>
+    <textarea id="vc-import-input" rows="9" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:.73rem;font-family:monospace;box-sizing:border-box;resize:vertical" placeholder='{"kty":"EC","crv":"P-256","d":"...","x":"...","y":"...","key_ops":["sign"]}'></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-a5" onclick="vcImportFromText()">Importa</button>
+      <button class="btn btn-outline" onclick="el('vc-modal-import').style.display='none'">Chiudi</button>
+    </div>
+    <div id="vc-import-alert" style="margin-top:8px"></div>
   </div>
 </div>
 
@@ -3805,6 +3867,319 @@ window.addEventListener('DOMContentLoaded', () => {
     const e=el(id); if(e) e.addEventListener('change',calcPresenza);
   });
   // inject AI chat tabs into all agent screens
+
+// ═══════════════════════════════════════════════════════════
+// VERIFIABLE CREDENTIALS — JSON-LD · did:key · ECDSA P-256
+// W3C VC Data Model 1.1 + RFC 7518
+// ═══════════════════════════════════════════════════════════
+
+// ── Base58btc (Bitcoin alphabet) ──
+const _B58A = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function _b58enc(bytes) {
+  let n = 0n;
+  for (const b of bytes) n = n * 256n + BigInt(b);
+  const out = [];
+  while (n > 0n) { out.push(_B58A[Number(n % 58n)]); n /= 58n; }
+  for (const b of bytes) { if (b !== 0) break; out.push(_B58A[0]); }
+  return out.reverse().join('');
+}
+
+function _b58dec(s) {
+  let n = 0n;
+  for (const c of s) {
+    const i = _B58A.indexOf(c);
+    if (i < 0) throw new Error('Base58 char non valido: ' + c);
+    n = n * 58n + BigInt(i);
+  }
+  const hex = n.toString(16);
+  const pad = hex.length % 2 ? '0' + hex : hex;
+  const bytes = new Uint8Array(pad.match(/.{2}/g).map(function(h){ return parseInt(h,16); }));
+  let lead = 0;
+  for (const c of s) { if (c !== _B58A[0]) break; lead++; }
+  const res = new Uint8Array(lead + bytes.length);
+  res.set(bytes, lead);
+  return res;
+}
+
+// ── base64url helpers ──
+function _b64u(ab) {
+  const b = new Uint8Array(ab);
+  let s = '';
+  b.forEach(function(x){ s += String.fromCharCode(x); });
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function _b64ud(s) {
+  s = s.replace(/-/g,'+').replace(/_/g,'/');
+  while (s.length % 4) s += '=';
+  return new Uint8Array([...atob(s)].map(function(c){ return c.charCodeAt(0); }));
+}
+
+// ── P-256 compressed public key → did:key ──
+function _rawToDID(raw) {
+  // raw = 65 bytes: 0x04 + X(32) + Y(32)
+  const y = raw[64];
+  const compressed = new Uint8Array(33);
+  compressed[0] = (y % 2 === 0) ? 0x02 : 0x03;
+  compressed.set(raw.slice(1, 33), 1);
+  // multicodec varint for P-256 = 0x1200 → [0x80, 0x24]
+  const mc = new Uint8Array([0x80, 0x24, ...compressed]);
+  return 'did:key:z' + _b58enc(mc);
+}
+
+// ── Decompress P-256 point (for verification) ──
+function _modpow(b, e, m) {
+  let r = 1n; b = b % m;
+  while (e > 0n) { if (e & 1n) r = r * b % m; e >>= 1n; b = b * b % m; }
+  return r;
+}
+function _decompressP256(compressed) {
+  const P = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffffn;
+  const B = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604bn;
+  const prefix = compressed[0];
+  const xb = compressed.slice(1);
+  const x = BigInt('0x' + Array.from(xb).map(function(b){ return b.toString(16).padStart(2,'0'); }).join(''));
+  const rhs = ((x**3n - 3n*x + B) % P + P) % P;
+  let y = _modpow(rhs, (P + 1n) / 4n, P);
+  if ((prefix === 2 && y % 2n !== 0n) || (prefix === 3 && y % 2n === 0n)) y = P - y;
+  const yh = y.toString(16).padStart(64,'0');
+  const yb = new Uint8Array(yh.match(/.{2}/g).map(function(h){ return parseInt(h,16); }));
+  return new Uint8Array([0x04, ...xb, ...yb]);
+}
+
+// ── Canonical JSON (sorted keys, deterministic) ──
+function _cj(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(_cj).join(',') + ']';
+  const ks = Object.keys(v).sort();
+  return '{' + ks.map(function(k){ return JSON.stringify(k) + ':' + _cj(v[k]); }).join(',') + '}';
+}
+
+// ── Unique credential ID ──
+function _uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+    const r = Math.random()*16|0;
+    return (c==='x'?r:(r&0x3|0x8)).toString(16);
+  });
+}
+
+// ── Build VC (unsigned) from session state ──
+function vcBuild() {
+  const a1 = S.a1 || {};
+  const nome = ((a1['vol-nome']||'') + ' ' + (a1['vol-cognome']||'')).trim();
+  const ente = a1['ente-denominazione'] || '';
+  const settore = a1['percorso-settore'] || '';
+  const dataInizio = a1['percorso-dataInizio'] || '';
+  const dataFine   = a1['percorso-dataFine'] || '';
+
+  // Competencies with level
+  const competencies = [];
+  const allIds = EU8.concat(DIGCOMP, LIFECOMP, ENTRECOMP);
+  allIds.forEach(function(item) {
+    const ph = S.a2 || {};
+    const d = ph[item.id];
+    if (d && d.livello) {
+      competencies.push({ framework: item.area || 'EU', competencyId: item.id,
+        name: item.nome, level: d.livello, notes: (d.note||'').substring(0,200) });
+    }
+  });
+
+  // Validated ADAs
+  const adas = [];
+  Object.keys((S.a4 && S.a4.mappings) || {}).forEach(function(ak) {
+    const m = S.a4.mappings[ak];
+    if (m && m.validated) adas.push({ adaCode: ak, livello: m.livello||1,
+      copertura: m.copertura||0, attivita: (m.attivita||'').substring(0,300) });
+  });
+
+  return {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      { 'HubSCompetencyCredential': 'https://hubs-transparentia.vercel.app/vocab#HubSCompetencyCredential',
+        'competencies': 'https://hubs-transparentia.vercel.app/vocab#competencies',
+        'adas': 'https://hubs-transparentia.vercel.app/vocab#adas',
+        'adaCode': 'https://hubs-transparentia.vercel.app/vocab#adaCode',
+        'level': 'https://hubs-transparentia.vercel.app/vocab#level',
+        'copertura': 'https://hubs-transparentia.vercel.app/vocab#copertura',
+        'settore': 'https://hubs-transparentia.vercel.app/vocab#settore' }
+    ],
+    'id': 'urn:uuid:' + _uuid(),
+    'type': ['VerifiableCredential', 'HubSCompetencyCredential'],
+    'issuer': (S.vc && S.vc.did) ? S.vc.did : 'did:example:issuer-not-configured',
+    'issuanceDate': new Date().toISOString(),
+    'credentialSubject': {
+      'id': nome ? ('urn:volunteer:' + encodeURIComponent(nome)) : 'urn:volunteer:unknown',
+      'name': nome, 'ente': ente, 'settore': settore,
+      'serviceStart': dataInizio, 'serviceEnd': dataFine,
+      'competencies': competencies,
+      'adas': adas
+    }
+  };
+}
+
+// ── Generate key pair ──
+async function vcGenerateKey() {
+  try {
+    const kp = await crypto.subtle.generateKey({ name:'ECDSA', namedCurve:'P-256' }, true, ['sign','verify']);
+    const privJWK = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    const pubJWK  = await crypto.subtle.exportKey('jwk', kp.publicKey);
+    const rawPub  = await crypto.subtle.exportKey('raw', kp.publicKey);
+    const did = _rawToDID(new Uint8Array(rawPub));
+    S.vc = { privateJWK: privJWK, publicJWK: pubJWK, did: did };
+    _vcUpdateUI();
+    el('vc-alert').innerHTML = '<div class="alert alert-ok">&#10003; Coppia di chiavi generata. <strong>Esporta e conserva la chiave privata in un luogo sicuro.</strong></div>';
+  } catch(e) {
+    el('vc-alert').innerHTML = '<div class="alert alert-err">Errore generazione chiavi: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+// ── Update UI after key load ──
+function _vcUpdateUI() {
+  if (!S.vc || !S.vc.did) return;
+  const badge = el('vc-key-badge');
+  const didBox = el('vc-did-box');
+  const didDisp = el('vc-did-display');
+  const btnExp = el('btn-vc-export-key');
+  const btnSign = el('btn-vc-sign');
+  if (badge) { badge.className = 'vc-badge ok'; badge.textContent = '\u2713 Chiave configurata'; }
+  if (didBox) didBox.style.display = '';
+  if (didDisp) didDisp.textContent = S.vc.did;
+  if (btnExp) btnExp.style.display = '';
+  if (btnSign) btnSign.style.display = '';
+}
+
+// ── Export private key as JWK JSON download ──
+function vcExportPrivKey() {
+  if (!S.vc || !S.vc.privateJWK) { alert('Nessuna chiave da esportare.'); return; }
+  const blob = new Blob([JSON.stringify(S.vc.privateJWK, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'hubs_private_key_' + new Date().toISOString().slice(0,10) + '.jwk.json';
+  a.click();
+}
+
+// ── Import key UI ──
+function vcImportKeyUI() {
+  el('vc-modal-import').style.display = 'flex';
+  el('vc-import-input').value = '';
+  el('vc-import-alert').innerHTML = '';
+}
+
+async function vcImportFromText() {
+  const raw = el('vc-import-input').value.trim();
+  if (!raw) return;
+  try {
+    const jwk = JSON.parse(raw);
+    if (jwk.kty !== 'EC' || jwk.crv !== 'P-256') throw new Error('JWK non valido: atteso EC P-256');
+    // Derive public key from private JWK
+    const privKey = await crypto.subtle.importKey('jwk', jwk,
+      { name:'ECDSA', namedCurve:'P-256' }, true, ['sign']);
+    // Reconstruct public JWK from private JWK fields
+    const pubJWK = { kty:'EC', crv:'P-256', x: jwk.x, y: jwk.y, key_ops:['verify'] };
+    const pubKey = await crypto.subtle.importKey('jwk', pubJWK,
+      { name:'ECDSA', namedCurve:'P-256' }, true, ['verify']);
+    const rawPub = await crypto.subtle.exportKey('raw', pubKey);
+    const did = _rawToDID(new Uint8Array(rawPub));
+    S.vc = { privateJWK: jwk, publicJWK: pubJWK, did: did };
+    _vcUpdateUI();
+    el('vc-import-alert').innerHTML = '<div class="alert alert-ok">&#10003; Chiave importata.</div>';
+    setTimeout(function(){ el('vc-modal-import').style.display='none'; el('vc-alert').innerHTML='<div class="alert alert-ok">&#10003; Chiave privata importata correttamente.</div>'; }, 1200);
+  } catch(e) {
+    el('vc-import-alert').innerHTML = '<div class="alert alert-err">Errore: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+// ── Sign VC and download JSON ──
+async function vcSignAndDownload() {
+  if (!S.vc || !S.vc.privateJWK) {
+    el('vc-alert').innerHTML = '<div class="alert alert-err">Genera o importa prima una coppia di chiavi.</div>'; return;
+  }
+  try {
+    el('vc-alert').innerHTML = '<div class="alert alert-ok">Firma in corso&#8230;</div>';
+    const privKey = await crypto.subtle.importKey('jwk', S.vc.privateJWK,
+      { name:'ECDSA', namedCurve:'P-256' }, false, ['sign']);
+    const vc = vcBuild();
+    const payload = new TextEncoder().encode(_cj(vc));
+    const sig = await crypto.subtle.sign({ name:'ECDSA', hash:'SHA-256' }, privKey, payload);
+    const signed = Object.assign({}, vc, {
+      proof: {
+        type: 'EcdsaSecp256r1Signature2019',
+        created: new Date().toISOString(),
+        verificationMethod: S.vc.did + '#' + S.vc.did.slice('did:key:'.length),
+        proofPurpose: 'assertionMethod',
+        proofValue: _b64u(sig)
+      }
+    });
+    const blob = new Blob([JSON.stringify(signed, null, 2)], { type:'application/ld+json' });
+    const a = document.createElement('a');
+    const nome = ((S.a1||{})['vol-nome']||'vc').replace(/\s+/g,'_').toLowerCase();
+    a.href = URL.createObjectURL(blob);
+    a.download = 'hubs_vc_' + nome + '_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    el('vc-alert').innerHTML = '<div class="alert alert-ok">&#10003; Credenziale firmata e scaricata.</div>';
+  } catch(e) {
+    el('vc-alert').innerHTML = '<div class="alert alert-err">Errore firma: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+// ── Open verifier modal ──
+function vcOpenVerifier() {
+  el('vc-modal-verify').style.display = 'flex';
+  el('vc-verify-input').value = '';
+  el('vc-verify-result').innerHTML = '';
+}
+
+// ── Verify a pasted VC ──
+async function vcVerifyPasted() {
+  const raw = el('vc-verify-input').value.trim();
+  const resEl = el('vc-verify-result');
+  if (!raw) { resEl.innerHTML = '<div class="vc-result fail">Incolla il JSON della credenziale.</div>'; return; }
+  try {
+    const vc = JSON.parse(raw);
+    const proof = vc.proof;
+    if (!proof || !proof.proofValue) throw new Error('Campo proof.proofValue mancante.');
+    if (!proof.verificationMethod) throw new Error('Campo proof.verificationMethod mancante.');
+
+    // Extract DID from verificationMethod
+    const did = proof.verificationMethod.split('#')[0];
+    if (!did.startsWith('did:key:z')) throw new Error('Supportato solo did:key (prefisso z = base58btc).');
+
+    // Decode key bytes
+    const keyB58 = did.slice('did:key:z'.length);
+    const keyBytes = _b58dec(keyB58);
+    // Remove 2-byte multicodec prefix [0x80, 0x24]
+    const compressed = keyBytes.slice(2);
+    const rawPub = _decompressP256(compressed);
+
+    const pubKey = await crypto.subtle.importKey('raw', rawPub,
+      { name:'ECDSA', namedCurve:'P-256' }, false, ['verify']);
+
+    // Recreate signed payload (VC without proof)
+    const { proof: _p, ...vcNoproof } = vc;
+    const payload = new TextEncoder().encode(_cj(vcNoproof));
+    const sigBytes = _b64ud(proof.proofValue);
+    const valid = await crypto.subtle.verify({ name:'ECDSA', hash:'SHA-256' }, pubKey, sigBytes, payload);
+
+    if (valid) {
+      const subj = vc.credentialSubject || {};
+      resEl.innerHTML = '<div class="vc-result ok">'
+        + '<strong>&#10003; Firma valida</strong><br>'
+        + 'Firmatario: <code style="font-size:.72rem">' + escHtml(did) + '</code><br>'
+        + 'Soggetto: <strong>' + escHtml(subj.name || 'N/D') + '</strong>'
+        + (subj.ente ? ' — ' + escHtml(subj.ente) : '') + '<br>'
+        + 'Emessa il: ' + escHtml(vc.issuanceDate||'') + '<br>'
+        + 'Competenze: ' + ((subj.competencies||[]).length)
+        + ' | ADA validate: ' + ((subj.adas||[]).length)
+        + '</div>';
+    } else {
+      resEl.innerHTML = '<div class="vc-result fail"><strong>&#10007; Firma NON valida.</strong> Il documento potrebbe essere stato alterato dopo la firma.</div>';
+    }
+  } catch(e) {
+    resEl.innerHTML = '<div class="vc-result fail"><strong>Errore verifica:</strong> ' + escHtml(e.message) + '</div>';
+  }
+}
+// ═══════════════════════════════════════════════════════════
   initChatSystem();
 });
 </script>
