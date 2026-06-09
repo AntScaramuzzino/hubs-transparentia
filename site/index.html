@@ -33,6 +33,35 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 #hdr .hbtn.green{background:#27ae60;border-color:#27ae60}
 #hdr .hbtn.green:hover{background:#1e8449}
 #hdr .hbtn.saved-flash{background:rgba(74,222,128,.35)!important;border-color:#4ade80!important;transition:none}
+/* ── SPLIT SAVE BUTTON ── */
+.split-save-wrap{position:relative;display:inline-flex;align-items:stretch}
+.split-save-wrap .hbtn.split-main{border-radius:7px 0 0 7px;border-right:1px solid rgba(255,255,255,.08)}
+.split-save-wrap .hbtn.split-arrow{border-radius:0 7px 7px 0;padding:7px 8px;border-left:none}
+.split-save-menu{display:none;position:absolute;right:0;top:calc(100% + 5px);
+  background:#1e2a4a;border:1px solid rgba(255,255,255,.15);border-radius:8px;
+  padding:6px 0;min-width:175px;z-index:301;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.split-save-menu.open{display:block}
+.split-save-menu button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 16px;
+  color:#fff;background:none;border:none;cursor:pointer;font-size:.85rem;font-weight:600;
+  font-family:inherit;white-space:nowrap;transition:background .12s}
+.split-save-menu button:hover{background:rgba(255,255,255,.12)}
+/* ── EXPORT TOAST ── */
+.export-toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:#1e2a4a;color:#fff;border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;padding:10px 18px;font-size:.82rem;font-weight:600;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:400;
+  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;
+  display:flex;align-items:center;gap:10px;white-space:nowrap
+}
+.export-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.export-toast .et-actions{display:flex;gap:6px;margin-left:4px}
+.export-toast .et-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:#fff;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:.78rem;
+  font-weight:700;font-family:inherit;transition:background .12s;pointer-events:all}
+.export-toast .et-btn:hover{background:rgba(255,255,255,.25)}
+.export-toast .et-btn.green{background:#27ae60;border-color:#27ae60}
+.export-toast .et-btn.green:hover{background:#1e8449}
 
 /* ── HAMBURGER (desktop hidden) ── */
 #menu-btn{display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:7px;cursor:pointer;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-family:inherit}
@@ -615,16 +644,43 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <button onclick="closeActionsMenu();hubsClearLocalData()" role="menuitem" style="color:#e74c3c"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Cancella dati locali (browser)</button>
       </div>
     </div>
-    <button class="hbtn" onclick="hubsSaveLocal()" aria-label="Salva nel browser" id="btn-save" title="Salva nel browser">
-      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-      <span class="hbtn-lbl">Salva</span>
-    </button>
+    <!-- SPLIT SAVE BUTTON -->
+    <div class="split-save-wrap" id="split-save-wrap">
+      <button class="hbtn split-main" onclick="hubsSaveLocal()" id="btn-save"
+        title="Salva nel browser (temporaneo) — usa ▾ per esportare un file permanente"
+        aria-label="Salva nel browser">
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+        <span class="hbtn-lbl">Salva</span>
+      </button>
+      <button class="hbtn split-arrow" onclick="toggleSplitSaveMenu()" id="btn-save-arrow"
+        title="Esporta PDF o JSON" aria-label="Opzioni di esportazione" aria-haspopup="true">
+        <i class="fa-solid fa-chevron-down" style="font-size:.68rem" aria-hidden="true"></i>
+      </button>
+      <div class="split-save-menu" id="split-save-menu" role="menu">
+        <button onclick="closeSplitSaveMenu();exportSessionPdf()" role="menuitem">
+          <i class="fa-regular fa-file-pdf" aria-hidden="true"></i> Esporta PDF
+        </button>
+        <button onclick="closeSplitSaveMenu();saveSession()" role="menuitem">
+          <i class="fa-solid fa-file-export" aria-hidden="true"></i> Esporta JSON
+        </button>
+      </div>
+    </div>
     <button class="hbtn green" onclick="exportSessionPdf()" aria-label="Esporta PDF">
       <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
       <span class="hbtn-lbl">PDF</span>
     </button>
   </div>
   <input type="file" id="load-input" accept=".json,.pdf" style="display:none" onchange="loadSession(event)">
+</div>
+<!-- EXPORT REMINDER TOAST -->
+<div class="export-toast" id="export-toast" role="status" aria-live="polite">
+  <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+  <span>Salvato nel browser · non dimenticare di esportare!</span>
+  <div class="et-actions">
+    <button class="et-btn green" onclick="dismissExportToast();exportSessionPdf()">PDF</button>
+    <button class="et-btn" onclick="dismissExportToast();saveSession()">JSON</button>
+    <button class="et-btn" onclick="dismissExportToast()" aria-label="Chiudi">✕</button>
+  </div>
 </div>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -1917,10 +1973,33 @@ function toggleActionsMenu() {
 function closeActionsMenu() {
   el('actions-menu').classList.remove('open');
 }
+function toggleSplitSaveMenu() {
+  const m = el('split-save-menu');
+  if(m) m.classList.toggle('open');
+}
+function closeSplitSaveMenu() {
+  const m = el('split-save-menu');
+  if(m) m.classList.remove('open');
+}
+var _exportToastTimer = null;
+function showExportToast() {
+  const t = el('export-toast');
+  if(!t) return;
+  t.classList.add('show');
+  clearTimeout(_exportToastTimer);
+  _exportToastTimer = setTimeout(function(){ dismissExportToast(); }, 7000);
+}
+function dismissExportToast() {
+  const t = el('export-toast');
+  if(t) t.classList.remove('show');
+  clearTimeout(_exportToastTimer);
+}
 // Close on outside click
 document.addEventListener('click', function(e) {
   const am = el('actions-menu'), ab = el('hbtn-actions');
   if(am && ab && !ab.contains(e.target)) am.classList.remove('open');
+  const sm = el('split-save-menu'), sw = el('split-save-wrap');
+  if(sm && sw && !sw.contains(e.target)) sm.classList.remove('open');
 });
 
 // ── COLLAPSIBLE SECTIONS ────────────────────────────────────
@@ -4540,13 +4619,15 @@ async function vcVerifyPasted() {
     autosave('manual');
     paintStatus('autosaved');
     var dot = document.getElementById('sess-dot');
-    if (dot) { dot.style.background = '#4ade80'; dot.title = 'Salvato nel browser'; }
+    if (dot) { dot.style.background = '#4ade80'; dot.title = 'Salvato nel browser — esporta in PDF o JSON per archiviare'; }
     // Brief flash feedback on button
     var btn = document.getElementById('btn-save');
     if (btn) {
       btn.classList.add('saved-flash');
       setTimeout(function(){ btn.classList.remove('saved-flash'); }, 1200);
     }
+    // Remind user to export
+    if (typeof showExportToast === 'function') showExportToast();
   };
 
   if (typeof window.saveSession === 'function') {
