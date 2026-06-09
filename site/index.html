@@ -949,7 +949,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card">
       <div class="card-title"><i class="fa-solid fa-calendar-days"></i> Dati del Percorso</div>
       <div class="frow"><label for="a1-percorso-settore">Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
-      <div class="frow"><label for="a1-percorso-luogo">Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
+      <div class="frow"><label for="a1-percorso-luogo">Luogo di svolgimento<span class="required-mark">*</span></label><input type="text" id="a1-percorso-luogo" required aria-required="true"></div>
       <div class="frow inline">
         <div><label for="a1-percorso-dataInizio">Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
         <div><label for="a1-percorso-dataFine">Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
@@ -1570,7 +1570,13 @@ function showAlert(containerId, msg, type='info') {
 }
 
 function today() {
-  return new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+function fmtDate(s) {
+  if(!s) return '___';
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?`${m[3]}.${m[2]}.${m[1]}`:s;
 }
 
 // ============================================================
@@ -2072,13 +2078,14 @@ function validateA1() {
   if(!S.a1.ente.denominazione) missing.push('Denominazione ente');
   if(!S.a1.ente.tutor) missing.push('Tutor / Responsabile');
   if(!S.a1.percorso.dataInizio) missing.push('Data inizio percorso');
+  if(!S.a1.percorso.luogo) missing.push('Luogo di svolgimento');
   // Check obiettivi
   const objInputs = document.querySelectorAll('#a1-obiettivi-list .obj-input');
   let objFilled = 0;
   objInputs.forEach((inp,i) => { if(inp.value.trim()) objFilled++; else if(i<3) inp.classList.add('invalid'); });
   if(objFilled < 3) missing.push('Almeno 3 obiettivi specifici di apprendimento');
   // Highlight fields
-  ['a1-vol-nome','a1-vol-cognome','a1-ente-denominazione','a1-ente-tutor','a1-percorso-dataInizio'].forEach(id => {
+  ['a1-vol-nome','a1-vol-cognome','a1-ente-denominazione','a1-ente-tutor','a1-percorso-dataInizio','a1-percorso-luogo'].forEach(id => {
     const inp = el(id);
     if(inp) inp.classList.toggle('invalid', !inp.value.trim());
   });
@@ -3560,7 +3567,7 @@ function renderDocPreview() {
       <table><tbody>
         <tr><td style="width:40%;background:#f9f9f9"><strong>Cognome</strong></td><td>${v.cognome||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Nome</strong></td><td>${v.nome||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data di nascita</strong></td><td>${fmtDate(v.dob)}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Codice fiscale</strong></td><td>${v.cf||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Cittadinanza</strong></td><td>${v.cittadinanza||'___'}</td></tr>
@@ -3574,8 +3581,8 @@ function renderDocPreview() {
       <table><tbody>
         <tr><td style="width:40%;background:#f9f9f9"><strong>Descrizione del percorso / attività svolta</strong></td><td>${p.attivita||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
-        <tr><td style="background:#f9f9f9"><strong>Data fine</strong></td><td>${p.dataFine||'___'}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data inizio</strong></td><td>${fmtDate(p.dataInizio)}</td></tr>
+        <tr><td style="background:#f9f9f9"><strong>Data fine</strong></td><td>${fmtDate(p.dataFine)}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Ore totali previste</strong></td><td>${p.orePreviste||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Ore totali effettivamente svolte</strong></td><td>${p.oreSvolte||'___'}</td></tr>
         <tr><td style="background:#f9f9f9"><strong>Percentuale di presenza</strong></td><td>${percNum}%</td></tr>
@@ -3643,7 +3650,7 @@ function renderDocPreview() {
         <tbody>
           <tr><td style="background:#f9f9f9"><strong>Nome e cognome</strong></td><td>${e.tutor||'___'}</td><td>${v.nome||'___'} ${v.cognome||'___'}</td></tr>
           <tr><td style="background:#f9f9f9"><strong>Ente</strong></td><td>${e.denominazione||'___'}</td><td></td></tr>
-          <tr><td style="background:#f9f9f9"><strong>Luogo e data</strong></td><td>${e.indirizzo?e.indirizzo.split(',').pop().trim():''}, ${today()}</td><td></td></tr>
+          <tr><td style="background:#f9f9f9"><strong>Luogo e data</strong></td><td>${p.luogo||'___'}, ${today()}</td><td></td></tr>
           <tr><td style="background:#f9f9f9"><strong>Firma</strong></td><td style="height:40px"></td><td style="height:40px"></td></tr>
         </tbody>
       </table>
@@ -3697,7 +3704,7 @@ function downloadDocx() {
 
   let s5rows='';
   S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
-    s5rows+=`<tr><td style="text-align:center">${i+1}</td><td>${ev.tipo||'—'}</td><td>${ev.titolo||'—'}</td><td>${ev.data||'—'}</td><td style="text-align:center">${ev.fvaQuadrante||'—'}</td><td style="text-align:center">${ev.esito==='accettata'?'SI':ev.esito==='riserva'?'(+/-)':'—'}</td></tr>`;
+    s5rows+=`<tr><td style="text-align:center">${i+1}</td><td>${ev.tipo||'—'}</td><td>${ev.titolo||'—'}</td><td>${fmtDate(ev.data)||'—'}</td><td style="text-align:center">${ev.fvaQuadrante||'—'}</td><td style="text-align:center">${ev.esito==='accettata'?'SI':ev.esito==='riserva'?'(+/-)':'—'}</td></tr>`;
   });
   if(!s5rows) s5rows='<tr><td colspan="6" style="text-align:center;color:#999">Nessuna evidenza registrata nella Fase 3</td></tr>';
 
@@ -3741,7 +3748,7 @@ function downloadDocx() {
     <table><tbody>
       <tr><td style="width:40%;background:#f5f5f5"><strong>Cognome</strong></td><td>${v.cognome||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Nome</strong></td><td>${v.nome||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data di nascita</strong></td><td>${fmtDate(v.dob)}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Codice fiscale</strong></td><td>${v.cf||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Cittadinanza</strong></td><td>${v.cittadinanza||'___'}</td></tr>
@@ -3753,8 +3760,8 @@ function downloadDocx() {
     <table><tbody>
       <tr><td style="width:40%;background:#f5f5f5"><strong>Descrizione attività svolta</strong></td><td>${p.attivita||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
-      <tr><td style="background:#f5f5f5"><strong>Data fine</strong></td><td>${p.dataFine||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data inizio</strong></td><td>${fmtDate(p.dataInizio)}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data fine</strong></td><td>${fmtDate(p.dataFine)}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Ore totali previste</strong></td><td>${p.orePreviste||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Ore totali svolte</strong></td><td>${p.oreSvolte||'___'}</td></tr>
       <tr><td style="background:#f5f5f5"><strong>Percentuale di presenza</strong></td><td>${percNum}%</td></tr>
@@ -3808,7 +3815,7 @@ function downloadDocx() {
       <tbody>
         <tr><td style="background:#f5f5f5"><strong>Nome e cognome</strong></td><td>${e.tutor||'___'}</td><td>${v.nome||''} ${v.cognome||'___'}</td></tr>
         <tr><td style="background:#f5f5f5"><strong>Ente</strong></td><td>${e.denominazione||'___'}</td><td></td></tr>
-        <tr><td style="background:#f5f5f5"><strong>Luogo e data</strong></td><td>${dataOggi}</td><td></td></tr>
+        <tr><td style="background:#f5f5f5"><strong>Luogo e data</strong></td><td>${p.luogo||'___'}, ${dataOggi}</td><td></td></tr>
         <tr><td style="background:#f5f5f5"><strong>Firma</strong></td><td style="height:35pt"></td><td style="height:35pt"></td></tr>
       </tbody>
     </table>
