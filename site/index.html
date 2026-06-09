@@ -1385,6 +1385,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <button class="btn btn-outline" onclick="showScreen('a4')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 4</button>
     <div class="flex gap8">
       <button class="btn btn-a5" onclick="hubsSaveLocal()"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salva</button>
+      <button class="btn btn-outline" onclick="collectA5();renderDocPreview()"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Aggiorna anteprima</button>
       <button class="btn btn-success" onclick="guardedDownloadDocx()"><i class="fa-regular fa-file-word" aria-hidden="true"></i> Esporta DOCX</button>
     </div>
   </div>
@@ -2591,10 +2592,7 @@ function downloadPattoDocx() {
   collectA1(); renderPattoPreview();
   const preview=el('patto-preview'); if(!preview) return;
   const name=((S.a1.vol.cognome||'')+'_'+(S.a1.vol.nome||'volontario')).replace(/\s/g,'_');
-  const htmlContent=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:w="urn:schemas-microsoft-com:office:word"
-    xmlns="http://www.w3.org/TR/REC-html40">
-    <head><meta charset="utf-8">
+  const htmlContent=`<!DOCTYPE html><html><head><meta charset="utf-8">
     <style>
       body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
       table{border-collapse:collapse;width:100%}
@@ -3711,10 +3709,7 @@ function downloadDocx() {
   const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
   const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
 
-  const htmlContent=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:w="urn:schemas-microsoft-com:office:word"
-    xmlns="http://www.w3.org/TR/REC-html40">
-    <head><meta charset="utf-8">
+  const htmlContent=`<!DOCTYPE html><html><head><meta charset="utf-8">
     <style>
       body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;color:#000}
       table{border-collapse:collapse;width:100%;margin-bottom:10pt}
@@ -3824,11 +3819,32 @@ function downloadDocx() {
     Trattamento dati ai sensi del Regolamento UE 2016/679 (GDPR) — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · ${dataOggi}</p>
     </body></html>`;
 
-  const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
-  a.click();
+  if(window.htmlDocx) {
+    const blob=window.htmlDocx.asBlob(htmlContent);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
+    a.click();
+  } else {
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js';
+    s.onload=function(){
+      const blob=window.htmlDocx.asBlob(htmlContent);
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
+      a.click();
+    };
+    s.onerror=function(){
+      // fallback: plain download
+      const blob=new Blob([htmlContent],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
+      a.click();
+    };
+    document.head.appendChild(s);
+  }
 }
 
 function downloadPdf() {
