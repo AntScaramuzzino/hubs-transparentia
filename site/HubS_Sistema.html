@@ -387,6 +387,9 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .card-title i{color:var(--sub);font-size:.8rem}
 .card.card-info{background:#eafaf1;border-color:#a7f3d0}
 .card.card-info p{font-size:.82rem;color:#1b6b3a}
+.card.card-patto{border-top:3px solid var(--c-a1);background:#fafbff}
+.card-title.card-title-patto{color:var(--c-a1);border-bottom-color:var(--c-a1,var(--border));opacity:.85}
+.card-title.card-title-patto i{color:var(--c-a1)}
 
 /* GRID */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1092,22 +1095,23 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
   </div>
 
-  <!-- NOTE + PATTO -->
-  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Note del Tutor · Bozza Patto di Servizio</span><span class="sez-toggle-ico">▲</span></div>
-  <div class="grid2">
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del tutor (fase di accoglienza)</div>
-      <div class="frow mb0"><textarea id="a1-note" rows="4" placeholder="Osservazioni iniziali, motivazioni emerse, contesto del volontario..."></textarea></div>
+  <!-- NOTE TUTOR -->
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del Tutor</span><span class="sez-toggle-ico">▲</span></div>
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del tutor (fase di accoglienza)</div>
+    <div class="frow mb0"><textarea id="a1-note" rows="5" placeholder="Osservazioni iniziali, motivazioni emerse, contesto del volontario..."></textarea></div>
+  </div>
+
+  <!-- PATTO DI SERVIZIO -->
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Bozza Patto di Servizio</span><span class="sez-toggle-ico">▲</span></div>
+  <div class="card card-patto">
+    <div class="card-title card-title-patto"><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Bozza Patto di Servizio — Modulo 02</div>
+    <div class="flex gap12" style="margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-a1" onclick="renderPattoPreview()"><i class="fa-solid fa-rotate"></i> Aggiorna anteprima</button>
+      <button class="btn btn-a1" onclick="downloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
+      <button class="btn btn-outline" onclick="downloadPattoPdf()"><i class="fa-solid fa-print"></i> Stampa / PDF</button>
     </div>
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Bozza Patto di Servizio — Modulo 02</div>
-      <div class="flex gap12 mb0" style="margin-bottom:14px;flex-wrap:wrap">
-        <button class="btn btn-a1" onclick="renderPattoPreview()"><i class="fa-solid fa-rotate"></i> Aggiorna anteprima</button>
-        <button class="btn btn-a1" onclick="downloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
-        <button class="btn btn-outline" onclick="downloadPattoPdf()"><i class="fa-solid fa-print"></i> Stampa / PDF</button>
-      </div>
-      <div id="patto-preview-container"></div>
-    </div>
+    <div id="patto-preview-container"></div>
   </div>
 
   <div id="a1-val-banner" class="val-banner"></div>
