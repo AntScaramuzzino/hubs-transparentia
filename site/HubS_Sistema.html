@@ -1374,6 +1374,12 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Note del tutor (documento finale)</div>
     <div class="frow mb0"><textarea id="a5-notetutor" rows="3" placeholder="Osservazioni conclusive sull'esperienza e sullo sviluppo del volontario..."></textarea></div>
   </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;margin-top:16px">
+    <span style="font-size:.78rem;color:#888;font-style:italic">Anteprima documento di trasparenza</span>
+    <button class="btn btn-outline btn-sm" onclick="collectA5();renderDocPreview()" style="gap:6px">
+      <i class="fa-solid fa-rotate" aria-hidden="true"></i> Aggiorna anteprima
+    </button>
+  </div>
   <div id="doc-preview-container"></div>
   <div class="agent-nav-footer">
     <button class="btn btn-outline" onclick="showScreen('a4')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Fase 4</button>
@@ -3653,27 +3659,168 @@ function renderDocPreview() {
 }
 
 function downloadDocx() {
-  collectA5(); renderDocPreview();
-  const preview=el('doc-preview'); if(!preview) return;
-  const name=((S.a1.vol.cognome||'')+'_'+(S.a1.vol.nome||'volontario')).replace(/\s/g,'_');
+  collectA5();
+  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+  const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
+  const dataOggi=today();
+
+  const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+  let s41rows=''; let rowN=0;
+  validated.forEach(([ak,m])=>{
+    const ada=ADA_DB[ak]; if(!ada) return;
+    (ada.ra||[]).forEach((ra,ri)=>{
+      rowN++;
+      const cov=m.copertura?m.copertura[ri]:'';
+      s41rows+=`<tr><td style="text-align:center">${rowN}</td><td>${m.attivita||p.attivita||''}</td><td>${ada.code}</td><td>${ada.desc}</td><td>${ra.code}</td><td>${ra.desc}</td><td style="text-align:center">${m.livello||'—'}</td><td>${cov||'—'}</td></tr>`;
+    });
+  });
+  if(!s41rows) s41rows='<tr><td colspan="8" style="text-align:center;color:#999">Sezione vuota — completare la Fase 4</td></tr>';
+
+  let s42rows='';
+  DIGCOMP.forEach(dc=>{
+    const a2d=S.a2.dc[dc.id]||{livello:0,note:''};
+    const m=S.a4.mappings[dc.ada]||{};
+    s42rows+=`<tr><td>${dc.area}</td><td>${dc.nome}</td><td>${dc.ada}</td><td style="text-align:center">${a2d.livello||m.livello||'—'}</td><td>${a2d.note||''}</td></tr>`;
+  });
+
+  let s43rows='';
+  LIFECOMP.forEach(lc=>{
+    const a2l=S.a2.lc[lc.id]||{livello:0,note:''};
+    s43rows+=`<tr><td>${lc.area}</td><td>${lc.nome}</td><td>${a2l.note||''}</td><td style="text-align:center">${a2l.livello||'—'}</td></tr>`;
+  });
+
+  let s44rows='';
+  ENTRECOMP.forEach(ec=>{
+    const a2e=S.a2.ec[ec.id]||{livello:0,note:''};
+    s44rows+=`<tr><td>${ec.area}</td><td>${ec.nome}</td><td>${a2e.note||''}</td><td style="text-align:center">${a2e.livello||'—'}</td></tr>`;
+  });
+
+  let s5rows='';
+  S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
+    s5rows+=`<tr><td style="text-align:center">${i+1}</td><td>${ev.tipo||'—'}</td><td>${ev.titolo||'—'}</td><td>${ev.data||'—'}</td><td style="text-align:center">${ev.fvaQuadrante||'—'}</td><td style="text-align:center">${ev.esito==='accettata'?'SI':ev.esito==='riserva'?'(+/-)':'—'}</td></tr>`;
+  });
+  if(!s5rows) s5rows='<tr><td colspan="6" style="text-align:center;color:#999">Nessuna evidenza registrata nella Fase 3</td></tr>';
+
+  const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
+  const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
+
   const htmlContent=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
     xmlns:w="urn:schemas-microsoft-com:office:word"
     xmlns="http://www.w3.org/TR/REC-html40">
     <head><meta charset="utf-8">
     <style>
-      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
-      table{border-collapse:collapse;width:100%}
-      td,th{border:1px solid #ccc;padding:4pt 6pt;font-size:9pt}
-      th{background:#eeeeee;font-weight:bold}
-      h1{font-size:14pt;text-align:center}h2{font-size:12pt;text-align:center}
-      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
-    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
-</style></head>
-    <body>${preview.innerHTML}</body></html>`;
+      body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;color:#000}
+      table{border-collapse:collapse;width:100%;margin-bottom:10pt}
+      td,th{border:1px solid #999;padding:4pt 6pt;font-size:9pt;vertical-align:top}
+      th{background:#eeeeee;font-weight:bold;font-size:8.5pt;text-align:left}
+      h1{font-size:14pt;text-align:center;margin-bottom:4pt}
+      h2{font-size:11pt;text-align:center;color:#555;margin-bottom:8pt}
+      h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin:14pt 0 6pt}
+      p{font-size:10pt;margin:4pt 0 8pt}
+      small{font-size:8pt;color:#666}
+      .footer{font-size:8pt;color:#999;text-align:center;margin-top:20pt;border-top:1pt solid #ddd;padding-top:8pt}
+    </style></head>
+    <body>
+    <h1>DOCUMENTO DI TRASPARENZA</h1>
+    <h2>HubS – Spazi di Innovazione Sociale<br>
+    <small>Messa in trasparenza delle competenze acquisite in contesti non formali e informali<br>
+    Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021</small></h2>
+
+    <h3>Sezione 1 — Ente di Accoglienza</h3>
+    <table><tbody>
+      <tr><td style="width:40%;background:#f5f5f5"><strong>Denominazione ente</strong></td><td>${e.denominazione||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Codice fiscale</strong></td><td>${e.cfEnte||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Tipologia ente</strong></td><td>${e.tipo||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Indirizzo sede legale</strong></td><td>${e.indirizzo||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Rappresentante legale</strong></td><td>${e.repLegale||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Tutor / Responsabile accompagnamento</strong></td><td>${e.tutor||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Codice progetto HubS</strong></td><td>${e.codice||'___'}</td></tr>
+    </tbody></table>
+
+    <h3>Sezione 2 — Dati del Volontario</h3>
+    <table><tbody>
+      <tr><td style="width:40%;background:#f5f5f5"><strong>Cognome</strong></td><td>${v.cognome||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Nome</strong></td><td>${v.nome||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data di nascita</strong></td><td>${v.dob||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Luogo di nascita</strong></td><td>${v.luogoNascita||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Codice fiscale</strong></td><td>${v.cf||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Cittadinanza</strong></td><td>${v.cittadinanza||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Titolo di studio</strong></td><td>${v.titoloStudio||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Situazione occupazionale</strong></td><td>${v.occupazione||'___'}</td></tr>
+    </tbody></table>
+
+    <h3>Sezione 3 — Dati del Percorso</h3>
+    <table><tbody>
+      <tr><td style="width:40%;background:#f5f5f5"><strong>Descrizione attività svolta</strong></td><td>${p.attivita||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Settore di attività</strong></td><td>${p.settore||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data inizio</strong></td><td>${p.dataInizio||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Data fine</strong></td><td>${p.dataFine||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Ore totali previste</strong></td><td>${p.orePreviste||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Ore totali svolte</strong></td><td>${p.oreSvolte||'___'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Percentuale di presenza</strong></td><td>${percNum}%</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Soglia minima 75% raggiunta</strong></td><td>${percNum>=75?'Si':'No'}</td></tr>
+      <tr><td style="background:#f5f5f5"><strong>Luogo di svolgimento</strong></td><td>${p.luogo||'___'}</td></tr>
+    </tbody></table>
+
+    <h3>Sezione 4.1 — Mappatura verso l'Atlante del Lavoro INAPP</h3>
+    <p style="font-size:8.5pt;color:#666;font-style:italic">Conforme Allegato A — DI 5 gennaio 2021. Scala livelli: 1=Esecutivo · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise</p>
+    <table>
+      <thead><tr>
+        <th>N.</th><th>Attivita svolta</th><th>ADA Codice</th><th>ADA Descrizione</th>
+        <th>RA Codice</th><th>RA Descrizione</th><th>Livello (1-4)</th><th>Copertura RA</th>
+      </tr></thead>
+      <tbody>${s41rows}</tbody>
+    </table>
+
+    <h3>Sezione 4.2 — Competenza Digitale — DigComp 2.2</h3>
+    <table>
+      <thead><tr><th>Area DigComp</th><th>Competenza specifica</th><th>ADA di riferimento</th><th>Livello (1-4)</th><th>Note / esempio</th></tr></thead>
+      <tbody>${s42rows}</tbody>
+    </table>
+
+    <h3>Sezione 4.3 — Competenza Personale e Sociale — LifeComp</h3>
+    <p style="font-size:8.5pt;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
+    <table>
+      <thead><tr><th>Area LifeComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1-4)</th></tr></thead>
+      <tbody>${s43rows}</tbody>
+    </table>
+
+    <h3>Sezione 4.4 — Competenza Imprenditoriale — EntreComp</h3>
+    <p style="font-size:8.5pt;color:#666;font-style:italic">Mappatura verso ADA in elaborazione INAPP (metamodello, atteso fine 2026)</p>
+    <table>
+      <thead><tr><th>Area EntreComp</th><th>Competenza specifica</th><th>Descrizione manifestazione</th><th>Livello (1-4)</th></tr></thead>
+      <tbody>${s44rows}</tbody>
+    </table>
+
+    <h3>Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)</h3>
+    <table>
+      <thead><tr><th>N.</th><th>Tipo di evidenza</th><th>Descrizione</th><th>Data</th><th>Quadrante FVA</th><th>Validazione tutor</th></tr></thead>
+      <tbody>${s5rows}</tbody>
+    </table>
+
+    <h3>Sezione 6 — Note del Tutor</h3>
+    <p style="border:1pt solid #ccc;padding:6pt;min-height:40pt">${S.a5.notetutor||'___'}</p>
+
+    <h3>Sezione 7 — Dichiarazioni e Firme</h3>
+    <p style="font-size:9pt">Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.</p>
+    <table>
+      <thead><tr><th></th><th>Responsabile accompagnamento (Tutor)</th><th>Volontario/a</th></tr></thead>
+      <tbody>
+        <tr><td style="background:#f5f5f5"><strong>Nome e cognome</strong></td><td>${e.tutor||'___'}</td><td>${v.nome||''} ${v.cognome||'___'}</td></tr>
+        <tr><td style="background:#f5f5f5"><strong>Ente</strong></td><td>${e.denominazione||'___'}</td><td></td></tr>
+        <tr><td style="background:#f5f5f5"><strong>Luogo e data</strong></td><td>${dataOggi}</td><td></td></tr>
+        <tr><td style="background:#f5f5f5"><strong>Firma</strong></td><td style="height:35pt"></td><td style="height:35pt"></td></tr>
+      </tbody>
+    </table>
+
+    <p class="footer">Documento conforme all'Allegato A del Decreto Interministeriale 5 gennaio 2021, come richiesto dall'Art. 5, comma 1, lett. d) del DI 31 luglio 2025.<br>
+    Trattamento dati ai sensi del Regolamento UE 2016/679 (GDPR) — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · ${dataOggi}</p>
+    </body></html>`;
+
   const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`HubS_DocTrasparenza_${name}_${new Date().toISOString().slice(0,10)}.docx`;
+  a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
   a.click();
 }
 
