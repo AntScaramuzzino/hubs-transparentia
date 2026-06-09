@@ -1,12 +1,12 @@
 // Vercel Serverless Function — firma Ed25519 per Verifiable Credentials
-// Richiede env var: VC_SIGNING_PRIVATE_KEY (chiave Ed25519 in formato PEM PKCS#8)
+// Env var richiesta: VC_SIGNING_PRIVATE_KEY (chiave Ed25519 PKCS#8 PEM)
 //
-// Per generare la chiave (una tantum, da eseguire in locale):
+// Generazione chiave (una tantum in locale):
 //   node -e "const {generateKeyPairSync}=require('crypto');
 //     const kp=generateKeyPairSync('ed25519');
 //     console.log(kp.privateKey.export({type:'pkcs8',format:'pem'}));"
-// Poi impostare VC_SIGNING_PRIVATE_KEY in Vercel → Settings → Environment Variables
-// (sostituire i newline con \n nella stringa)
+// Copiare l'intero output (incluse le righe -----BEGIN/END PRIVATE KEY-----)
+// e incollarlo nel campo VC_SIGNING_PRIVATE_KEY su Vercel.
 
 const { createPrivateKey, sign: cryptoSign } = require('crypto');
 
@@ -16,8 +16,26 @@ const ORIGIN_PATTERNS = [
   /^http:\/\/127\.0\.0\.1(:\d+)?$/
 ];
 const isAllowedOrigin = (o) => ORIGIN_PATTERNS.some((re) => re.test(o));
-
 const VC_DID = 'did:web:hubs-transparentia.vercel.app';
+
+function parsePem(raw) {
+  // Normalizza newline (Vercel può avere \n letterale o \\n come escape)
+  let pem = raw
+    .replace(/\\n/g, '\n')  // escaped \n → newline reale
+    .replace(/\r\n/g, '\n') // CRLF → LF
+    .trim();
+
+  // Se l'utente ha copiato solo la parte base64 senza header PEM, lo avvolgiamo
+  if (!pem.startsWith('-----')) {
+    pem = '-----BEGIN PRIVATE KEY-----\n' + pem + '\n-----END PRIVATE KEY-----';
+  }
+
+  // Estrai solo il blocco PEM valido (in caso ci sia testo extra prima/dopo)
+  const match = pem.match(/(-----BEGIN [A-Z ]+-----[\s\S]+?-----END [A-Z ]+-----)/);
+  if (match) pem = match[1];
+
+  return pem;
+}
 
 module.exports = async function handler(req, res) {
   const origin = req.headers.origin || '';
@@ -35,8 +53,8 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Origine non autorizzata' });
   }
 
-  const privateKeyPem = process.env.VC_SIGNING_PRIVATE_KEY;
-  if (!privateKeyPem) {
+  const rawPem = process.env.VC_SIGNING_PRIVATE_KEY;
+  if (!rawPem) {
     return res.status(500).json({ error: 'VC_SIGNING_PRIVATE_KEY non configurata su Vercel' });
   }
 
@@ -49,12 +67,18 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Normalizza newline (Vercel env vars usano \n letterale)
-    const pem = privateKeyPem.replace(/\\n/g, '\n');
-    const privateKey = createPrivateKey(pem);
+    const pem = parsePem(rawPem);
+    const privateKey = createPrivateKey({ key: pem, format: 'pem', type: 'pkcs8' });
+
     if (privateKey.asymmetricKeyType !== 'ed25519') {
-      throw new Error('La chiave configurata non è Ed25519');
+      return res.status(500).json({
+        error: `Tipo chiave errato: trovato "${privateKey.asymmetricKeyType}", atteso "ed25519". ` +
+               'Rigenerare con: node -e "const {generateKeyPairSync}=require(\'crypto\'); ' +
+               'const kp=generateKeyPairSync(\'ed25519\'); ' +
+               'console.log(kp.privateKey.export({type:\'pkcs8\',format:\'pem\'}))"'
+      });
     }
+
     const data = Buffer.from(payload, 'utf8');
     const signature = cryptoSign(null, data, privateKey);
 
@@ -64,6 +88,12 @@ module.exports = async function handler(req, res) {
       keyId:      `${VC_DID}#key-1`
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Errore firma: ' + err.message });
+    // Messaggio diagnostico senza esporre la chiave
+    const pemSnippet = rawPem ? rawPem.substring(0, 30).replace(/\n/g, '\\n') + '...' : '(vuoto)';
+    return res.status(500).json({
+      error: `Errore parsing chiave: ${err.message}`,
+      hint: `Primi 30 char env var: "${pemSnippet}". ` +
+            'Assicurarsi che la chiave sia PKCS#8 PEM (-----BEGIN PRIVATE KEY-----).'
+    });
   }
 };
