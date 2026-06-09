@@ -13,7 +13,7 @@
   --arancio:#92400E;--arancio-light:#FFFBEB;--arancio-border:#FCD34D;
   --viola:#5B21B6;--viola-light:#F5F3FF;--viola-border:#C4B5FD;
   --rosso:#991B1B;--rosso-light:#FEF2F2;--rosso-border:#FECACA;
-  --text:#111827;--sub:#6B7280;--border:#E5E7EB;--bg:#F1F5F9;
+  --text:#111827;--sub:#6B7280;--border:#E5E7EB;--bg:#e8ecf2;
   --white:#fff;--sidebar:272px;--radius:12px;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.06)
 }
@@ -21,21 +21,21 @@ html{scroll-behavior:smooth}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;font-size:15px}
 
 /* NAV */
-nav{background:var(--text);color:#fff;padding:0 28px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.35)}
-nav .logo{font-weight:800;font-size:1.1rem;color:#fff;text-decoration:none;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
-nav .logo i{color:#60A5FA;font-size:.9rem}
-nav .logo span{color:#60A5FA}
+nav{background:linear-gradient(90deg,#12172e,#1e2a4a);color:#fff;padding:0 28px;display:flex;align-items:center;gap:16px;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 14px rgba(0,0,0,.38)}
+nav .logo{font-weight:800;font-size:1.22rem;color:#fff;text-decoration:none;letter-spacing:-.4px;display:flex;align-items:center;gap:9px}
+nav .logo i{color:#2ecc71;font-size:1rem}
+nav .logo span{color:#27ae60}
 nav .sep{color:#4B5563;font-size:.9rem}
 nav .crumb{color:#9CA3AF;font-size:.88rem}
 nav .spacer{flex:1}
-nav a.btn-app{background:var(--blu);color:#fff;padding:7px 18px;border-radius:7px;text-decoration:none;font-size:.85rem;font-weight:700;transition:.15s;display:flex;align-items:center;gap:7px}
-nav a.btn-app:hover{background:#1e40af;transform:translateY(-1px)}
+nav a.btn-app{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 15px;border-radius:7px;text-decoration:none;font-size:.84rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:7px}
+nav a.btn-app:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 
 /* LAYOUT */
-.layout{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:calc(100vh - 56px)}
+.layout{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:calc(100vh - 64px)}
 
 /* SIDEBAR */
-aside{background:#fff;border-right:1px solid var(--border);padding:24px 0 40px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+aside{background:#fff;border-right:1px solid var(--border);padding:24px 0 40px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
 aside .section-label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);padding:18px 20px 6px;display:flex;align-items:center;gap:6px}
 aside a{display:flex;align-items:center;gap:11px;padding:9px 20px;color:#374151;text-decoration:none;font-size:.9rem;transition:.12s;border-left:3px solid transparent;position:relative}
 aside a i{width:16px;text-align:center;flex-shrink:0;font-size:.88rem;color:var(--sub);transition:.12s}
@@ -183,7 +183,7 @@ details[open] summary{border-bottom:1px solid var(--border);color:var(--blu);bac
 /* FOOTER */
 footer{background:var(--text);color:#9CA3AF;text-align:center;padding:32px 24px;font-size:.86rem;margin-top:0}
 footer .footer-logo{font-weight:800;color:#fff;font-size:1rem;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
-footer .footer-logo i{color:#60A5FA}
+footer .footer-logo i{color:#2ecc71}
 footer p{margin-top:8px}
 footer a{color:#60A5FA;text-decoration:none;font-weight:600}
 footer a:hover{text-decoration:underline}
@@ -199,7 +199,7 @@ footer .footer-links a{display:flex;align-items:center;gap:6px;font-size:.83rem}
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="/"><i class="fa-solid fa-network-wired"></i>HubS<span>-TransparentIA</span></a>
+  <a class="logo" href="/"><i class="fa-solid fa-network-wired"></i>HubS<span>·</span>TransparentIA</a>
   <span class="sep"><i class="fa-solid fa-chevron-right" style="font-size:.7rem"></i></span>
   <span class="crumb">Guida &amp; Documenti</span>
   <span class="spacer"></span>
@@ -748,7 +748,7 @@ footer .footer-links a{display:flex;align-items:center;gap:6px;font-size:.83rem}
 </div>
 
 <footer>
-  <div class="footer-logo"><i class="fa-solid fa-network-wired"></i> HubS-TransparentIA</div>
+  <div class="footer-logo"><i class="fa-solid fa-network-wired"></i> HubS·TransparentIA</div>
   <p>ASC Calabria · Sistema per la messa in trasparenza delle competenze dei volontari</p>
   <p style="margin-top:6px;font-size:.8rem">Conforme al DI 31 luglio 2025 · Allegato A DI 5 gennaio 2021 · GDPR 2016/679</p>
   <div class="footer-links">
