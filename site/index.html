@@ -2618,7 +2618,7 @@ function _wH(text, level) {
   const sz={1:32,2:26,3:22}[level]||20;
   const center=(level<=2)?'<w:jc w:val="center"/>':'';
   const border=(level===3)?'<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="2" w:color="333333"/></w:pBdr>':'';
-  const sp={1:'before="240" after="120"',2:'before="160" after="80"',3:'before="140" after="60"'}[level]||'before="100" after="60"';
+  const sp={1:'w:before="240" w:after="120"',2:'w:before="160" w:after="80"',3:'w:before="140" w:after="60"'}[level]||'w:before="100" w:after="60"';
   return `<w:p><w:pPr>${border}<w:spacing ${sp}/>${center}</w:pPr><w:r><w:rPr><w:b/><w:bCs/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
 }
 function _wP(text, opts) {
@@ -2630,7 +2630,7 @@ function _wP(text, opts) {
   const al=o.align?`<w:jc w:val="${o.align}"/>`:'';
   const sp=o.spacing?`<w:spacing ${o.spacing}/>`:'';
   const pBdr=o.topBorder?'<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="DDDDDD"/></w:pBdr>':'';
-  return `<w:p><w:pPr>${pBdr}${al}${sp}</w:pPr><w:r><w:rPr>${b}${i}${sz}${col}</w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
+  return `<w:p><w:pPr>${pBdr}${sp}${al}</w:pPr><w:r><w:rPr>${b}${i}${sz}${col}</w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
 }
 function _wBr() { return '<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>'; }
 function _wTcBorders() {
@@ -2641,7 +2641,8 @@ function _wTc(text, opts) {
   const fill=o.header?'EEEEEE':(o.fill||'FFFFFF');
   const w=o.w?`<w:tcW w:w="${o.w}" w:type="pct"/>`:'';
   const vAlign=o.vAlign?`<w:vAlign w:val="${o.vAlign}"/>`:'';
-  const tcPr=`<w:tcPr>${w}<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>${_wTcBorders()}${vAlign}</w:tcPr>`;
+  const gs=o.gridSpan?`<w:gridSpan w:val="${o.gridSpan}"/>`:'';
+  const tcPr=`<w:tcPr>${w}${gs}${_wTcBorders()}<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>${vAlign}</w:tcPr>`;
   const bold=(o.header||o.bold)?'<w:b/><w:bCs/>':'';
   const sz=`<w:sz w:val="${o.sz||18}"/><w:szCs w:val="${o.sz||18}"/>`;
   const lines=String(text||'—').split('\n');
@@ -2651,14 +2652,18 @@ function _wTc(text, opts) {
   ).join('');
   return `<w:tc>${tcPr}<w:p>${runs}</w:p></w:tc>`;
 }
+function _wGrid(cols) { // cols = pesi relativi delle colonne; tblGrid è obbligatorio per ISO 29500 (Word ripara i file senza)
+  const TOT=9638; const sum=cols.reduce((a,b)=>a+b,0);
+  return '<w:tblGrid>'+cols.map(c=>`<w:gridCol w:w="${Math.round(TOT*c/sum)}"/>`).join('')+'</w:tblGrid>';
+}
 function _wKVTable(rows) {
   const trs=rows.map(([k,v])=>`<w:tr>${_wTc(k,{bold:true,fill:'F5F5F5',w:2000})}${_wTc(v,{w:3000})}</w:tr>`).join('');
-  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblStyle w:val="TableGrid"/></w:tblPr>${trs}</w:tbl>`;
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/></w:tblPr>${_wGrid([2,3])}${trs}</w:tbl>`;
 }
 function _wDataTable(hdrs, rows) {
   const hTr=`<w:tr>${hdrs.map(h=>_wTc(h,{header:true})).join('')}</w:tr>`;
   const bTrs=rows.map(row=>`<w:tr>${row.map((c,i)=>_wTc(c||'—')).join('')}</w:tr>`).join('');
-  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblStyle w:val="TableGrid"/></w:tblPr>${hTr}${bTrs}</w:tbl>`;
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/></w:tblPr>${_wGrid(hdrs.map(()=>1))}${hTr}${bTrs}</w:tbl>`;
 }
 function _wSigTable(tutor, vol, luogo, data) {
   const sigCol=(label,name)=>
@@ -2670,7 +2675,8 @@ function _wSigTable(tutor, vol, luogo, data) {
     `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="444444"/></w:rPr>`+
     `<w:t xml:space="preserve">${_x(name)}</w:t></w:r></w:p></w:tc>`;
   return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/></w:tblPr>`+
-    `<w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/>${_wTcBorders()}</w:tcPr>`+
+    `${_wGrid([1,1])}`+
+    `<w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:gridSpan w:val="2"/>${_wTcBorders()}</w:tcPr>`+
     `<w:p><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>`+
     `<w:t xml:space="preserve">Luogo e data: ${_x(luogo)}, ${_x(data)}</w:t></w:r></w:p></w:tc></w:tr>`+
     `<w:tr>${sigCol('Responsabile / Tutor:',tutor)}${sigCol('Volontario/a:',vol)}</w:tr></w:tbl>`;
@@ -2685,17 +2691,17 @@ async function _assembleDocx(bodyXml, title) {
     '<Default Extension="xml" ContentType="application/xml"/>'+
     '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
     '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
-    '</Types>');
+    '</Types>', {createFolders:false});
   z.file('_rels/.rels',
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
-    '</Relationships>');
+    '</Relationships>', {createFolders:false});
   z.file('word/_rels/document.xml.rels',
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
-    '</Relationships>');
+    '</Relationships>', {createFolders:false});
   z.file('word/styles.xml',
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
@@ -2709,14 +2715,14 @@ async function _assembleDocx(bodyXml, title) {
     '<w:right w:val="single" w:sz="4" w:color="AAAAAA"/>'+
     '<w:insideH w:val="single" w:sz="4" w:color="CCCCCC"/>'+
     '<w:insideV w:val="single" w:sz="4" w:color="CCCCCC"/>'+
-    '</w:tblBorders></w:tblPr></w:style></w:styles>');
+    '</w:tblBorders></w:tblPr></w:style></w:styles>', {createFolders:false});
   z.file('word/document.xml',
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
     `<w:body>${bodyXml}`+
     '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'+
     '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+
-    '</w:body></w:document>');
+    '</w:body></w:document>', {createFolders:false});
   return z.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
 
