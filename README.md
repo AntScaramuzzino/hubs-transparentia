@@ -17,7 +17,7 @@ Sistema multi-agente a 5 agenti per la **messa in trasparenza delle competenze**
 - ✅ Offline — nessuna API esterna richiesta
 - ✅ Sessione JSON — salva e riprendi il lavoro
 - ✅ Export DOCX + PDF del Documento di Trasparenza
-- ✅ Dati ADA reali da Atlante del Lavoro INAPP (962 ADA)
+- ✅ Dati ADA reali da Atlante del Lavoro INAPP (961 ADA)
 
 ## Normativa
 
