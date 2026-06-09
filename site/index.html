@@ -576,6 +576,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         <hr>
         <button onclick="closeActionsMenu();openNewSession()" role="menuitem"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nuova sessione</button>
         <button onclick="closeActionsMenu();triggerLoad()" role="menuitem"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Carica (.json/.pdf)</button>
+        <hr>
+        <button onclick="closeActionsMenu();hubsClearLocalData()" role="menuitem" style="color:#e74c3c"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Cancella dati locali (browser)</button>
       </div>
     </div>
     <button class="hbtn" onclick="saveSession()" aria-label="Salva sessione come JSON" id="btn-save">
@@ -4370,6 +4372,152 @@ async function vcVerifyPasted() {
 // ═══════════════════════════════════════════════════════════
   initChatSystem();
 });
+</script>
+<script>
+/* ============================================================
+   HubS-TransparentIA — Autosave + Recovery + Unload Guard v1.0
+   ============================================================ */
+(function () {
+  'use strict';
+  var KEY      = 'hubs_autosave_v1';
+  var KEY_PREV = 'hubs_autosave_prev_v1';
+  var INTERVAL_MS = 20000;
+  var DEBOUNCE_MS = 2500;
+  var dirty = false;
+  var debounceTimer = null;
+  var lastSerialized = '';
+
+  function storageOk() {
+    try { localStorage.setItem('__hubs_test','1'); localStorage.removeItem('__hubs_test'); return true; }
+    catch(e) { return false; }
+  }
+  var LS = storageOk();
+
+  function sessionHasContent(sess) {
+    if (!sess) return false;
+    try {
+      return !!((sess.meta && sess.meta.name) ||
+                (sess.a1 && sess.a1.vol && (sess.a1.vol.nome || sess.a1.vol.cognome)));
+    } catch(e) { return false; }
+  }
+
+  function paintStatus(state) {
+    var dot = document.getElementById('sess-dot');
+    if (!dot) return;
+    var map = {
+      dirty:     { c:'#e67e22', t:'Modifiche non salvate — autosave attivo' },
+      autosaved: { c:'#f1c40f', t:'Salvato nel browser — esporta il JSON per archiviare' },
+      exported:  { c:'#27ae60', t:'Sessione esportata correttamente' }
+    };
+    var s = map[state];
+    if (s) { dot.style.background = s.c; dot.title = s.t; }
+  }
+
+  function autosave(reason) {
+    if (!LS) return;
+    try {
+      if (typeof collectAll === 'function') collectAll();
+      var payload = JSON.stringify({ ts: new Date().toISOString(), reason: reason||'auto', S: S });
+      if (payload === lastSerialized) return;
+      var prev = localStorage.getItem(KEY);
+      if (prev) localStorage.setItem(KEY_PREV, prev);
+      localStorage.setItem(KEY, payload);
+      lastSerialized = payload;
+      paintStatus('autosaved');
+    } catch(e) {
+      console.warn('[HubS autosave] fallito:', e.message);
+    }
+  }
+
+  function scheduleAutosave() {
+    dirty = true;
+    paintStatus('dirty');
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function(){ autosave('input'); }, DEBOUNCE_MS);
+  }
+
+  function tryRecovery() {
+    if (!LS) return;
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return;
+    var saved;
+    try { saved = JSON.parse(raw); } catch(e) { return; }
+    if (!sessionHasContent(saved.S)) return;
+    if (sessionHasContent(S)) return;
+    var when = saved.ts ? new Date(saved.ts).toLocaleString('it-IT') : 'data sconosciuta';
+    var name = (saved.S && saved.S.meta && saved.S.meta.name) || 'senza nome';
+    var msg = 'Trovata una sessione non esportata salvata automaticamente.\n\n'
+            + 'Sessione: ' + name + '\nUltimo salvataggio: ' + when + '\n\n'
+            + 'Vuoi ripristinarla?';
+    if (confirm(msg)) {
+      S = saved.S;
+      if (!S.meta) S.meta = {};
+      if (typeof populateAll   === 'function') populateAll();
+      if (typeof updateSidebar === 'function') updateSidebar();
+      if (typeof showScreen    === 'function') showScreen('a1');
+      lastSerialized = raw;
+      paintStatus('autosaved');
+    }
+  }
+
+  window.hubsClearLocalData = function() {
+    if (!confirm('Eliminare i dati salvati localmente in questo browser?\n'
+               + 'La sessione visibile NON viene toccata.')) return;
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(KEY_PREV);
+      lastSerialized = '';
+      alert('Dati locali eliminati.');
+    } catch(e) { alert('Impossibile eliminare: ' + e.message); }
+  };
+
+  if (typeof window.saveSession === 'function') {
+    var _save = window.saveSession;
+    window.saveSession = function() {
+      _save.apply(this, arguments);
+      dirty = false;
+      autosave('export');
+      paintStatus('exported');
+    };
+  }
+
+  if (typeof window.openNewSession === 'function') {
+    var _openNew = window.openNewSession;
+    window.openNewSession = function() {
+      _openNew.apply(this, arguments);
+      dirty = false;
+      autosave('new-session');
+    };
+  }
+
+  if (typeof window.loadSession === 'function') {
+    var _load = window.loadSession;
+    window.loadSession = function(ev) {
+      _load.apply(this, arguments);
+      setTimeout(function(){ dirty = false; autosave('load'); }, 800);
+    };
+  }
+
+  document.addEventListener('input',  scheduleAutosave, true);
+  document.addEventListener('change', scheduleAutosave, true);
+  setInterval(function(){ if (dirty) autosave('interval'); }, INTERVAL_MS);
+  window.addEventListener('pagehide', function(){ autosave('pagehide'); });
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'hidden') autosave('hidden');
+  });
+  window.addEventListener('beforeunload', function(e){
+    if (!dirty) return;
+    autosave('beforeunload');
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryRecovery);
+  } else {
+    tryRecovery();
+  }
+})();
 </script>
 </body>
 </html>
