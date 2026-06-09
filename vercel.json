@@ -1,25 +1,11 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/guida",
-      "destination": "/site/guida.html"
-    },
-    {
-      "source": "/analisi-progetto",
-      "destination": "/site/analisi_progetto.html"
-    },
-    {
-      "source": "/mappatore",
-      "destination": "/site/mappatore_competenze_ada.html"
-    },
-    {
-      "source": "/mappatore-competenze",
-      "destination": "/site/mappatore_lifecomp_entrecomp.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/site/$1"
-    }
+    { "source": "/.well-known/did.json", "destination": "/api/did-document" },
+    { "source": "/guida", "destination": "/site/guida.html" },
+    { "source": "/analisi-progetto", "destination": "/site/analisi_progetto.html" },
+    { "source": "/mappatore", "destination": "/site/mappatore_competenze_ada.html" },
+    { "source": "/mappatore-competenze", "destination": "/site/mappatore_lifecomp_entrecomp.html" },
+    { "source": "/(.*)", "destination": "/site/$1" }
   ]
 }
