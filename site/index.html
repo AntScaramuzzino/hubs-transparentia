@@ -816,13 +816,18 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     </div>
     <div class="card mt16">
       <div class="card-title"><i class="fa-solid fa-play"></i> Avvio sessione</div>
+      <div class="frow inline">
+        <div><label for="ws-vol-nome">Nome volontario</label><input type="text" id="ws-vol-nome" placeholder="Mario" oninput="syncWsName()" autocomplete="given-name"></div>
+        <div><label for="ws-vol-cognome">Cognome volontario</label><input type="text" id="ws-vol-cognome" placeholder="Rossi" oninput="syncWsName()" autocomplete="family-name"></div>
+      </div>
       <div class="frow">
-        <label for="ws-name">Nome sessione</label>
-        <input type="text" id="ws-name" placeholder="Es. Mario Rossi — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
+        <label for="ws-name">Nome sessione <span style="font-size:.75rem;color:var(--sub);font-weight:400">(si compila automaticamente)</span></label>
+        <input type="text" id="ws-name" placeholder="Es. Rossi Mario — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
       </div>
       <div class="flex gap8 wrap">
         <button class="btn btn-success" onclick="startSession()"><i class="fa-solid fa-play"></i> Avvia nuova sessione</button>
-        <button class="btn btn-outline" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica sessione (.json)</button>
+        <button class="btn btn-outline" onclick="triggerLoad()"><i class="fa-solid fa-folder-open"></i> Carica JSON</button>
+        <button class="btn btn-outline" onclick="triggerLoad()" style="color:#c0392b;border-color:#e8b0a8"><i class="fa-regular fa-file-pdf"></i> Importa PDF</button>
       </div>
     </div>
 
@@ -935,59 +940,59 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-calendar-days"></i> Dati del Percorso</div>
-        <div class="frow"><label for="a1-percorso-settore">Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
-        <div class="frow"><label for="a1-percorso-luogo">Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
-        <div class="frow inline">
-          <div><label for="a1-percorso-dataInizio">Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
-          <div><label for="a1-percorso-dataFine">Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
-        </div>
-        <div class="frow inline">
-          <div class="narrow"><label for="a1-percorso-orePreviste">Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()" aria-label="Ore previste"></div>
-          <div class="narrow"><label for="a1-percorso-oreSvolte">Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()" aria-label="Ore svolte"></div>
-          <div><label for="a1-percorso-presenzaPerc">% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700" aria-label="Percentuale presenza"></div>
-        </div>
-        <div class="req-progress-wrap" id="req-progress-wrap" style="display:none">
-          <div class="req-progress-row">
-            <span class="req-progress-label">Ore svolte</span>
-            <div class="req-bar-track"><div class="req-bar-fill" id="ore-bar-fill" style="width:0%"></div></div>
-            <span class="req-progress-val" id="ore-stat-val">0 / 60 h</span>
-          </div>
-          <div class="req-progress-row">
-            <span class="req-progress-label">Presenza</span>
-            <div class="req-bar-track"><div class="req-bar-fill" id="pres-bar-fill" style="width:0%"></div></div>
-            <span class="req-progress-val" id="pres-stat-val">0%</span>
-          </div>
-        </div>
-        <div id="a1-presenza-alert"></div>
-      </div>
-
-
     </div>
   </div>
 
   <!-- SEZ. B -->
-  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Sezione B — Obiettivi del Percorso</span><span class="sez-toggle-ico">▲</span></div>
-  <div class="card">
-    <div class="card-title"><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Obiettivi del Percorso</div>
-    <div class="frow">
-      <label for="a1-obiettivoGenerale">Obiettivo generale del volontariato</label>
-      <textarea id="a1-obiettivoGenerale" rows="2" placeholder="Descrivi l'obiettivo generale del percorso di volontariato..."></textarea>
+  <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Sezione B — Dati e Obiettivi del Percorso</span><span class="sez-toggle-ico">▲</span></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-calendar-days"></i> Dati del Percorso</div>
+      <div class="frow"><label for="a1-percorso-settore">Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
+      <div class="frow"><label for="a1-percorso-luogo">Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
+      <div class="frow inline">
+        <div><label for="a1-percorso-dataInizio">Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
+        <div><label for="a1-percorso-dataFine">Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
+      </div>
+      <div class="frow inline">
+        <div class="narrow"><label for="a1-percorso-orePreviste">Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()" aria-label="Ore previste"></div>
+        <div class="narrow"><label for="a1-percorso-oreSvolte">Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()" aria-label="Ore svolte"></div>
+        <div><label for="a1-percorso-presenzaPerc">% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700" aria-label="Percentuale presenza"></div>
+      </div>
+      <div class="req-progress-wrap" id="req-progress-wrap" style="display:none">
+        <div class="req-progress-row">
+          <span class="req-progress-label">Ore svolte</span>
+          <div class="req-bar-track"><div class="req-bar-fill" id="ore-bar-fill" style="width:0%"></div></div>
+          <span class="req-progress-val" id="ore-stat-val">0 / 60 h</span>
+        </div>
+        <div class="req-progress-row">
+          <span class="req-progress-label">Presenza</span>
+          <div class="req-bar-track"><div class="req-bar-fill" id="pres-bar-fill" style="width:0%"></div></div>
+          <span class="req-progress-val" id="pres-stat-val">0%</span>
+        </div>
+      </div>
+      <div id="a1-presenza-alert"></div>
     </div>
-    <div class="card-title" style="margin-top:14px">Obiettivi specifici di apprendimento</div>
-    <div id="a1-obiettivi-list"></div>
-    <p id="a1-obj-note" style="font-size:.74rem;color:var(--c-a1);margin:6px 0 4px;font-weight:600">* I primi 3 obiettivi sono obbligatori</p>
-    <button class="btn btn-outline" style="margin-top:4px;font-size:.8rem;padding:5px 14px" onclick="addObiettivo()"><i class="fa-solid fa-plus"></i> Aggiungi obiettivo</button>
-    <div class="frow mt12">
-      <span id="lbl-ct" class="group-label">Competenze chiave europee target</span>
-      <div class="check-wrap" role="group" aria-labelledby="lbl-ct">
-        <label class="check-inline"><input type="checkbox" id="a1-ct-comm"> Comunicazione</label>
-        <label class="check-inline"><input type="checkbox" id="a1-ct-dig"> Digitale (DigComp)</label>
-        <label class="check-inline"><input type="checkbox" id="a1-ct-imparare"> Imparare ad imparare (LifeComp)</label>
-        <label class="check-inline"><input type="checkbox" id="a1-ct-sociali"> Competenze sociali e civiche</label>
-        <label class="check-inline"><input type="checkbox" id="a1-ct-spirito"> Spirito di iniziativa (EntreComp)</label>
-        <label class="check-inline"><input type="checkbox" id="a1-ct-cultura"> Consapevolezza culturale</label>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Obiettivi del Percorso</div>
+      <div class="frow">
+        <label for="a1-obiettivoGenerale">Obiettivo generale del volontariato</label>
+        <textarea id="a1-obiettivoGenerale" rows="2" placeholder="Descrivi l'obiettivo generale del percorso di volontariato..."></textarea>
+      </div>
+      <div class="card-title" style="margin-top:14px">Obiettivi specifici di apprendimento</div>
+      <div id="a1-obiettivi-list"></div>
+      <p id="a1-obj-note" style="font-size:.74rem;color:var(--c-a1);margin:6px 0 4px;font-weight:600">* I primi 3 obiettivi sono obbligatori</p>
+      <button class="btn btn-outline" style="margin-top:4px;font-size:.8rem;padding:5px 14px" onclick="addObiettivo()"><i class="fa-solid fa-plus"></i> Aggiungi obiettivo</button>
+      <div class="frow mt12">
+        <span id="lbl-ct" class="group-label">Competenze chiave europee target</span>
+        <div class="check-wrap" role="group" aria-labelledby="lbl-ct">
+          <label class="check-inline"><input type="checkbox" id="a1-ct-comm"> Comunicazione</label>
+          <label class="check-inline"><input type="checkbox" id="a1-ct-dig"> Digitale (DigComp)</label>
+          <label class="check-inline"><input type="checkbox" id="a1-ct-imparare"> Imparare ad imparare (LifeComp)</label>
+          <label class="check-inline"><input type="checkbox" id="a1-ct-sociali"> Competenze sociali e civiche</label>
+          <label class="check-inline"><input type="checkbox" id="a1-ct-spirito"> Spirito di iniziativa (EntreComp)</label>
+          <label class="check-inline"><input type="checkbox" id="a1-ct-cultura"> Consapevolezza culturale</label>
+        </div>
       </div>
     </div>
   </div>
@@ -1585,10 +1590,37 @@ function openNewSession() {
   showScreen('a1');
 }
 
+function syncWsName() {
+  const nome    = (el('ws-vol-nome')    ? el('ws-vol-nome').value    : '').trim();
+  const cognome = (el('ws-vol-cognome') ? el('ws-vol-cognome').value : '').trim();
+  const derived = [cognome, nome].filter(Boolean).join(' ');
+  if (derived) {
+    const wsn = el('ws-name');
+    if (wsn) wsn.value = derived;
+    S.meta.name = derived;
+    updateSidebar();
+  }
+}
+
 function startSession() {
   const n = el('ws-name');
   S.meta.name = (n && n.value) ? n.value : 'Sessione ' + today();
   S.meta.created = S.meta.created || new Date().toISOString();
+  // Pre-popola Nome e Cognome in Fase A1 dai campi Dashboard
+  const wsNome    = el('ws-vol-nome');
+  const wsCognome = el('ws-vol-cognome');
+  if (wsNome && wsNome.value.trim()) {
+    S.a1 = S.a1 || {};
+    S.a1.vol = S.a1.vol || {};
+    S.a1.vol.nome = wsNome.value.trim();
+    const f = el('a1-vol-nome'); if (f) f.value = wsNome.value.trim();
+  }
+  if (wsCognome && wsCognome.value.trim()) {
+    S.a1 = S.a1 || {};
+    S.a1.vol = S.a1.vol || {};
+    S.a1.vol.cognome = wsCognome.value.trim();
+    const f = el('a1-vol-cognome'); if (f) f.value = wsCognome.value.trim();
+  }
   updateSidebar();
   renderObiettiviList(['','','']);
   renderPianoAttivita(Array(5).fill({attivita:'',area:'',ore:''}));
