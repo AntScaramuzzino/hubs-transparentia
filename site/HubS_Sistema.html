@@ -163,29 +163,49 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .a4sg-stat{font-size:.78rem;font-weight:700;color:var(--text)}
 .a4sg-stat span{color:var(--c-a4)}
 
-/* ── AI INLINE SPLIT PANEL ── */
+/* ── AI SIDE PANEL ── */
 .ai-panel-side{
-  position:fixed;right:0;top:88px;bottom:0;width:360px;z-index:250;
-  background:#fff;border-left:2px solid var(--border);
-  box-shadow:-6px 0 24px rgba(0,0,0,.13);
-  transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  position:fixed;right:0;top:88px;bottom:0;width:380px;z-index:250;
+  background:#fff;border-left:1px solid #e2e3f0;
+  box-shadow:-8px 0 32px rgba(30,20,60,.12);
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
   display:flex;flex-direction:column;overflow:hidden
 }
 .ai-panel-side.open{transform:translateX(0)}
 .ai-panel-hdr{
-  padding:11px 14px;background:var(--c-a2);color:#fff;
-  display:flex;justify-content:space-between;align-items:center;
-  flex-shrink:0;font-weight:700;font-size:.88rem
+  padding:0;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 55%,#4338ca 100%);
+  color:#fff;flex-shrink:0;position:relative;overflow:hidden
 }
-.ai-panel-hdr button{background:rgba(255,255,255,.2);border:none;color:#fff;
-  border-radius:5px;padding:4px 10px;cursor:pointer;font-weight:700;font-family:inherit;font-size:.8rem}
-.ai-panel-hdr button:hover{background:rgba(255,255,255,.35)}
+.ai-panel-hdr::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 80% 20%,rgba(99,102,241,.35) 0%,transparent 70%);
+  pointer-events:none
+}
+.ai-panel-hdr-inner{
+  display:flex;align-items:center;gap:10px;padding:12px 14px 10px;position:relative
+}
+.ai-panel-avatar{
+  width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);
+  display:grid;place-items:center;font-size:1.1rem;flex-shrink:0;
+  border:1.5px solid rgba(255,255,255,.25)
+}
+.ai-panel-hdr-txt{flex:1;min-width:0}
+.ai-panel-hdr-txt strong{display:block;font-size:.82rem;font-weight:800;letter-spacing:.02em}
+.ai-panel-hdr-txt span{display:block;font-size:.7rem;opacity:.75;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.ai-panel-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-weight:700;
+  font-size:.78rem;flex-shrink:0;transition:background .15s;font-family:inherit}
+.ai-panel-close:hover{background:rgba(255,255,255,.28)}
+.ai-panel-phase-bar{height:3px;background:rgba(255,255,255,.12)}
+.ai-panel-phase-fill{height:100%;background:#6366f1;transition:width .4s,background .3s;
+  min-width:4px;border-radius:0 2px 2px 0}
 .ai-panel-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .ai-panel-body .chat-panel{height:100%;border:none;border-radius:0;box-shadow:none}
 /* Nudge main content when panel is open */
-#main.ai-side-open{padding-right:376px}
+#main.ai-side-open{padding-right:396px}
 @media(max-width:768px){
-  .ai-panel-side{top:0;width:100%;z-index:400}
+  .ai-panel-side{top:0;width:100%;z-index:400;border-left:none}
   #main.ai-side-open{padding-right:0}
 }
 
@@ -558,8 +578,17 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 <!-- AI SIDE PANEL -->
 <div class="ai-panel-side" id="ai-panel-side">
   <div class="ai-panel-hdr">
-    <span id="ai-panel-title">🤖 Assistente AI</span>
-    <button onclick="closeAISidePanel()">✕ Chiudi</button>
+    <div class="ai-panel-hdr-inner">
+      <div class="ai-panel-avatar">🤖</div>
+      <div class="ai-panel-hdr-txt">
+        <strong>Assistente AI</strong>
+        <span id="ai-panel-title">Seleziona una fase per iniziare</span>
+      </div>
+      <button class="ai-panel-close" onclick="closeAISidePanel()">✕ Chiudi</button>
+    </div>
+    <div class="ai-panel-phase-bar">
+      <div class="ai-panel-phase-fill" id="ai-panel-phase-fill" style="width:20%"></div>
+    </div>
   </div>
   <div class="ai-panel-body" id="ai-panel-body"></div>
 </div>
@@ -1589,11 +1618,11 @@ function _updateWelcomeCard(phase, text) {
 // ============================================================
 // Maps screen id to agent id and display name
 const SCREEN_AGENT_MAP = {
-  a1:{ id:'a1', label:'Fase 1 · Orientatore' },
-  a2:{ id:'a2', label:'Fase 2 · Emersione' },
-  a3:{ id:'a3', label:'Fase 3 · Istruttoria' },
-  a4:{ id:'a4', label:'Fase 4 · Ricognizione' },
-  a5:{ id:'a5', label:'Fase 5 · Formalizzazione' }
+  a1:{ id:'a1', label:'Fase 1 · Orientatore',    color:'#2e86c1', pct:'20%' },
+  a2:{ id:'a2', label:'Fase 2 · Emersione',       color:'#27ae60', pct:'40%' },
+  a3:{ id:'a3', label:'Fase 3 · Istruttoria',     color:'#e67e22', pct:'60%' },
+  a4:{ id:'a4', label:'Fase 4 · Ricognizione',    color:'#8e44ad', pct:'80%' },
+  a5:{ id:'a5', label:'Fase 5 · Formalizzazione', color:'#c0392b', pct:'100%' }
 };
 
 function showScreen(id) {
@@ -1618,14 +1647,16 @@ function showScreen(id) {
   if(panel && panel.classList.contains('open')) {
     const info = SCREEN_AGENT_MAP[id];
     if(info) {
-      const body = el('ai-panel-body');
+      const body    = el('ai-panel-body');
       const titleEl = el('ai-panel-title');
+      const fillEl  = el('ai-panel-phase-fill');
       // Only re-render if agent actually changed (preserves history)
       if(body && body.dataset.agent !== info.id) {
         body.innerHTML = renderChatPanel(info.id);
         body.dataset.agent = info.id;
       }
-      if(titleEl) titleEl.textContent = '\u{1F916} Assistente AI — ' + info.label;
+      if(titleEl) titleEl.textContent = info.label;
+      if(fillEl) { fillEl.style.width = info.pct; fillEl.style.background = info.color; }
     }
   }
 }
@@ -2105,11 +2136,14 @@ function openAISidePanel(agentId, promptText) {
     body.dataset.agent = agentId;
   }
 
-  // Update header title
+  // Update header title + accent color + progress bar
   const titleEl = el('ai-panel-title');
-  if(titleEl) {
-    const info = SCREEN_AGENT_MAP[agentId];
-    titleEl.textContent = '\u{1F916} Assistente AI' + (info ? ' — ' + info.label : '');
+  const fillEl  = el('ai-panel-phase-fill');
+  const info = SCREEN_AGENT_MAP[agentId];
+  if(titleEl) titleEl.textContent = info ? info.label : agentId.toUpperCase();
+  if(fillEl && info) {
+    fillEl.style.width = info.pct;
+    fillEl.style.background = info.color;
   }
   // Show panel + push main content
   panel.classList.add('open');
