@@ -1507,10 +1507,16 @@ Object.values(ADA_DB).forEach(ada => {
 });
 
 // ============================================================
+// VERSIONE
+// ============================================================
+const APP_VER = '2.4';           // versione applicazione
+const FW_VER  = '2.4';           // versione Framework Progettuale (v9)
+
+// ============================================================
 // STATE
 // ============================================================
 const DEFAULT_SESSION = {
-  meta:{created:null,modified:null,version:'2.0',name:''},
+  meta:{created:null,modified:null,version:APP_VER,name:''},
   a1:{
     vol:{nome:'',cognome:'',cf:'',dob:'',luogoNascita:'',residenza:'',cittadinanza:'Italia',titoloStudio:'',occupazione:''},
     ente:{denominazione:'',cfEnte:'',tipo:'',indirizzo:'',repLegale:'',tutor:'',codice:''},
@@ -2571,9 +2577,9 @@ function renderPattoPreview() {
     </div>
 
     <div class="doc-section">
-      <h3>Sezione H — Firme e Sottoscrizione</h3>
+      <h3>Sezione I — Firme e Sottoscrizione</h3>
       <p style="font-size:.75rem;color:#666;margin-bottom:10px">Il presente Progetto Personalizzato è stato letto, compreso e sottoscritto. Conservare in originale firmato nel fascicolo del volontario.</p>
-      <p style="font-size:.75rem;color:#666;margin-bottom:10px">Generato con HubS-TransparentIA — ${today()}</p>
+      <p style="font-size:.75rem;color:#666;margin-bottom:10px">Generato con HubS-TransparentIA v${APP_VER} · Framework Progettuale v${FW_VER} — ${today()}</p>
       <div class="firma-line">
         <div class="firma-item">Volontario/a<br><br><br>Data: _______________</div>
         <div class="firma-item">Tutor: ${e.tutor||'_______________'}<br><br><br>Data: _______________</div>
