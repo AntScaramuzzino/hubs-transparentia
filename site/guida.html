@@ -28,15 +28,14 @@ nav .logo span{color:#27ae60}
 nav .sep{color:#4B5563;font-size:.9rem}
 nav .crumb{color:#9CA3AF;font-size:.88rem}
 nav .spacer{flex:1}
-nav a.btn-app{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 15px;border-radius:7px;text-decoration:none;font-size:.84rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:7px}
-nav a.btn-app:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 
 /* LAYOUT */
 .layout{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:calc(100vh - 64px)}
 
 /* SIDEBAR */
 aside{background:#fff;border-right:1px solid var(--border);padding:24px 0 40px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
-aside .section-label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);padding:18px 20px 6px;display:flex;align-items:center;gap:6px}
+aside .section-label{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1e3a5f;padding:20px 20px 5px;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);margin-top:4px}
+aside .section-label:first-of-type{border-top:none;margin-top:0}
 aside a{display:flex;align-items:center;gap:11px;padding:9px 20px;color:#374151;text-decoration:none;font-size:.9rem;transition:.12s;border-left:3px solid transparent;position:relative}
 aside a i{width:16px;text-align:center;flex-shrink:0;font-size:.88rem;color:var(--sub);transition:.12s}
 aside a:hover{background:var(--blu-light);border-left-color:var(--blu-border);color:var(--blu)}
@@ -207,8 +206,6 @@ footer .footer-links a{display:flex;align-items:center;gap:6px;font-size:.83rem}
   <a class="logo" href="/"><i class="fa-solid fa-network-wired"></i>HubS<span>·</span>TransparentIA</a>
   <span class="sep"><i class="fa-solid fa-chevron-right" style="font-size:.7rem"></i></span>
   <span class="crumb">Guida &amp; Documenti</span>
-  <span class="spacer"></span>
-  <a class="btn-app" href="/"><i class="fa-solid fa-play"></i> Apri il Sistema</a>
 </nav>
 
 <!-- LAYOUT -->
