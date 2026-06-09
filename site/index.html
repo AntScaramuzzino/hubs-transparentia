@@ -556,6 +556,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .chat-msg.user .msg-bubble{background:#dbeafe;border-color:#93c5fd}
 .msg-avatar{font-size:1.1rem;flex-shrink:0;margin-top:2px;line-height:1}
 .chat-thinking{text-align:center;color:var(--sub);font-size:.82rem;font-style:italic;padding:10px}
+.group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
 </style>
 </head>
 <body>
@@ -713,7 +714,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card mt16">
       <div class="card-title"><i class="fa-solid fa-play"></i> Avvio sessione</div>
       <div class="frow">
-        <label>Nome sessione</label>
+        <label for="ws-name">Nome sessione</label>
         <input type="text" id="ws-name" placeholder="Es. Mario Rossi — Coop Calabria 2026" oninput="S.meta.name=this.value;updateSidebar()">
       </div>
       <div class="flex gap8 wrap">
@@ -770,18 +771,18 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-user"></i> Dati del Volontario</div>
         <div class="frow inline">
-          <div><label>Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome" required aria-required="true" aria-label="Nome volontario"></div>
-          <div><label>Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome" required aria-required="true" aria-label="Cognome volontario"></div>
+          <div><label for="a1-vol-nome">Nome<span class="required-mark">*</span></label><input type="text" id="a1-vol-nome" required aria-required="true" aria-label="Nome volontario"></div>
+          <div><label for="a1-vol-cognome">Cognome<span class="required-mark">*</span></label><input type="text" id="a1-vol-cognome" required aria-required="true" aria-label="Cognome volontario"></div>
         </div>
         <div class="frow inline">
-          <div><label>Data di nascita</label><input type="date" id="a1-vol-dob"></div>
-          <div><label>Luogo di nascita</label><input type="text" id="a1-vol-luogoNascita"></div>
+          <div><label for="a1-vol-dob">Data di nascita</label><input type="date" id="a1-vol-dob"></div>
+          <div><label for="a1-vol-luogoNascita">Luogo di nascita</label><input type="text" id="a1-vol-luogoNascita"></div>
         </div>
-        <div class="frow"><label>Codice Fiscale</label><input type="text" id="a1-vol-cf" maxlength="16" style="text-transform:uppercase"></div>
-        <div class="frow"><label>Residenza</label><input type="text" id="a1-vol-residenza" placeholder="Via, Città, CAP"></div>
+        <div class="frow"><label for="a1-vol-cf">Codice Fiscale</label><input type="text" id="a1-vol-cf" maxlength="16" style="text-transform:uppercase"></div>
+        <div class="frow"><label for="a1-vol-residenza">Residenza</label><input type="text" id="a1-vol-residenza" placeholder="Via, Città, CAP"></div>
         <div class="frow inline">
-          <div><label>Cittadinanza</label><input type="text" id="a1-vol-cittadinanza" value="Italia"></div>
-          <div><label>Titolo di studio</label>
+          <div><label for="a1-vol-cittadinanza">Cittadinanza</label><input type="text" id="a1-vol-cittadinanza" value="Italia"></div>
+          <div><label for="a1-vol-titoloStudio">Titolo di studio</label>
             <select id="a1-vol-titoloStudio">
               <option value="">— seleziona —</option>
               <option>Licenza media</option>
@@ -794,7 +795,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
           </div>
         </div>
         <div class="frow">
-          <label>Situazione occupazionale</label>
+          <label for="a1-vol-occupazione">Situazione occupazionale</label>
           <select id="a1-vol-occupazione">
             <option value="">— seleziona —</option>
             <option>Occupato/a</option>
@@ -810,10 +811,10 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div>
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-building"></i> Ente di Accoglienza</div>
-        <div class="frow"><label>Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione" required aria-required="true" aria-label="Denominazione ente"></div>
+        <div class="frow"><label for="a1-ente-denominazione">Denominazione ente<span class="required-mark">*</span></label><input type="text" id="a1-ente-denominazione" required aria-required="true" aria-label="Denominazione ente"></div>
         <div class="frow inline">
-          <div><label>Codice Fiscale ente</label><input type="text" id="a1-ente-cfEnte"></div>
-          <div><label>Tipologia</label>
+          <div><label for="a1-ente-cfEnte">Codice Fiscale ente</label><input type="text" id="a1-ente-cfEnte"></div>
+          <div><label for="a1-ente-tipo">Tipologia</label>
             <select id="a1-ente-tipo">
               <option value="">— seleziona —</option>
               <option>APS</option><option>ODV</option>
@@ -822,27 +823,27 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
             </select>
           </div>
         </div>
-        <div class="frow"><label>Indirizzo sede legale</label><input type="text" id="a1-ente-indirizzo"></div>
-        <div class="frow"><label>Rappresentante legale</label><input type="text" id="a1-ente-repLegale"></div>
-        <div class="frow"><label>Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor" required aria-required="true" aria-label="Tutor responsabile"></div>
+        <div class="frow"><label for="a1-ente-indirizzo">Indirizzo sede legale</label><input type="text" id="a1-ente-indirizzo"></div>
+        <div class="frow"><label for="a1-ente-repLegale">Rappresentante legale</label><input type="text" id="a1-ente-repLegale"></div>
+        <div class="frow"><label for="a1-ente-tutor">Tutor / Responsabile accompagnamento<span class="required-mark">*</span></label><input type="text" id="a1-ente-tutor" required aria-required="true" aria-label="Tutor responsabile"></div>
         <div class="frow inline">
-          <div><label>Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
-          <div><label>Data di sottoscrizione</label><input type="date" id="a1-dataRotte"></div>
+          <div><label for="a1-ente-codice">Codice progetto HubS</label><input type="text" id="a1-ente-codice"></div>
+          <div><label for="a1-dataRotte">Data di sottoscrizione</label><input type="date" id="a1-dataRotte"></div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-calendar-days"></i> Dati del Percorso</div>
-        <div class="frow"><label>Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
-        <div class="frow"><label>Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
+        <div class="frow"><label for="a1-percorso-settore">Settore di attività</label><input type="text" id="a1-percorso-settore" placeholder="Es. Servizi socio-educativi, Formazione..."></div>
+        <div class="frow"><label for="a1-percorso-luogo">Luogo di svolgimento</label><input type="text" id="a1-percorso-luogo"></div>
         <div class="frow inline">
-          <div><label>Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
-          <div><label>Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
+          <div><label for="a1-percorso-dataInizio">Data inizio<span class="required-mark">*</span></label><input type="date" id="a1-percorso-dataInizio" oninput="calcPresenza()" required aria-required="true" aria-label="Data inizio percorso"></div>
+          <div><label for="a1-percorso-dataFine">Data fine</label><input type="date" id="a1-percorso-dataFine" oninput="calcPresenza()"></div>
         </div>
         <div class="frow inline">
-          <div class="narrow"><label>Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()" aria-label="Ore previste"></div>
-          <div class="narrow"><label>Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()" aria-label="Ore svolte"></div>
-          <div><label>% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700" aria-label="Percentuale presenza"></div>
+          <div class="narrow"><label for="a1-percorso-orePreviste">Ore previste</label><input type="number" id="a1-percorso-orePreviste" min="0" value="60" oninput="calcPresenza()" aria-label="Ore previste"></div>
+          <div class="narrow"><label for="a1-percorso-oreSvolte">Ore svolte</label><input type="number" id="a1-percorso-oreSvolte" min="0" value="0" oninput="calcPresenza()" aria-label="Ore svolte"></div>
+          <div><label for="a1-percorso-presenzaPerc">% Presenza</label><input type="text" id="a1-percorso-presenzaPerc" readonly style="background:var(--grey);font-weight:700" aria-label="Percentuale presenza"></div>
         </div>
         <div class="req-progress-wrap" id="req-progress-wrap" style="display:none">
           <div class="req-progress-row">
@@ -867,7 +868,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
   <div class="sez-label" onclick="toggleSez(this)" role="button" tabindex="0" aria-expanded="true"><span><i class="fa-solid fa-bullseye" aria-hidden="true"></i> Sezione B — Obiettivi del Percorso</span><span class="sez-toggle-ico">▲</span></div>
   <div class="card">
     <div class="frow">
-      <label>Obiettivo generale del volontariato</label>
+      <label for="a1-obiettivoGenerale">Obiettivo generale del volontariato</label>
       <textarea id="a1-obiettivoGenerale" rows="2" placeholder="Descrivi l'obiettivo generale del percorso di volontariato..."></textarea>
     </div>
     <div class="card-title" style="margin-top:14px">Obiettivi specifici di apprendimento</div>
@@ -875,8 +876,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <p id="a1-obj-note" style="font-size:.74rem;color:var(--c-a1);margin:6px 0 4px;font-weight:600">* I primi 3 obiettivi sono obbligatori</p>
     <button class="btn btn-outline" style="margin-top:4px;font-size:.8rem;padding:5px 14px" onclick="addObiettivo()"><i class="fa-solid fa-plus"></i> Aggiungi obiettivo</button>
     <div class="frow mt12">
-      <label>Competenze chiave europee target</label>
-      <div class="check-wrap">
+      <span id="lbl-ct" class="group-label">Competenze chiave europee target</span>
+      <div class="check-wrap" role="group" aria-labelledby="lbl-ct">
         <label class="check-inline"><input type="checkbox" id="a1-ct-comm"> Comunicazione</label>
         <label class="check-inline"><input type="checkbox" id="a1-ct-dig"> Digitale (DigComp)</label>
         <label class="check-inline"><input type="checkbox" id="a1-ct-imparare"> Imparare ad imparare (LifeComp)</label>
@@ -922,16 +923,16 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card">
       <div class="card-title">Piano di Tutoraggio</div>
       <div class="frow">
-        <label>Frequenza dei colloqui</label>
-        <div class="check-wrap">
+        <span id="lbl-tut-freq" class="group-label">Frequenza dei colloqui</span>
+        <div class="check-wrap" role="radiogroup" aria-labelledby="lbl-tut-freq">
           <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-mensile" value="mensile"> Mensile</label>
           <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-bimestrale" value="bimestrale"> Bimestrale</label>
           <label class="check-inline"><input type="radio" name="a1-tut-freq" id="a1-tut-bisogno" value="bisogno"> Al bisogno</label>
         </div>
       </div>
       <div class="frow mt8">
-        <label>Modalità</label>
-        <div class="check-wrap">
+        <span id="lbl-tut-mod" class="group-label">Modalità</span>
+        <div class="check-wrap" role="group" aria-labelledby="lbl-tut-mod">
           <label class="check-inline"><input type="checkbox" id="a1-tm-presenza"> Colloquio individuale in presenza</label>
           <label class="check-inline"><input type="checkbox" id="a1-tm-distanza"> Colloquio a distanza (video call)</label>
           <label class="check-inline"><input type="checkbox" id="a1-tm-campo"> Osservazione sul campo</label>
@@ -951,8 +952,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
         </tbody>
       </table>
       <div class="frow mb0">
-        <label>Framework europei pertinenti</label>
-        <div class="check-wrap">
+        <span id="lbl-fw" class="group-label">Framework europei pertinenti</span>
+        <div class="check-wrap" role="group" aria-labelledby="lbl-fw">
           <label class="check-inline"><input type="checkbox" id="a1-fw-digcomp"> DigComp 2.2</label>
           <label class="check-inline"><input type="checkbox" id="a1-fw-lifecomp"> LifeComp</label>
           <label class="check-inline"><input type="checkbox" id="a1-fw-entrecomp"> EntreComp</label>
@@ -967,8 +968,8 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="grid2">
       <div>
         <div class="frow">
-          <label>Metodi di valutazione previsti</label>
-          <div class="check-wrap">
+          <span id="lbl-vm" class="group-label">Metodi di valutazione previsti</span>
+          <div class="check-wrap" role="group" aria-labelledby="lbl-vm">
             <label class="check-inline"><input type="checkbox" id="a1-vm-colloquio"> Colloquio finale di emersione (Learning Interview)</label>
             <label class="check-inline"><input type="checkbox" id="a1-vm-autoval"> Autovalutazione finale delle competenze</label>
             <label class="check-inline"><input type="checkbox" id="a1-vm-dossier"> Revisione del Dossier delle Evidenze</label>
@@ -978,11 +979,11 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       </div>
       <div>
         <div class="frow">
-          <label>Data prevista di conclusione</label>
+          <label for="a1-dataConclusioneStimata">Data prevista di conclusione</label>
           <input type="date" id="a1-dataConclusioneStimata">
         </div>
         <div class="frow">
-          <label>Descrizione attività svolta (sintesi percorso)</label>
+          <label for="a1-percorso-attivita">Descrizione attività svolta (sintesi percorso)</label>
           <textarea id="a1-percorso-attivita" rows="3" placeholder="Descrivi brevemente le attività principali del percorso..."></textarea>
         </div>
       </div>
@@ -1081,16 +1082,16 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card">
       <div class="card-title">Riflessione globale sull'esperienza (Learning Outcomes)</div>
       <div class="frow">
-        <label>Le 3 cose più importanti imparate durante il percorso</label>
+        <label for="a2-rifl-top0">Le 3 cose più importanti imparate durante il percorso</label>
         <div class="obiettivi-list">
           <div class="obj-item"><input type="text" id="a2-rifl-top0" placeholder="Prima cosa..."></div>
           <div class="obj-item"><input type="text" id="a2-rifl-top1" placeholder="Seconda cosa..."></div>
           <div class="obj-item"><input type="text" id="a2-rifl-top2" placeholder="Terza cosa..."></div>
         </div>
       </div>
-      <div class="frow"><label>Momento più difficile e come è stato affrontato</label><textarea id="a2-rifl-difficolta" rows="3"></textarea></div>
-      <div class="frow"><label>Cosa è cambiato nel modo di vedere se stessi o il mondo</label><textarea id="a2-rifl-cambiamento" rows="3"></textarea></div>
-      <div class="frow"><label>Competenze che intende usare nel lavoro / nella vita futura</label><textarea id="a2-rifl-lavoro" rows="3"></textarea></div>
+      <div class="frow"><label for="a2-rifl-difficolta">Momento più difficile e come è stato affrontato</label><textarea id="a2-rifl-difficolta" rows="3"></textarea></div>
+      <div class="frow"><label for="a2-rifl-cambiamento">Cosa è cambiato nel modo di vedere se stessi o il mondo</label><textarea id="a2-rifl-cambiamento" rows="3"></textarea></div>
+      <div class="frow"><label for="a2-rifl-lavoro">Competenze che intende usare nel lavoro / nella vita futura</label><textarea id="a2-rifl-lavoro" rows="3"></textarea></div>
     </div>
   </div>
   <div class="agent-nav-footer">
@@ -2414,7 +2415,8 @@ function downloadPattoDocx() {
       h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
       .firma-line{display:flex;gap:24pt;margin-top:20pt}
       .firma-item{flex:1;border-top:1px solid #333;padding-top:4pt;font-size:9pt}
-    </style></head>
+    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
+</style></head>
     <body>${preview.innerHTML}</body></html>`;
   const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
   const a=document.createElement('a');
@@ -2457,7 +2459,8 @@ function downloadPattoPdf() {
 .ptbl tr:nth-child(even) td{background:#fafbfc}
 
 @media print{@page{size:A4;margin:15mm}}
-    </style></head>
+    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
+</style></head>
     <body>${preview.innerHTML}
     <script>window.onload=()=>{window.print();}<\/script>
     </body></html>`);
@@ -2486,9 +2489,9 @@ function buildCompCard(item, group, stored) {
   let lvlHtml = '';
   if(!isSkip) {
     lvlHtml = `<div class="frow mt8">
-      <label>Livello di padronanza osservato</label>
-      <div class="level-sel lc-a2">
-        ${[1,2,3,4].map(n=>`<label><input type="radio" name="${group}_${item.id}_lvl" value="${n}" ${lvl===n?'checked':''}><span>${n}</span></label>`).join('')}
+      <span id="lbl-lvl-${item.id}" class="group-label">Livello di padronanza osservato</span>
+      <div class="level-sel lc-a2" role="radiogroup" aria-labelledby="lbl-lvl-${item.id}">
+        ${[1,2,3,4].map(n=>`<label class="lvl-opt"><input type="radio" name="${group}_${item.id}_lvl" value="${n}" ${lvl===n?'checked':''}><span>${n}</span></label>`).join('')}
       </div>
       <div class="level-desc">1=Base con supporto · 2=Autonomia parziale · 3=Autonomia piena · 4=Expertise/trasferisce ad altri</div>
     </div>`;
@@ -2511,7 +2514,7 @@ function buildCompCard(item, group, stored) {
         <ul>${questions.map(q=>`<li>${q}</li>`).join('')}</ul>
       </div>
       ${!isSkip?`<div class="frow">
-        <label>Note dal colloquio / Esempio narrato dal volontario</label>
+        <label for="${group}_${item.id}_note">Note dal colloquio / Esempio narrato dal volontario</label>
         <textarea id="${group}_${item.id}_note" rows="3" placeholder="Trascrivi brevemente quanto emerso dal colloquio...">${data.note||''}</textarea>
       </div>`:''}
       ${lvlHtml}
@@ -2676,10 +2679,10 @@ function selectEvidenza(id) {
       <h3>Scheda evidenza</h3>
       <button class="btn btn-danger btn-sm" onclick="removeEvidenza('${id}')">✕ Rimuovi</button>
     </div>
-    <div class="frow"><label>Titolo / nome evidenza<span class="required-mark">*</span></label>
+    <div class="frow"><label for="ef-titolo">Titolo / nome evidenza<span class="required-mark">*</span></label>
       <input type="text" id="ef-titolo" value="${escHtml(ev.titolo)}"></div>
     <div class="frow inline">
-      <div><label>Tipologia</label>
+      <div><label for="ef-tipo">Tipologia</label>
         <select id="ef-tipo">
           <option value="">—</option>
           <option ${ev.tipo==='Documento/report'?'selected':''}>Documento/report</option>
@@ -2692,16 +2695,16 @@ function selectEvidenza(id) {
           <option ${ev.tipo==='Altro'?'selected':''}>Altro</option>
         </select>
       </div>
-      <div><label>Data produzione</label><input type="date" id="ef-data" value="${ev.data||''}"></div>
+      <div><label for="ef-data">Data produzione</label><input type="date" id="ef-data" value="${ev.data||''}"></div>
     </div>
     <div class="frow inline">
-      <div><label>Autore/Produttore</label>
+      <div><label for="ef-autore">Autore/Produttore</label>
         <select id="ef-autore">
           <option ${ev.autore==='volontario'?'selected':''} value="volontario">Il volontario</option>
           <option ${ev.autore==='terzo'?'selected':''} value="terzo">Terzo / Ente</option>
         </select>
       </div>
-      <div><label>Formato</label>
+      <div><label for="ef-formato">Formato</label>
         <select id="ef-formato">
           <option value="">—</option>
           <option ${ev.formato==='cartaceo'?'selected':''}>cartaceo</option>
@@ -2710,9 +2713,9 @@ function selectEvidenza(id) {
         </select>
       </div>
     </div>
-    <div class="frow"><label>Descrizione del contenuto</label>
+    <div class="frow"><label for="ef-descrizione">Descrizione del contenuto</label>
       <textarea id="ef-descrizione" rows="2">${escHtml(ev.descrizione)}</textarea></div>
-    <div class="frow"><label>In quale attività è stata prodotta?</label>
+    <div class="frow"><label for="ef-attivita">In quale attività è stata prodotta?</label>
       <textarea id="ef-attivita" rows="2">${escHtml(ev.attivita)}</textarea></div>
 
     <div class="card-title mt12">B — Valutazione eQval (Standard 17)</div>
@@ -2733,8 +2736,8 @@ function selectEvidenza(id) {
     </div>
     <div id="ev-score-${id}" class="ev-score ${computeEvidenzaScore(ev)}">${getEvidenzaScoreLabel(ev)}</div>
     <div class="frow">
-      <label>Esito complessivo</label>
-      <div class="esito-sel">
+      <span id="lbl-esito" class="group-label">Esito complessivo</span>
+      <div class="esito-sel" role="radiogroup" aria-labelledby="lbl-esito">
         <label><input type="radio" name="ef-esito" value="accettata" ${ev.esito==='accettata'?'checked':''}><span>✅ Accettata</span></label>
         <label><input type="radio" name="ef-esito" value="riserva" ${ev.esito==='riserva'?'checked':''}><span>⚠ Con riserva</span></label>
         <label><input type="radio" name="ef-esito" value="no" ${ev.esito==='no'?'checked':''}><span>✗ Non accettata</span></label>
@@ -2790,10 +2793,10 @@ function selectEvidenza(id) {
       }).join('')}
     </div>
 
-    <div class="frow mt12"><label>Note / azioni correttive</label>
+    <div class="frow mt12"><label for="ef-note">Note / azioni correttive</label>
       <textarea id="ef-note" rows="2">${escHtml(ev.note)}</textarea></div>
     <div class="frow inline">
-      <div class="narrow"><label>Posizione in dossier</label><input type="number" id="ef-posizione" min="1" value="${ev.posizione||''}"></div>
+      <div class="narrow"><label for="ef-posizione">Posizione in dossier</label><input type="number" id="ef-posizione" min="1" value="${ev.posizione||''}"></div>
       <div style="flex:1;display:flex;align-items:flex-end">
         <button class="btn btn-a3 fw" onclick="saveCurrentEvidenza();renderEvidenze()">💾 Salva evidenza</button>
       </div>
@@ -3099,7 +3102,7 @@ function renderA4Step3() {
   }
 
   let html=`<div class="alert alert-info">Per ogni ADA proposta, indica il livello di realizzazione (1–4) e valida cliccando ✓. Le ADA non validate non saranno incluse nel documento finale.</div>
-  <div class="frow" style="margin-bottom:14px"><label style="font-weight:700">Aggiungi ADA manualmente</label>
+  <div class="frow" style="margin-bottom:14px"><label for="a4-manual-ada" style="font-weight:700">Aggiungi ADA manualmente</label>
     <div style="display:flex;gap:8px">
       <select id="a4-manual-ada" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:5px;font-size:.82rem">
         <option value="">— seleziona ADA —</option>
@@ -3122,11 +3125,11 @@ function renderA4Step3() {
       </div>
       <div class="ada-card-body">
         <div style="font-size:.75rem;color:var(--sub);margin-bottom:8px">Framework: ${ada.fw} · Competenze collegate: ${(info.comps||[]).join(', ')||'manuale'}</div>
-        <div class="frow"><label style="font-size:.75rem">Attività svolta che ha generato questa competenza</label>
+        <div class="frow"><label for="am-att-${ak}" style="font-size:.75rem">Attività svolta che ha generato questa competenza</label>
           <input type="text" id="am-att-${ak}" value="${escHtml(mapping.attivita||S.a1.percorso.attivita||'')}" placeholder="Descrivi l'attività concreta svolta...">
         </div>
-        <div class="frow"><label style="font-size:.75rem">Livello di realizzazione (1–4)</label>
-          <div class="level-sel lc-a4">
+        <div class="frow"><span id="lbl-lvl-${ak}" class="group-label" style="font-size:.75rem">Livello di realizzazione (1–4)</span>
+          <div class="level-sel lc-a4" role="radiogroup" aria-labelledby="lbl-lvl-${ak}">
             ${[1,2,3,4].map(n=>`<label><input type="radio" name="am-lvl-${ak}" value="${n}" ${(mapping.livello||1)===n?'checked':''}><span>${n}</span></label>`).join('')}
           </div>
           <div class="level-desc">1=Esecutivo con istruzioni · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise</div>
@@ -3469,7 +3472,8 @@ function downloadDocx() {
       th{background:#eeeeee;font-weight:bold}
       h1{font-size:14pt;text-align:center}h2{font-size:12pt;text-align:center}
       h3{font-size:10pt;text-transform:uppercase;border-bottom:2px solid #333;padding-bottom:2pt;margin-bottom:6pt}
-    </style></head>
+    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
+</style></head>
     <body>${preview.innerHTML}</body></html>`;
   const blob=new Blob(['﻿'+htmlContent],{type:'application/msword'});
   const a=document.createElement('a');
@@ -3510,7 +3514,8 @@ function downloadPdf() {
 .ptbl tr:nth-child(even) td{background:#fafbfc}
 
 @media print{@page{size:A4;margin:15mm}}
-    </style></head>
+    .group-label{font-size:.87rem;font-weight:600;display:block;margin-bottom:6px;color:var(--sub)}
+</style></head>
     <body>${preview.innerHTML}
     <script>window.onload=()=>{window.print();}<\/script>
     </body></html>`);
