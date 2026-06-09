@@ -418,13 +418,28 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .eqval-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase}
 .eqval-item select{width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.78rem}
 
-/* FVA Valore × Pertinenza */
-.fva-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.fva-quadrante{padding:8px 12px;border-radius:6px;font-size:.82rem;font-weight:700;border:1px solid var(--border);text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center}
-.fva-centrale{background:#d4edda;color:#155724;border-color:#c3e6cb}
-.fva-supporto{background:#fff3cd;color:#856404;border-color:#ffc107}
-.fva-marginale{background:#f8d7da;color:#721c24;border-color:#f5c6cb}
-.fva-scarto{background:#e2e3e5;color:#383d41;border-color:#d6d8db}
+/* FVA Valore × Pertinenza — card design */
+.fva-card{border:1px solid #d9e1ec;background:#fff;border-radius:8px;padding:18px;box-shadow:0 8px 22px rgba(31,41,55,.08);margin-bottom:12px}
+.fva-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+.fva-head h3{margin:0;font-size:.93rem;font-weight:800;color:#1f2a37}
+.fva-head p{margin:3px 0 0;font-size:.78rem;color:#667085}
+.fva-badge{border-radius:999px;background:#eef4ff;color:#2457a6;padding:4px 10px;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.fva-grid{display:grid;grid-template-columns:1fr 1fr 180px;gap:14px;align-items:end}
+.fva-grid label{display:block}
+.fva-grid label span,.fva-result-lbl{display:block;margin-bottom:6px;font-size:.78rem;font-weight:700;color:#344054}
+.fva-grid select{width:100%;height:42px;border:1px solid #cfd8e3;border-radius:7px;padding:0 10px;background:#fff;font-size:.84rem;font-family:inherit;cursor:pointer}
+.fva-result{min-height:72px;border-radius:8px;padding:10px 14px;background:#f8fafc;border:1px dashed #cbd5e1;transition:all .2s}
+.fva-result strong{display:block;font-size:1.3rem;font-weight:800;color:#475467;margin:3px 0}
+.fva-result small{font-size:.68rem;color:#667085}
+.fva-forte{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
+.fva-forte strong{color:#065f46}
+.fva-utile{background:#fef9c3;border:1px solid #fde047;color:#713f12}
+.fva-utile strong{color:#713f12}
+.fva-debole{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
+.fva-debole strong{color:#7f1d1d}
+.fva-integrare{background:#f1f5f9;border:1px solid #94a3b8;color:#334155}
+.fva-integrare strong{color:#334155}
+@media(max-width:760px){.fva-grid{grid-template-columns:1fr}}
 
 /* ADA CARDS (A4) */
 .ada-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
@@ -2044,9 +2059,9 @@ function checkA5Readiness() {
   // FVA warning: evidenze sotto-soglia
   const fvaWarnEl = el('a5-fva-warn');
   if(fvaWarnEl) {
-    const evAssociate = S.a3.evidenze.filter(ev => ev.esito==='accettata' && (ev.fvaQuadrante==='Marginale' || ev.fvaQuadrante==='In scarto'));
+    const evAssociate = S.a3.evidenze.filter(ev => ev.esito==='accettata' && (ev.fvaQuadrante==='Debole' || ev.fvaQuadrante==='Da integrare'));
     if(evAssociate.length > 0) {
-      fvaWarnEl.innerHTML = '<div class="alert alert-warn" style="margin-top:10px">⚠ <strong>Classificazione FVA:</strong> ' + evAssociate.length + ' evidenza/e accettata/e con quadrante <strong>Marginale</strong> o <strong>In scarto</strong>. Rivedere o rimuovere prima della firma:<ul style="margin:6px 0 0 16px">' + evAssociate.map(e=>'<li style="font-size:.8rem">' + (e.titolo||'senza titolo') + ' — <em>' + (e.fvaQuadrante||'?') + '</em></li>').join('') + '</ul></div>';
+      fvaWarnEl.innerHTML = '<div class="alert alert-warn" style="margin-top:10px">⚠ <strong>Classificazione FVA:</strong> ' + evAssociate.length + ' evidenza/e accettata/e con quadrante <strong>Debole</strong> o <strong>Da integrare</strong>. Rivedere o rimuovere prima della firma:<ul style="margin:6px 0 0 16px">' + evAssociate.map(e=>'<li style="font-size:.8rem">' + (e.titolo||'senza titolo') + ' — <em>' + (e.fvaQuadrante||'?') + '</em></li>').join('') + '</ul></div>';
     } else {
       fvaWarnEl.innerHTML = '';
     }
@@ -2724,32 +2739,40 @@ function selectEvidenza(id) {
       </div>
     </div>
 
-    <div class="card-title mt12">C — Classificazione FVA (DM 30/06/2015)</div>
-    <div class="fva-grid">
-      <div class="frow" style="margin-bottom:0">
-        <label>Valore (fonte dell'evidenza)</label>
-        <select id="ef-fvaValore" onchange="calcolaQuadrante('${id}')">
-          <option value="">— seleziona —</option>
-          <option value="1p" ${ev.fvaValore==='1p'?'selected':''}>1ª parte — autodichiarazione</option>
-          <option value="2priv" ${ev.fvaValore==='2priv'?'selected':''}>2ª parte privata — attestazione privata</option>
-          <option value="2pub" ${ev.fvaValore==='2pub'?'selected':''}>2ª parte pubblica — attestazione pubblica</option>
-          <option value="3p" ${ev.fvaValore==='3p'?'selected':''}>3ª parte — atto pubblico / certificazione</option>
-        </select>
+    <section class="fva-card">
+      <div class="fva-head">
+        <div>
+          <h3>C — Classificazione FVA</h3>
+          <p>DM 30/06/2015 · Valore e pertinenza dell'evidenza</p>
+        </div>
+        <span class="fva-badge">Auto</span>
       </div>
-      <div class="frow" style="margin-bottom:0">
-        <label>Pertinenza rispetto alla competenza</label>
-        <select id="ef-fvaPertinenza" onchange="calcolaQuadrante('${id}')">
-          <option value="">— seleziona —</option>
-          <option value="B" ${ev.fvaPertinenza==='B'?'selected':''}>B — Bassa</option>
-          <option value="M" ${ev.fvaPertinenza==='M'?'selected':''}>M — Media</option>
-          <option value="A" ${ev.fvaPertinenza==='A'?'selected':''}>A — Alta</option>
-        </select>
+      <div class="fva-grid">
+        <label>
+          <span>Valore dell'evidenza</span>
+          <select id="ef-fvaValore" onchange="calcolaQuadrante('${id}')">
+            <option value="">— seleziona —</option>
+            <option value="Alto" ${ev.fvaValore==='Alto'?'selected':''}>Alto — atto pubblico / terza parte</option>
+            <option value="Medio" ${ev.fvaValore==='Medio'?'selected':''}>Medio — attestazione istituzionale</option>
+            <option value="Basso" ${ev.fvaValore==='Basso'?'selected':''}>Basso — autodichiarazione</option>
+          </select>
+        </label>
+        <label>
+          <span>Pertinenza rispetto alla competenza</span>
+          <select id="ef-fvaPertinenza" onchange="calcolaQuadrante('${id}')">
+            <option value="">— seleziona —</option>
+            <option value="Alta" ${ev.fvaPertinenza==='Alta'?'selected':''}>Alta</option>
+            <option value="Media" ${ev.fvaPertinenza==='Media'?'selected':''}>Media</option>
+            <option value="Bassa" ${ev.fvaPertinenza==='Bassa'?'selected':''}>Bassa</option>
+          </select>
+        </label>
+        <div id="fva-result-${id}" class="fva-result ${ev.fvaQuadrante==='Forte'?'fva-forte':ev.fvaQuadrante==='Utile'?'fva-utile':ev.fvaQuadrante==='Debole'?'fva-debole':ev.fvaQuadrante==='Da integrare'?'fva-integrare':''}">
+          <span class="fva-result-lbl">Quadrante FVA</span>
+          <strong id="ef-fvaQuadrante">${ev.fvaQuadrante||'—'}</strong>
+          <small>Calcolato automaticamente</small>
+        </div>
       </div>
-    </div>
-    <div class="frow">
-      <label>Quadrante FVA (calcolato automaticamente)</label>
-      <input type="text" id="ef-fvaQuadrante" readonly value="${ev.fvaQuadrante||'—'}" class="fva-quadrante ${ev.fvaQuadrante==='Centrale'?'fva-centrale':ev.fvaQuadrante==='Di supporto'?'fva-supporto':ev.fvaQuadrante==='Marginale'?'fva-marginale':ev.fvaQuadrante==='In scarto'?'fva-scarto':''}" style="cursor:default">
-    </div>
+    </section>
 
     <div class="card-title mt12">D — Competenze collegate</div>
     <div class="comp-link-grid">
@@ -2801,7 +2824,8 @@ function saveCurrentEvidenza() {
   ev.esito=esitoEl?esitoEl.value:'';
   ev.fvaValore=getVal('ef-fvaValore');
   ev.fvaPertinenza=getVal('ef-fvaPertinenza');
-  ev.fvaQuadrante=getVal('ef-fvaQuadrante');
+  const _qEl=document.getElementById('ef-fvaQuadrante');
+  ev.fvaQuadrante=_qEl?_qEl.textContent.trim():'';
   ev.note=getVal('ef-note');
   ev.posizione=getVal('ef-posizione');
   updateNavStatus();
@@ -2811,35 +2835,34 @@ function collectA3() {
   saveCurrentEvidenza();
 }
 function calcolaQuadrante(evId) {
-  const v = document.getElementById('ef-fvaValore') ? document.getElementById('ef-fvaValore').value : '';
-  const p = document.getElementById('ef-fvaPertinenza') ? document.getElementById('ef-fvaPertinenza').value : '';
-  let q = '';
-  if (!v || !p) { q = '—'; }
-  else if (v === '3p') {
-    q = 'Centrale';
-  } else if ((v === '2priv' || v === '2pub') && p === 'A') {
-    q = 'Centrale';
-  } else if ((v === '2priv' || v === '2pub') && p === 'M') {
-    q = 'Di supporto';
-  } else if ((v === '2priv' || v === '2pub') && p === 'B') {
-    q = 'Marginale';
-  } else if (v === '1p' && p === 'A') {
-    q = 'Di supporto';
-  } else if (v === '1p' && p === 'M') {
-    q = 'Marginale';
-  } else if (v === '1p' && p === 'B') {
-    q = 'In scarto';
+  const vEl = document.getElementById('ef-fvaValore');
+  const pEl = document.getElementById('ef-fvaPertinenza');
+  const v = vEl ? vEl.value : '';
+  const p = pEl ? pEl.value : '';
+  let q = '—';
+  if (v && p) {
+    if      (v==='Alto'  && p==='Alta')   q='Forte';
+    else if (v==='Alto'  && p==='Media')  q='Forte';
+    else if (v==='Alto'  && p==='Bassa')  q='Utile';
+    else if (v==='Medio' && p==='Alta')   q='Utile';
+    else if (v==='Medio' && p==='Media')  q='Utile';
+    else if (v==='Medio' && p==='Bassa')  q='Debole';
+    else if (v==='Basso' && p==='Alta')   q='Debole';
+    else if (v==='Basso' && p==='Media')  q='Da integrare';
+    else if (v==='Basso' && p==='Bassa')  q='Da integrare';
   }
+  // Aggiorna <strong> e container
   const qEl = document.getElementById('ef-fvaQuadrante');
-  if (qEl) {
-    qEl.value = q;
-    const colori = { 'Centrale':'fva-centrale', 'Di supporto':'fva-supporto', 'Marginale':'fva-marginale', 'In scarto':'fva-scarto' };
-    qEl.className = 'fva-quadrante ' + (colori[q] || '');
-    // aggiorna anche nel modello se evId disponibile
-    if (evId) {
-      const ev = S.a3.evidenze.find(e=>e.id===evId);
-      if (ev) ev.fvaQuadrante = q;
-    }
+  const resEl = evId ? document.getElementById('fva-result-'+evId) : null;
+  if (qEl) qEl.textContent = q;
+  if (resEl) {
+    resEl.className = 'fva-result'
+      + (q==='Forte'?' fva-forte':q==='Utile'?' fva-utile':q==='Debole'?' fva-debole':q==='Da integrare'?' fva-integrare':'');
+  }
+  // Aggiorna modello
+  if (evId) {
+    const ev = S.a3.evidenze.find(e=>e.id===evId);
+    if (ev) ev.fvaQuadrante = q;
   }
 }
 
@@ -3291,7 +3314,7 @@ function renderDocPreview() {
   let s5rows='';
   S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
     const fvaQ = ev.fvaQuadrante||'—';
-    const fvaStyle = fvaQ==='Centrale'?'color:#155724;font-weight:600':fvaQ==='Di supporto'?'color:#856404':fvaQ==='Marginale'?'color:#721c24':fvaQ==='In scarto'?'color:#383d41;opacity:.6':'';
+    const fvaStyle = fvaQ==='Forte'?'color:#065f46;font-weight:600':fvaQ==='Utile'?'color:#713f12':fvaQ==='Debole'?'color:#7f1d1d':fvaQ==='Da integrare'?'color:#334155;opacity:.7':'';
     s5rows+=`<tr>
       <td style="text-align:center">${i+1}</td>
       <td>${ev.tipo||'—'}</td>
@@ -3725,7 +3748,7 @@ function renderFVAMatrix() {
     container.innerHTML='<p style="font-size:.8rem;color:var(--sub);text-align:center;padding:12px">Nessuna ADA validata. Completa il mapping in Fase 4.</p>';
     return;
   }
-  const quadranti = ['Centrale','Di supporto','Marginale','In scarto'];
+  const quadranti = ['Forte','Utile','Debole','Da integrare'];
   let rows='';
   validated.forEach(([adaCode])=>{
     const ada = Object.values(ADA_DB).find(a=>a.code===adaCode) || {desc:adaCode};
@@ -3736,20 +3759,20 @@ function renderFVAMatrix() {
     quadranti.forEach(q=>{ counts[q] = evForAda.filter(ev=>ev.fvaQuadrante===q).length; });
     rows+=`<tr>
       <td style="font-size:.78rem">${adaCode}<br><span style="color:var(--sub);font-size:.7rem">${(ada.desc||'').substring(0,60)}</span></td>
-      <td style="text-align:center;background:${counts['Centrale']>0?'#d4edda':'#fafafa'};color:${counts['Centrale']>0?'#155724':'#aaa'};font-weight:${counts['Centrale']>0?'700':'400'}">${counts['Centrale']||'—'}</td>
-      <td style="text-align:center;background:${counts['Di supporto']>0?'#fff3cd':'#fafafa'};color:${counts['Di supporto']>0?'#856404':'#aaa'}">${counts['Di supporto']||'—'}</td>
-      <td style="text-align:center;background:${counts['Marginale']>0?'#f8d7da':'#fafafa'};color:${counts['Marginale']>0?'#721c24':'#aaa'}">${counts['Marginale']||'—'}</td>
-      <td style="text-align:center;background:${counts['In scarto']>0?'#e2e3e5':'#fafafa'};color:${counts['In scarto']>0?'#383d41':'#aaa'}">${counts['In scarto']||'—'}</td>
+      <td style="text-align:center;background:${counts['Forte']>0?'#d1fae5':'#fafafa'};color:${counts['Forte']>0?'#065f46':'#aaa'};font-weight:${counts['Forte']>0?'700':'400'}">${counts['Forte']||'—'}</td>
+      <td style="text-align:center;background:${counts['Utile']>0?'#fef9c3':'#fafafa'};color:${counts['Utile']>0?'#713f12':'#aaa'}">${counts['Utile']||'—'}</td>
+      <td style="text-align:center;background:${counts['Debole']>0?'#fee2e2':'#fafafa'};color:${counts['Debole']>0?'#7f1d1d':'#aaa'}">${counts['Debole']||'—'}</td>
+      <td style="text-align:center;background:${counts['Da integrare']>0?'#f1f5f9':'#fafafa'};color:${counts['Da integrare']>0?'#334155':'#aaa'}">${counts['Da integrare']||'—'}</td>
     </tr>`;
   });
   container.innerHTML=`<div style="overflow-x:auto;margin-top:8px">
     <table style="width:100%;border-collapse:collapse;font-size:.8rem">
       <thead><tr>
         <th style="background:#1a2940;color:#fff;padding:7px 10px;text-align:left">ADA Validata</th>
-        <th style="background:#d4edda;color:#155724;padding:7px 8px">Centrale</th>
-        <th style="background:#fff3cd;color:#856404;padding:7px 8px">Di supporto</th>
-        <th style="background:#f8d7da;color:#721c24;padding:7px 8px">Marginale</th>
-        <th style="background:#e2e3e5;color:#383d41;padding:7px 8px">In scarto</th>
+        <th style="background:#d1fae5;color:#065f46;padding:7px 8px">Forte</th>
+        <th style="background:#fef9c3;color:#713f12;padding:7px 8px">Utile</th>
+        <th style="background:#fee2e2;color:#7f1d1d;padding:7px 8px">Debole</th>
+        <th style="background:#f1f5f9;color:#334155;padding:7px 8px">Da integrare</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
@@ -3790,7 +3813,7 @@ a1:'Sei l\'Assistente AI della Fase 1 — Avvio e Inquadramento del sistema HubS
 
 a2:'Sei l\'Assistente AI della Fase 2 — Emersione del sistema HubS-TransparentIA.\nSupporti il TUTOR nella conduzione dei colloqui narrativi e biografici per l\'emersione delle competenze acquisite in contesti formali, non formali e informali.\n\nPuoi aiutare il tutor a:\n• Riformulare domande Youthpass quando il volontario non comprende o risponde in modo vago\n• Approfondire con domande di follow-up (es. "Puoi fare un esempio concreto?", "Come hai affrontato la difficoltà?")\n• Riconoscere nelle narrazioni del volontario pattern riconducibili a EU8, DigComp 2.2, LifeComp, EntreComp\n• Valutare a quale livello (1-4) corrisponde un comportamento descritto:\n  1=Base con guida costante · 2=Autonomia con supervisione · 3=Autonomia piena · 4=Trasferisce la competenza ad altri\n• Gestire volontari reticenti o che tendono a sminuire le proprie competenze\n\nMetodologia: Youthpass Learning Interview, Factory of Learning, approccio narrativo/riflessivo.\nRispondi sempre in italiano. Proponi riformulazioni e domande pronte all\'uso.',
 
-a3:'Sei l\'Assistente AI della Fase 3 — Istruttoria del sistema HubS-TransparentIA.\nSupporti il TUTOR nella selezione, organizzazione e valutazione delle evidenze documentali a supporto delle competenze emerse.\n\nPuoi aiutare il tutor a:\n• Valutare un\'evidenza secondo i 5 criteri eQval Standard 17:\n  - Validità: dimostra davvero la competenza dichiarata?\n  - Attualità: prodotta durante/subito dopo l\'esperienza rilevante?\n  - Pertinenza: coerente con le attività svolte e gli obiettivi del progetto?\n  - Sufficienza: da sola o con altre è abbastanza per provare la competenza al livello dichiarato?\n  - Autenticità: è certa la paternità del volontario?\n• Classificare le evidenze con la Matrice FVA Valore × Pertinenza (DM 30/06/2015):\n  - Asse Valore: 1ª parte (autodichiarazione) / 2ª parte privata / 2ª parte pubblica / 3ª parte (atto pubblico)\n  - Asse Pertinenza: B (Bassa) / M (Media) / A (Alta)\n  - Quadranti: Centrale (valore alto + pertinenza ≥M) · Di supporto · Marginale · In scarto\n  - Soglia raccomandata per il Documento: almeno 2ª parte + pertinenza ≥ M\n• Identificare gap di copertura e suggerire tipologie di evidenze complementari\n• Formulare motivazioni per i tre esiti: Accettata / Con riserva / Non accettata\n• Gestire situazioni con evidenze deboli, poche o ambigue\n\nRispondi sempre in italiano. Sii pratico, usa esempi concreti, aiuta il tutor a prendere decisioni motivate.',
+a3:'Sei l\'Assistente AI della Fase 3 — Istruttoria del sistema HubS-TransparentIA.\nSupporti il TUTOR nella selezione, organizzazione e valutazione delle evidenze documentali a supporto delle competenze emerse.\n\nPuoi aiutare il tutor a:\n• Valutare un\'evidenza secondo i 5 criteri eQval Standard 17:\n  - Validità: dimostra davvero la competenza dichiarata?\n  - Attualità: prodotta durante/subito dopo l\'esperienza rilevante?\n  - Pertinenza: coerente con le attività svolte e gli obiettivi del progetto?\n  - Sufficienza: da sola o con altre è abbastanza per provare la competenza al livello dichiarato?\n  - Autenticità: è certa la paternità del volontario?\n• Classificare le evidenze con la Matrice FVA Valore × Pertinenza (DM 30/06/2015):\n  - Asse Valore: 1ª parte (autodichiarazione) / 2ª parte privata / 2ª parte pubblica / 3ª parte (atto pubblico)\n  - Asse Pertinenza: B (Bassa) / M (Media) / A (Alta)\n  - Quadranti: Forte (Alto+Alta/Media) · Utile (Medio+Alta/Media, Alto+Bassa) · Debole (Medio+Bassa, Basso+Alta) · Da integrare (Basso+Media/Bassa)\n  - Soglia raccomandata per il Documento: quadrante ≥ Utile (Valore Medio/Alto + Pertinenza Media/Alta)\n• Identificare gap di copertura e suggerire tipologie di evidenze complementari\n• Formulare motivazioni per i tre esiti: Accettata / Con riserva / Non accettata\n• Gestire situazioni con evidenze deboli, poche o ambigue\n\nRispondi sempre in italiano. Sii pratico, usa esempi concreti, aiuta il tutor a prendere decisioni motivate.',
 
 a4:'Sei l\'Assistente AI della Fase 4 — Ricognizione del sistema HubS-TransparentIA.\nSupporti il TUTOR nella ricognizione normativa e nell\'ancoraggio delle competenze emerse ai repertori ufficiali (ADA/INAPP, repertorio regionale, ATECO).\n\nPuoi aiutare il tutor a:\n• Scegliere l\'ADA più appropriata tra più opzioni disponibili\n• Spiegare la differenza tra:\n  - Mapping L1 deterministico: DigComp 2.2 → ADA.QE.01.0x (fonte: GOL/EDO Regione Calabria n.15242/2025)\n  - Mapping L2 inferenziale: LifeComp/EntreComp/EU8 → ADA del SEP n.18 (INAPP)\n• Determinare il livello di realizzazione dell\'ADA più appropriato:\n  1=Esecutivo con istruzioni · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise tecnico\n• Interpretare i Risultati Attesi (RA) dell\'Atlante INAPP nel contesto del volontariato\n• Giustificare scelte di mappatura non ovvie per la documentazione\n• Navigare e spiegare le ADA del SEP n.18 (Servizi di educazione, formazione e lavoro)\n\nFonti: Atlante del Lavoro INAPP, Decreto GOL/EDO Regione Calabria n.15242/2025, SEP n.18.\nUsa sempre i codici ADA completi (es. ADA.QE.01.01, ADA.18.01.09).\nRispondi sempre in italiano. Usa la terminologia INAPP corretta.',
 
