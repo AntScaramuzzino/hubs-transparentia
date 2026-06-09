@@ -4612,22 +4612,26 @@ function _uuid() {
 // ── Build VC (unsigned) from session state ──
 function vcBuild() {
   const a1 = S.a1 || {};
-  const nome = ((a1['vol-nome']||'') + ' ' + (a1['vol-cognome']||'')).trim();
-  const ente = a1['ente-denominazione'] || '';
-  const settore = a1['percorso-settore'] || '';
-  const dataInizio = a1['percorso-dataInizio'] || '';
-  const dataFine   = a1['percorso-dataFine'] || '';
+  const vol = a1.vol || {}, enteObj = a1.ente || {}, per = a1.percorso || {};
+  const nome = ((vol.nome||'') + ' ' + (vol.cognome||'')).trim();
+  const enteName = enteObj.denominazione || '';
+  const settore = per.settore || '';
+  const dataInizio = per.dataInizio || '';
+  const dataFine   = per.dataFine || '';
 
-  // Competencies with level
+  // Competencies with level (S.a2 è suddiviso per framework: eu/dc/lc/ec)
   const competencies = [];
-  const allIds = EU8.concat(DIGCOMP, LIFECOMP, ENTRECOMP);
-  allIds.forEach(function(item) {
-    const ph = S.a2 || {};
-    const d = ph[item.id];
-    if (d && d.livello) {
-      competencies.push({ framework: item.area || 'EU', competencyId: item.id,
-        name: item.nome, level: d.livello, notes: (d.note||'').substring(0,200) });
-    }
+  const a2 = S.a2 || {};
+  const groups = [['EU8',EU8,a2.eu||{}],['DigComp',DIGCOMP,a2.dc||{}],['LifeComp',LIFECOMP,a2.lc||{}],['EntreComp',ENTRECOMP,a2.ec||{}]];
+  groups.forEach(function(g) {
+    const fw = g[0], items = g[1], store = g[2];
+    items.forEach(function(item) {
+      const d = store[item.id];
+      if (d && d.livello) {
+        competencies.push({ framework: fw, competencyId: item.id,
+          name: item.nome, level: d.livello, notes: (d.note||'').substring(0,200) });
+      }
+    });
   });
 
   // Validated ADAs
@@ -4655,7 +4659,7 @@ function vcBuild() {
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': {
       'id': nome ? ('urn:volunteer:' + encodeURIComponent(nome)) : 'urn:volunteer:unknown',
-      'name': nome, 'ente': ente, 'settore': settore,
+      'name': nome, 'ente': enteName, 'settore': settore,
       'serviceStart': dataInizio, 'serviceEnd': dataFine,
       'competencies': competencies,
       'adas': adas
@@ -4665,19 +4669,40 @@ function vcBuild() {
 
 // ── Sign VC via /api/sign (Ed25519 server-side) and download JSON ──
 async function vcSignAndDownload() {
+  const box = el('vc-alert');
+  const say = function(cls, msg){ if (box) box.innerHTML = '<div class="alert alert-' + cls + '">' + msg + '</div>'; };
   try {
-    el('vc-alert').innerHTML = '<div class="alert alert-ok">Generazione VC in corso&#8230;</div>';
+    if (typeof collectAll === 'function') collectAll();
+    say('ok', 'Firma Ed25519 in corso&#8230;');
     const vc = vcBuild();
+    const payload = _cj(vc); // canonical JSON: lo stesso che il verificatore ricalcola
+
+    const resp = await fetch('/api/sign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: payload })
+    });
+    const data = await resp.json().catch(function(){ return {}; });
+    if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status + ' da /api/sign'));
+    if (!data.signature) throw new Error('Risposta /api/sign senza firma.');
+
+    vc.proof = {
+      type: 'Ed25519Signature2020',
+      created: new Date().toISOString(),
+      verificationMethod: data.keyId || VC_KEY_ID,
+      proofPurpose: 'assertionMethod',
+      proofValue: data.signature
+    };
 
     const blob = new Blob([JSON.stringify(vc, null, 2)], { type:'application/ld+json' });
     const a = document.createElement('a');
-    const nome = ((S.a1||{})['vol-nome']||'vc').replace(/\s+/g,'_').toLowerCase();
+    const nome = (((S.a1||{}).vol||{}).nome||'vc').replace(/\s+/g,'_').toLowerCase();
     a.href = URL.createObjectURL(blob);
     a.download = 'hubs_vc_' + nome + '_' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
-    el('vc-alert').innerHTML = '<div class="alert alert-ok">&#10003; Credenziale scaricata (non firmata).</div>';
+    say('ok', '&#10003; Credenziale firmata (Ed25519) e scaricata. Verificabile con &#8220;Verifica VC&#8221; o tramite il DID Document pubblico.');
   } catch(e) {
-    el('vc-alert').innerHTML = '<div class="alert alert-err">Errore: ' + escHtml(e.message) + '</div>';
+    say('err', 'Errore firma VC: ' + escHtml(e.message) + '<br><span style="font-size:.78rem">Se l&#8217;errore riguarda la chiave: impostare <code>VC_SIGNING_PRIVATE_KEY</code> nelle Environment Variables di Vercel (istruzioni in <code>api/sign.js</code>) e rideployare.</span>');
   }
 }
 
@@ -4761,6 +4786,29 @@ async function vcVerifyPasted() {
     resEl.innerHTML = '<div class="vc-result fail"><strong>Errore verifica:</strong> ' + escHtml(e.message) + '</div>';
   }
 }
+
+// ── Badge dinamico: il DID Document risponde solo se la chiave server è configurata ──
+async function vcCheckKey() {
+  const badge = el('vc-key-badge'); if (!badge) return;
+  badge.className = 'vc-badge none'; badge.innerHTML = '&#8943; verifica chiave server&#8230;';
+  try {
+    const r = await fetch('/.well-known/did.json', { cache: 'no-store' });
+    if (!r.ok) { const d = await r.json().catch(function(){ return {}; }); throw new Error(d.error || ('HTTP ' + r.status)); }
+    badge.className = 'vc-badge ok'; badge.innerHTML = '&#10003; Chiave server Ed25519 configurata';
+  } catch (e) {
+    badge.className = 'vc-badge warn'; badge.innerHTML = '&#9888; Chiave server non configurata';
+    const box = el('vc-alert');
+    if (box) box.innerHTML = '<div class="alert alert-warn">Firma non disponibile: ' + escHtml(e.message) + '.<br><span style="font-size:.78rem">Impostare <code>VC_SIGNING_PRIVATE_KEY</code> nelle Environment Variables di Vercel (istruzioni in <code>api/sign.js</code>) e rideployare.</span></div>';
+  }
+}
+vcCheckKey();
+
+// Esposizione globale: gli onclick inline vivono fuori da questo scope (DOMContentLoaded)
+window.vcBuild = vcBuild;
+window.vcSignAndDownload = vcSignAndDownload;
+window.vcOpenVerifier = vcOpenVerifier;
+window.vcVerifyPasted = vcVerifyPasted;
+window.vcCheckKey = vcCheckKey;
 // ═══════════════════════════════════════════════════════════
   initChatSystem();
 });
