@@ -44,6 +44,11 @@ aside a:hover i{color:var(--blu)}
 aside a.active{background:var(--blu-light);border-left-color:var(--blu);color:var(--blu);font-weight:700}
 aside a.active i{color:var(--blu)}
 aside .nav-badge{margin-left:auto;background:var(--blu);color:#fff;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px}
+aside .back-home{display:flex;align-items:center;gap:10px;margin:16px 16px 4px;padding:10px 14px;background:linear-gradient(90deg,#12172e,#1e2a4a);color:#fff!important;border-radius:9px;text-decoration:none;font-size:.84rem;font-weight:700;transition:all .15s;border-left:none!important}
+aside .back-home:hover{background:linear-gradient(90deg,#1e2a4a,#2d3f6e)!important;transform:translateY(-1px);box-shadow:0 4px 12px rgba(18,23,46,.3)}
+aside .back-home i{color:#2ecc71!important;font-size:.9rem;width:16px}
+aside .back-home span.arrow{font-size:.75rem;opacity:.6;margin-left:auto}
+aside hr.nav-sep{border:none;border-top:1px solid var(--border);margin:12px 0 4px}
 
 /* MAIN */
 main{padding:44px 52px 60px;max-width:980px}
@@ -211,6 +216,12 @@ footer .footer-links a{display:flex;align-items:center;gap:6px;font-size:.83rem}
 
 <!-- SIDEBAR -->
 <aside>
+  <a class="back-home" href="/">
+    <i class="fa-solid fa-network-wired"></i>
+    <span>HubS · Dashboard</span>
+    <span class="arrow">↗</span>
+  </a>
+  <hr class="nav-sep">
   <div class="section-label"><i class="fa-solid fa-book-open"></i> Guida</div>
   <a href="#sistema" class="active"><i class="fa-solid fa-building-columns"></i> Il Sistema</a>
   <a href="#agenti"><i class="fa-solid fa-robot"></i> I 5 Agenti <span class="nav-badge">5</span></a>
