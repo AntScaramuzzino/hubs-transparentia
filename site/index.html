@@ -558,7 +558,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 <!-- AI SIDE PANEL -->
 <div class="ai-panel-side" id="ai-panel-side">
   <div class="ai-panel-hdr">
-    <span>🤖 Assistente AI</span>
+    <span id="ai-panel-title">🤖 Assistente AI</span>
     <button onclick="closeAISidePanel()">✕ Chiudi</button>
   </div>
   <div class="ai-panel-body" id="ai-panel-body"></div>
@@ -1587,6 +1587,15 @@ function _updateWelcomeCard(phase, text) {
 // ============================================================
 // NAVIGATION
 // ============================================================
+// Maps screen id to agent id and display name
+const SCREEN_AGENT_MAP = {
+  a1:{ id:'a1', label:'Fase 1 · Orientatore' },
+  a2:{ id:'a2', label:'Fase 2 · Emersione' },
+  a3:{ id:'a3', label:'Fase 3 · Istruttoria' },
+  a4:{ id:'a4', label:'Fase 4 · Ricognizione' },
+  a5:{ id:'a5', label:'Fase 5 · Formalizzazione' }
+};
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1604,6 +1613,21 @@ function showScreen(id) {
   closeSidebar();
   if(id==='a4') { renderA4Step(a4ActiveStep); updateA4Stepper(); }
   if(id==='a5') { collectA5(); renderDocPreview(); checkA5Readiness(); }
+  // ── If AI panel is open, switch it to the new agent ──
+  const panel = el('ai-panel-side');
+  if(panel && panel.classList.contains('open')) {
+    const info = SCREEN_AGENT_MAP[id];
+    if(info) {
+      const body = el('ai-panel-body');
+      const titleEl = el('ai-panel-title');
+      // Only re-render if agent actually changed (preserves history)
+      if(body && body.dataset.agent !== info.id) {
+        body.innerHTML = renderChatPanel(info.id);
+        body.dataset.agent = info.id;
+      }
+      if(titleEl) titleEl.textContent = '\u{1F916} Assistente AI — ' + info.label;
+    }
+  }
 }
 
 // ============================================================
@@ -2081,6 +2105,12 @@ function openAISidePanel(agentId, promptText) {
     body.dataset.agent = agentId;
   }
 
+  // Update header title
+  const titleEl = el('ai-panel-title');
+  if(titleEl) {
+    const info = SCREEN_AGENT_MAP[agentId];
+    titleEl.textContent = '\u{1F916} Assistente AI' + (info ? ' — ' + info.label : '');
+  }
   // Show panel + push main content
   panel.classList.add('open');
   const mainEl = el('main');
