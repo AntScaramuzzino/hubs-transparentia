@@ -418,12 +418,13 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
 .eqval-item label{display:block;font-size:.72rem;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase}
 .eqval-item select{width:100%;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.78rem}
 
-/* LEVER 4R */
-.lever-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.lever-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:5px;cursor:pointer}
-.lever-item input[type=checkbox]{margin-top:2px;flex-shrink:0}
-.lever-item .lever-label{font-size:.78rem;font-weight:600}
-.lever-item .lever-desc{font-size:.7rem;color:var(--sub);display:block}
+/* FVA Valore × Pertinenza */
+.fva-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.fva-quadrante{padding:8px 12px;border-radius:6px;font-size:.82rem;font-weight:700;border:1px solid var(--border);text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center}
+.fva-centrale{background:#d4edda;color:#155724;border-color:#c3e6cb}
+.fva-supporto{background:#fff3cd;color:#856404;border-color:#ffc107}
+.fva-marginale{background:#f8d7da;color:#721c24;border-color:#f5c6cb}
+.fva-scarto{background:#e2e3e5;color:#383d41;border-color:#d6d8db}
 
 /* ADA CARDS (A4) */
 .ada-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
@@ -1091,7 +1092,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <i class="fa-solid fa-folder-open ahicon"></i>
     <div class="ahtxt">
       <h2>Costruttore del Dossier</h2>
-      <p>Analisi e validazione evidenze · eQval Standard 17 · Lever Up Matrice 4R</p>
+      <p>Analisi e validazione evidenze · eQval Standard 17 · Matrice FVA Valore × Pertinenza</p>
     </div>
   </div>
   <div id="a3-alert"></div>
@@ -1193,6 +1194,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
       <div class="readiness-row"><span class="readiness-icon r-warn" id="a5r-note">⚠</span><span class="readiness-lbl">Note tutor</span><span class="readiness-detail" id="a5rd-note">Facoltative ma raccomandate</span></div>
     </div>
   </div>
+  <div id="a5-fva-warn"></div>
   <!-- A5 VC PANEL -->
   <div class="card vc-panel" id="a5-vc-panel">
     <div class="card-title">🔐 Verifiable Credential — W3C VC 1.1 · did:key · ECDSA P-256</div>
@@ -1994,7 +1996,7 @@ function importEvFromA2() {
       autore:'volontario', formato:'digitale', descrizione:c.note.substring(0,200),
       attivita: S.a1.percorso.attivita || '',
       eqval:{validita:'',attualita:'',pertinenza:'parziale',sufficienza:'',autenticita:''},
-      lever:{r1:false,r2:false,r3:false,r4:true}, leverPrinc:'R4',
+      fvaValore:'', fvaPertinenza:'', fvaQuadrante:'',
       compCollegate:[c.id], esito:'', posizione:'', note:'Importato da Fase 2', inclusa:true
     };
     S.a3.evidenze.push(ev);
@@ -2008,7 +2010,7 @@ function addEvidenzaColloquio() {
     autore:'volontario', formato:'digitale', descrizione:'',
     attivita: S.a1.percorso.attivita || '',
     eqval:{validita:'parziale',attualita:'piena',pertinenza:'',sufficienza:'',autenticita:'parziale'},
-    lever:{r1:false,r2:false,r3:false,r4:true}, leverPrinc:'R4',
+    fvaValore:'', fvaPertinenza:'', fvaQuadrante:'',
     compCollegate:[], esito:'', posizione:'', note:'', inclusa:true
   };
   S.a3.evidenze.push(ev);
@@ -2039,6 +2041,16 @@ function checkA5Readiness() {
   _setRow('a5r-vol','a5rd-vol', volOk, false, volOk?'✓':'✗', volOk?'Nome, cognome, ente compilati':'Completa i dati in Fase 1');
   _setRow('a5r-ev','a5rd-ev', evAcc>0, evTotal>0&&!evAcc, evAcc>0?'✓':evTotal>0?'⚠':'✗',
     evAcc>0?evAcc+'/'+evTotal+' evidenze accettate':evTotal>0?evTotal+' evidenze ma 0 accettate':'Aggiungi evidenze in Fase 3');
+  // FVA warning: evidenze sotto-soglia
+  const fvaWarnEl = el('a5-fva-warn');
+  if(fvaWarnEl) {
+    const evAssociate = S.a3.evidenze.filter(ev => ev.esito==='accettata' && (ev.fvaQuadrante==='Marginale' || ev.fvaQuadrante==='In scarto'));
+    if(evAssociate.length > 0) {
+      fvaWarnEl.innerHTML = '<div class="alert alert-warn" style="margin-top:10px">⚠ <strong>Classificazione FVA:</strong> ' + evAssociate.length + ' evidenza/e accettata/e con quadrante <strong>Marginale</strong> o <strong>In scarto</strong>. Rivedere o rimuovere prima della firma:<ul style="margin:6px 0 0 16px">' + evAssociate.map(e=>'<li style="font-size:.8rem">' + (e.titolo||'senza titolo') + ' — <em>' + (e.fvaQuadrante||'?') + '</em></li>').join('') + '</ul></div>';
+    } else {
+      fvaWarnEl.innerHTML = '';
+    }
+  }
   _setRow('a5r-ada','a5rd-ada', adaVal>0, false, adaVal>0?'✓':'✗', adaVal>0?adaVal+' ADA validate':'Valida ADA in Fase 4');
   _setRow('a5r-presenza','a5rd-presenza', presOk, perc>0&&perc<75, presOk?'✓':perc>0?'⚠':'✗',
     perc>0?perc+'% presenza ('+svolte+' / '+prev+' ore)':'Inserisci ore in Fase 1');
@@ -2578,7 +2590,7 @@ function addEvidenza() {
     id:'ev'+(evNextId++), titolo:'Nuova evidenza', tipo:'', data:'', autore:'volontario',
     formato:'', descrizione:'', attivita:'',
     eqval:{validita:'',attualita:'',pertinenza:'',sufficienza:'',autenticita:''},
-    lever:{r1:false,r2:false,r3:false,r4:false}, leverPrinc:'',
+    fvaValore:'', fvaPertinenza:'', fvaQuadrante:'',
     compCollegate:[], esito:'', posizione:'', note:'', inclusa:true
   };
   S.a3.evidenze.push(ev);
@@ -2712,25 +2724,31 @@ function selectEvidenza(id) {
       </div>
     </div>
 
-    <div class="card-title mt12">C — Classificazione Lever Up (Matrice 4R)</div>
-    <div class="lever-grid">
-      <label class="lever-item"><input type="checkbox" id="ef-r1" ${ev.lever.r1?'checked':''}>
-        <div><span class="lever-label">R1 — Risultati</span><span class="lever-desc">Prodotti tangibili realizzati</span></div></label>
-      <label class="lever-item"><input type="checkbox" id="ef-r2" ${ev.lever.r2?'checked':''}>
-        <div><span class="lever-label">R2 — Risorse</span><span class="lever-desc">Strumenti e conoscenze usate</span></div></label>
-      <label class="lever-item"><input type="checkbox" id="ef-r3" ${ev.lever.r3?'checked':''}>
-        <div><span class="lever-label">R3 — Reputazione</span><span class="lever-desc">Feedback e riconoscimenti di terzi</span></div></label>
-      <label class="lever-item"><input type="checkbox" id="ef-r4" ${ev.lever.r4?'checked':''}>
-        <div><span class="lever-label">R4 — Richiamo</span><span class="lever-desc">Autovalutazione e narrazione</span></div></label>
+    <div class="card-title mt12">C — Classificazione FVA (DM 30/06/2015)</div>
+    <div class="fva-grid">
+      <div class="frow" style="margin-bottom:0">
+        <label>Valore (fonte dell'evidenza)</label>
+        <select id="ef-fvaValore" onchange="calcolaQuadrante('${id}')">
+          <option value="">— seleziona —</option>
+          <option value="1p" ${ev.fvaValore==='1p'?'selected':''}>1ª parte — autodichiarazione</option>
+          <option value="2priv" ${ev.fvaValore==='2priv'?'selected':''}>2ª parte privata — attestazione privata</option>
+          <option value="2pub" ${ev.fvaValore==='2pub'?'selected':''}>2ª parte pubblica — attestazione pubblica</option>
+          <option value="3p" ${ev.fvaValore==='3p'?'selected':''}>3ª parte — atto pubblico / certificazione</option>
+        </select>
+      </div>
+      <div class="frow" style="margin-bottom:0">
+        <label>Pertinenza rispetto alla competenza</label>
+        <select id="ef-fvaPertinenza" onchange="calcolaQuadrante('${id}')">
+          <option value="">— seleziona —</option>
+          <option value="B" ${ev.fvaPertinenza==='B'?'selected':''}>B — Bassa</option>
+          <option value="M" ${ev.fvaPertinenza==='M'?'selected':''}>M — Media</option>
+          <option value="A" ${ev.fvaPertinenza==='A'?'selected':''}>A — Alta</option>
+        </select>
+      </div>
     </div>
-    <div class="frow"><label>Classificazione principale</label>
-      <select id="ef-leverPrinc">
-        <option value="">—</option>
-        <option value="R1" ${ev.leverPrinc==='R1'?'selected':''}>R1 — Risultati</option>
-        <option value="R2" ${ev.leverPrinc==='R2'?'selected':''}>R2 — Risorse</option>
-        <option value="R3" ${ev.leverPrinc==='R3'?'selected':''}>R3 — Reputazione</option>
-        <option value="R4" ${ev.leverPrinc==='R4'?'selected':''}>R4 — Richiamo</option>
-      </select>
+    <div class="frow">
+      <label>Quadrante FVA (calcolato automaticamente)</label>
+      <input type="text" id="ef-fvaQuadrante" readonly value="${ev.fvaQuadrante||'—'}" class="fva-quadrante ${ev.fvaQuadrante==='Centrale'?'fva-centrale':ev.fvaQuadrante==='Di supporto'?'fva-supporto':ev.fvaQuadrante==='Marginale'?'fva-marginale':ev.fvaQuadrante==='In scarto'?'fva-scarto':''}" style="cursor:default">
     </div>
 
     <div class="card-title mt12">D — Competenze collegate</div>
@@ -2781,8 +2799,9 @@ function saveCurrentEvidenza() {
   });
   const esitoEl=document.querySelector('input[name="ef-esito"]:checked');
   ev.esito=esitoEl?esitoEl.value:'';
-  ['r1','r2','r3','r4'].forEach(r=>{ ev.lever[r]=getVal('ef-'+r); });
-  ev.leverPrinc=getVal('ef-leverPrinc');
+  ev.fvaValore=getVal('ef-fvaValore');
+  ev.fvaPertinenza=getVal('ef-fvaPertinenza');
+  ev.fvaQuadrante=getVal('ef-fvaQuadrante');
   ev.note=getVal('ef-note');
   ev.posizione=getVal('ef-posizione');
   updateNavStatus();
@@ -2791,6 +2810,39 @@ function saveCurrentEvidenza() {
 function collectA3() {
   saveCurrentEvidenza();
 }
+function calcolaQuadrante(evId) {
+  const v = document.getElementById('ef-fvaValore') ? document.getElementById('ef-fvaValore').value : '';
+  const p = document.getElementById('ef-fvaPertinenza') ? document.getElementById('ef-fvaPertinenza').value : '';
+  let q = '';
+  if (!v || !p) { q = '—'; }
+  else if (v === '3p') {
+    q = 'Centrale';
+  } else if ((v === '2priv' || v === '2pub') && p === 'A') {
+    q = 'Centrale';
+  } else if ((v === '2priv' || v === '2pub') && p === 'M') {
+    q = 'Di supporto';
+  } else if ((v === '2priv' || v === '2pub') && p === 'B') {
+    q = 'Marginale';
+  } else if (v === '1p' && p === 'A') {
+    q = 'Di supporto';
+  } else if (v === '1p' && p === 'M') {
+    q = 'Marginale';
+  } else if (v === '1p' && p === 'B') {
+    q = 'In scarto';
+  }
+  const qEl = document.getElementById('ef-fvaQuadrante');
+  if (qEl) {
+    qEl.value = q;
+    const colori = { 'Centrale':'fva-centrale', 'Di supporto':'fva-supporto', 'Marginale':'fva-marginale', 'In scarto':'fva-scarto' };
+    qEl.className = 'fva-quadrante ' + (colori[q] || '');
+    // aggiorna anche nel modello se evId disponibile
+    if (evId) {
+      const ev = S.a3.evidenze.find(e=>e.id===evId);
+      if (ev) ev.fvaQuadrante = q;
+    }
+  }
+}
+
 
 function escHtml(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -3134,10 +3186,15 @@ function renderA4Step4() {
         <tbody>${rows}</tbody>
       </table>
     </div>
+    <div style="margin-top:18px">
+      <div class="card-title" style="margin-bottom:8px">📊 Copertura FVA per ADA — Matrice Evidenze × Quadranti</div>
+      <div id="a4-fva-matrix"></div>
+    </div>
     <div style="margin-top:14px;display:flex;gap:8px">
       <button class="btn btn-a4" onclick="exportA4CSV()">⬇ Export CSV</button>
       <button class="btn btn-a5" onclick="showScreen('a5')">→ Vai al Documento finale</button>
     </div>`;
+  renderFVAMatrix();
 }
 
 function exportA4CSV() {
@@ -3233,15 +3290,18 @@ function renderDocPreview() {
   // Sezione 5 evidenze
   let s5rows='';
   S.a3.evidenze.filter(ev=>ev.inclusa!==false).forEach((ev,i)=>{
+    const fvaQ = ev.fvaQuadrante||'—';
+    const fvaStyle = fvaQ==='Centrale'?'color:#155724;font-weight:600':fvaQ==='Di supporto'?'color:#856404':fvaQ==='Marginale'?'color:#721c24':fvaQ==='In scarto'?'color:#383d41;opacity:.6':'';
     s5rows+=`<tr>
       <td style="text-align:center">${i+1}</td>
       <td>${ev.tipo||'—'}</td>
       <td>${ev.titolo||'—'}</td>
       <td>${ev.data||'—'}</td>
+      <td style="text-align:center;${fvaStyle}">${fvaQ}</td>
       <td style="text-align:center">${ev.esito==='accettata'?'✓':ev.esito==='riserva'?'(±)':'—'}</td>
     </tr>`;
   });
-  if(!s5rows) s5rows='<tr><td colspan="5" style="text-align:center;color:#999">Nessuna evidenza registrata nell\'Agente 3</td></tr>';
+  if(!s5rows) s5rows='<tr><td colspan="6" style="text-align:center;color:#999">Nessuna evidenza registrata nell\'Agente 3</td></tr>';
 
   // Percentage text
   const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
@@ -3336,7 +3396,7 @@ function renderDocPreview() {
     <div class="doc-section">
       <h3>Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)</h3>
       <table>
-        <thead><tr><th>N.</th><th>Tipo di evidenza</th><th>Descrizione</th><th>Data</th><th>Validazione tutor</th></tr></thead>
+        <thead><tr><th>N.</th><th>Tipo di evidenza</th><th>Descrizione</th><th>Data</th><th>Quadrante FVA</th><th>Validazione tutor</th></tr></thead>
         <tbody>${s5rows}</tbody>
       </table>
     </div>
@@ -3656,6 +3716,47 @@ const AGENT_MAIN_LBL={a1:'📋 Scheda accoglienza',a2:'📝 Colloquio & autovalu
 
 // API key gestita server-side via Vercel (ANTHROPIC_API_KEY su Environment Variables)
 
+function renderFVAMatrix() {
+  const container = document.getElementById('a4-fva-matrix');
+  if(!container) return;
+  // Raccogli tutte le ADA validate con le loro evidenze collegate
+  const validated = Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+  if(validated.length===0) {
+    container.innerHTML='<p style="font-size:.8rem;color:var(--sub);text-align:center;padding:12px">Nessuna ADA validata. Completa il mapping in Fase 4.</p>';
+    return;
+  }
+  const quadranti = ['Centrale','Di supporto','Marginale','In scarto'];
+  let rows='';
+  validated.forEach(([adaCode])=>{
+    const ada = Object.values(ADA_DB).find(a=>a.code===adaCode) || {desc:adaCode};
+    const evForAda = S.a3.evidenze.filter(ev=>ev.esito==='accettata' && (ev.compCollegate||[]).some(cid=>{
+      return (COMP_TO_ADA[cid]||[]).includes(adaCode);
+    }));
+    const counts = {};
+    quadranti.forEach(q=>{ counts[q] = evForAda.filter(ev=>ev.fvaQuadrante===q).length; });
+    rows+=`<tr>
+      <td style="font-size:.78rem">${adaCode}<br><span style="color:var(--sub);font-size:.7rem">${(ada.desc||'').substring(0,60)}</span></td>
+      <td style="text-align:center;background:${counts['Centrale']>0?'#d4edda':'#fafafa'};color:${counts['Centrale']>0?'#155724':'#aaa'};font-weight:${counts['Centrale']>0?'700':'400'}">${counts['Centrale']||'—'}</td>
+      <td style="text-align:center;background:${counts['Di supporto']>0?'#fff3cd':'#fafafa'};color:${counts['Di supporto']>0?'#856404':'#aaa'}">${counts['Di supporto']||'—'}</td>
+      <td style="text-align:center;background:${counts['Marginale']>0?'#f8d7da':'#fafafa'};color:${counts['Marginale']>0?'#721c24':'#aaa'}">${counts['Marginale']||'—'}</td>
+      <td style="text-align:center;background:${counts['In scarto']>0?'#e2e3e5':'#fafafa'};color:${counts['In scarto']>0?'#383d41':'#aaa'}">${counts['In scarto']||'—'}</td>
+    </tr>`;
+  });
+  container.innerHTML=`<div style="overflow-x:auto;margin-top:8px">
+    <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+      <thead><tr>
+        <th style="background:#1a2940;color:#fff;padding:7px 10px;text-align:left">ADA Validata</th>
+        <th style="background:#d4edda;color:#155724;padding:7px 8px">Centrale</th>
+        <th style="background:#fff3cd;color:#856404;padding:7px 8px">Di supporto</th>
+        <th style="background:#f8d7da;color:#721c24;padding:7px 8px">Marginale</th>
+        <th style="background:#e2e3e5;color:#383d41;padding:7px 8px">In scarto</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="font-size:.71rem;color:var(--sub);margin-top:6px">Evidenze associate tramite collegamento competenze → ADA. Solo evidenze con esito "Accettata".</p>
+  </div>`;
+}
+
 function buildAIContext(agentId){
   try{collectAll();}catch(e){}
   const v=S.a1.vol,e=S.a1.ente,p=S.a1.percorso;
@@ -3689,7 +3790,7 @@ a1:'Sei l\'Assistente AI della Fase 1 — Avvio e Inquadramento del sistema HubS
 
 a2:'Sei l\'Assistente AI della Fase 2 — Emersione del sistema HubS-TransparentIA.\nSupporti il TUTOR nella conduzione dei colloqui narrativi e biografici per l\'emersione delle competenze acquisite in contesti formali, non formali e informali.\n\nPuoi aiutare il tutor a:\n• Riformulare domande Youthpass quando il volontario non comprende o risponde in modo vago\n• Approfondire con domande di follow-up (es. "Puoi fare un esempio concreto?", "Come hai affrontato la difficoltà?")\n• Riconoscere nelle narrazioni del volontario pattern riconducibili a EU8, DigComp 2.2, LifeComp, EntreComp\n• Valutare a quale livello (1-4) corrisponde un comportamento descritto:\n  1=Base con guida costante · 2=Autonomia con supervisione · 3=Autonomia piena · 4=Trasferisce la competenza ad altri\n• Gestire volontari reticenti o che tendono a sminuire le proprie competenze\n\nMetodologia: Youthpass Learning Interview, Factory of Learning, approccio narrativo/riflessivo.\nRispondi sempre in italiano. Proponi riformulazioni e domande pronte all\'uso.',
 
-a3:'Sei l\'Assistente AI della Fase 3 — Istruttoria del sistema HubS-TransparentIA.\nSupporti il TUTOR nella selezione, organizzazione e valutazione delle evidenze documentali a supporto delle competenze emerse.\n\nPuoi aiutare il tutor a:\n• Valutare un\'evidenza secondo i 5 criteri eQval Standard 17:\n  - Validità: dimostra davvero la competenza dichiarata?\n  - Attualità: prodotta durante/subito dopo l\'esperienza rilevante?\n  - Pertinenza: coerente con le attività svolte e gli obiettivi del progetto?\n  - Sufficienza: da sola o con altre è abbastanza per provare la competenza al livello dichiarato?\n  - Autenticità: è certa la paternità del volontario?\n• Classificare le evidenze nella Matrice Lever Up 4R:\n  R1=Risultati (output dimostrabili) · R2=Risorse (capacità mobilitate) · R3=Reputazione (riconoscimento esterno) · R4=Richiamo (attrattività)\n• Identificare gap di copertura e suggerire tipologie di evidenze complementari\n• Formulare motivazioni per i tre esiti: Accettata / Con riserva / Non accettata\n• Gestire situazioni con evidenze deboli, poche o ambigue\n\nRispondi sempre in italiano. Sii pratico, usa esempi concreti, aiuta il tutor a prendere decisioni motivate.',
+a3:'Sei l\'Assistente AI della Fase 3 — Istruttoria del sistema HubS-TransparentIA.\nSupporti il TUTOR nella selezione, organizzazione e valutazione delle evidenze documentali a supporto delle competenze emerse.\n\nPuoi aiutare il tutor a:\n• Valutare un\'evidenza secondo i 5 criteri eQval Standard 17:\n  - Validità: dimostra davvero la competenza dichiarata?\n  - Attualità: prodotta durante/subito dopo l\'esperienza rilevante?\n  - Pertinenza: coerente con le attività svolte e gli obiettivi del progetto?\n  - Sufficienza: da sola o con altre è abbastanza per provare la competenza al livello dichiarato?\n  - Autenticità: è certa la paternità del volontario?\n• Classificare le evidenze con la Matrice FVA Valore × Pertinenza (DM 30/06/2015):\n  - Asse Valore: 1ª parte (autodichiarazione) / 2ª parte privata / 2ª parte pubblica / 3ª parte (atto pubblico)\n  - Asse Pertinenza: B (Bassa) / M (Media) / A (Alta)\n  - Quadranti: Centrale (valore alto + pertinenza ≥M) · Di supporto · Marginale · In scarto\n  - Soglia raccomandata per il Documento: almeno 2ª parte + pertinenza ≥ M\n• Identificare gap di copertura e suggerire tipologie di evidenze complementari\n• Formulare motivazioni per i tre esiti: Accettata / Con riserva / Non accettata\n• Gestire situazioni con evidenze deboli, poche o ambigue\n\nRispondi sempre in italiano. Sii pratico, usa esempi concreti, aiuta il tutor a prendere decisioni motivate.',
 
 a4:'Sei l\'Assistente AI della Fase 4 — Ricognizione del sistema HubS-TransparentIA.\nSupporti il TUTOR nella ricognizione normativa e nell\'ancoraggio delle competenze emerse ai repertori ufficiali (ADA/INAPP, repertorio regionale, ATECO).\n\nPuoi aiutare il tutor a:\n• Scegliere l\'ADA più appropriata tra più opzioni disponibili\n• Spiegare la differenza tra:\n  - Mapping L1 deterministico: DigComp 2.2 → ADA.QE.01.0x (fonte: GOL/EDO Regione Calabria n.15242/2025)\n  - Mapping L2 inferenziale: LifeComp/EntreComp/EU8 → ADA del SEP n.18 (INAPP)\n• Determinare il livello di realizzazione dell\'ADA più appropriato:\n  1=Esecutivo con istruzioni · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise tecnico\n• Interpretare i Risultati Attesi (RA) dell\'Atlante INAPP nel contesto del volontariato\n• Giustificare scelte di mappatura non ovvie per la documentazione\n• Navigare e spiegare le ADA del SEP n.18 (Servizi di educazione, formazione e lavoro)\n\nFonti: Atlante del Lavoro INAPP, Decreto GOL/EDO Regione Calabria n.15242/2025, SEP n.18.\nUsa sempre i codici ADA completi (es. ADA.QE.01.01, ADA.18.01.09).\nRispondi sempre in italiano. Usa la terminologia INAPP corretta.',
 
