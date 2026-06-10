@@ -179,20 +179,71 @@
 <header>
   <div>
     <div class="logo">HubS <span>–</span> Mappatore Normativo</div>
-    <div class="subtitle">Mappatore Normativo · Competenze → ADA · Atlante del Lavoro INAPP (feb. 2026)</div>
+    <div class="subtitle">Progetto SCU (voci 5.1/5.3) → Attività → Competenze → ADA · Atlante del Lavoro INAPP (feb. 2026)</div>
   </div>
   <div class="badge-agente" onclick="openAgente()" title="Apri Agente AI per l'emersione competenze">🤖 Agente Emersione</div>
 </header>
 
 <div class="step-bar">
-  <div class="step active" id="step-tab-1" onclick="goStep(1)"><div class="num" id="step-num-1">1</div> Descrizione</div>
+  <div class="step active" id="step-tab-0" onclick="goStep(0)"><div class="num" id="step-num-0">0</div> Progetto SCU</div>
+  <div class="step" id="step-tab-1" onclick="goStep(1)"><div class="num" id="step-num-1">1</div> Descrizione</div>
   <div class="step" id="step-tab-2" onclick="goStep(2)"><div class="num" id="step-num-2">2</div> Competenze emerse</div>
   <div class="step" id="step-tab-3" onclick="goStep(3)"><div class="num" id="step-num-3">3</div> Mappatura ADA</div>
   <div class="step" id="step-tab-4" onclick="goStep(4)"><div class="num" id="step-num-4">4</div> Export</div>
 </div>
 
+<!-- SCREEN 0 — PROGETTO SCU -->
+<div class="screen" id="screen-0" style="display:flex;">
+  <div class="panel-left">
+    <div class="section">
+      <div class="section-title">📂 Progetto di Servizio Civile</div>
+      <p style="font-size:12px;color:var(--grigio);line-height:1.6;margin-bottom:10px;">Carica la <strong>scheda progetto (Allegato 3A)</strong> in PDF, Markdown (.md) o testo (.txt): il sistema estrae le voci <strong>5.1</strong> (complesso delle attività) e <strong>5.3</strong> (ruolo e attività degli operatori volontari), le struttura per sede di attuazione e prepara la mappatura ADA del settore.</p>
+      <div id="prog-dropzone" onclick="document.getElementById('prog-file').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--blu-chiaro)';"
+           ondragleave="this.style.borderColor='var(--bordo)';"
+           ondrop="handleProjectDrop(event)"
+           style="border:2px dashed var(--bordo);border-radius:8px;padding:22px 14px;text-align:center;cursor:pointer;background:#fafbfc;transition:border-color .2s;">
+        <div style="font-size:26px;">📄</div>
+        <div style="font-size:12px;color:var(--grigio);margin-top:6px;">Trascina qui il progetto (PDF, .md, .txt)<br>oppure <span style="color:var(--blu-chiaro);font-weight:600;">clicca per selezionarlo</span></div>
+        <div id="prog-file-name" style="font-size:11px;font-weight:600;margin-top:6px;color:var(--blu);"></div>
+      </div>
+      <input type="file" id="prog-file" accept=".pdf,.txt,.md,.markdown" style="display:none;" onchange="if(this.files[0])handleProjectFile(this.files[0])">
+      <div id="prog-extract-status" style="margin-top:10px;font-size:11px;line-height:1.7;"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">✂️ In alternativa: incolla il testo</div>
+      <p style="font-size:11px;color:var(--grigio);margin-bottom:8px;">Incolla le voci 5.1 e 5.3 (o anche solo la 5.3) copiate dal progetto.</p>
+      <textarea id="prog-paste" placeholder="5.1) Complesso delle attività previste...&#10;...&#10;5.3) Ruolo ed attività previste per gli operatori volontari..." style="min-height:110px;resize:vertical;width:100%;font-size:12px;"></textarea>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="usaTestoIncollato()">Usa questo testo</button>
+    </div>
+    <div class="section">
+      <button class="btn-ai" id="btn-analizza-prog" style="margin-top:0;" onclick="analizzaProgetto()">
+        <span id="analizza-prog-icon">🤖</span>
+        <span id="analizza-prog-label">Analizza progetto (voci 5.1 + 5.3) →</span>
+      </button>
+      <div style="font-size:10px;color:var(--grigio);margin-top:8px;line-height:1.5;">L'AI individua le sedi di attuazione, le attività dei volontari e suggerisce il settore SCU. Potrai scegliere sede e attività prima della mappatura.</div>
+    </div>
+    <div class="section">
+      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="goStep(1)">Salta — parti dalla descrizione libera →</button>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="section-header">
+      <div>
+        <h2>Progetto → attività dei volontari</h2>
+        <p>Estrazione voci 5.1 / 5.3 · selezione sede di attuazione e attività · settore SCU per il filtro ADA</p>
+      </div>
+    </div>
+    <div id="prog-result" style="padding:18px 22px;">
+      <div class="empty-mapping" id="prog-placeholder">Carica il PDF del progetto (o incolla il testo) e premi <strong>Analizza progetto</strong>.<br>
+      <span style="font-size:11px;color:var(--grigio);">Le attività selezionate diventeranno la descrizione del percorso (Passo 1) e guideranno la mappatura ADA sul catalogo del settore.</span></div>
+    </div>
+  </div>
+</div>
+
+
 <!-- SCREEN 1 -->
-<div class="screen active" id="screen-1" style="display:flex;">
+<div class="screen" id="screen-1" style="display:none;">
   <!-- Campi nascosti per compatibilità export -->
   <div style="display:none;">
     <input type="text" id="vol-nome"><input type="text" id="vol-ente">
@@ -203,6 +254,7 @@
   <div class="panel-left" style="overflow:hidden;">
     <div style="flex:1;overflow-y:auto;padding:16px 16px 12px;display:flex;flex-direction:column;min-height:0;">
       <div class="section-title">📝 Descrizione delle attività svolte</div>
+      <div id="progetto-banner" style="display:none;background:#eef4fb;border:1px solid var(--blu-chiaro);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.5;margin-bottom:10px;"></div>
       <p style="font-size:13px;color:var(--grigio);margin-bottom:12px;line-height:1.6;">Descrivi concretamente cosa ha fatto il/la volontario/a: compiti svolti, con chi interagiva, strumenti usati, se coordinava altri. Più è dettagliata, più precisa sarà la mappatura.</p>
       <textarea id="perc-desc" placeholder="Es. Il/la volontario/a affiancava gli operatori nel front-office dello sportello di orientamento, accoglieva gli utenti, raccoglieva dati nel gestionale, forniva informazioni sui servizi disponibili, partecipava alle riunioni di équipe settimanali, supportava la predisposizione di materiali informativi..." style="flex:1;min-height:200px;resize:vertical;margin-bottom:0;"></textarea>
     </div>
@@ -301,6 +353,12 @@
       <div id="map-stats" style="font-size:12px;color:var(--grigio);">Seleziona competenze nel Passo 2.</div>
     </div>
     <div class="section">
+      <div class="section-title">🔎 Cerca nell'Atlante (catalogo SCU)</div>
+      <div style="font-size:11px;color:var(--grigio);margin-bottom:6px;">251 ADA dei 7 settori SCU con RA e attività. Clicca un risultato per aggiungerlo alla mappatura.</div>
+      <input type="text" id="catalogo-search" placeholder="Codice o parola chiave (min 3 lettere)…" oninput="searchCatalogo()" onfocus="ensureCatalogo().catch(()=>{})">
+      <div id="catalogo-results" style="margin-top:6px;max-height:220px;overflow-y:auto;"></div>
+    </div>
+    <div class="section">
       <div class="section-title">➕ Aggiungi ADA manualmente</div>
       <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;">Per ADA non in elenco — cerca su <a class="atlante-link" href="https://atlantelavoro.inapp.org" target="_blank">atlantelavoro.inapp.org ↗</a></div>
       <label>Codice ADA</label><input type="text" id="manual-ada-code" placeholder="Es. ADA.18.02.01">
@@ -351,6 +409,62 @@
       <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadDocx()">📄 Solo Sez.4.1 .docx</button>
       <button class="btn btn-outline" style="width:100%;" onclick="downloadPdf()">🖨️ Stampa / Salva PDF</button>
     </div>
+    <div class="section" style="background:#eef4fb;border-left:3px solid var(--blu);">
+      <div class="section-title" style="color:var(--blu);">📑 MODELLI UFFICIALI (All. 6C / 6D)</div>
+      <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;line-height:1.5;">Compila i dati e genera i due modelli precompilati con la mappatura ADA validata. I campi vuoti restano come linee da completare.</div>
+      <details style="margin-bottom:6px;">
+        <summary style="font-size:11px;font-weight:700;cursor:pointer;padding:4px 0;">🏛️ Ente titolato / proponente / attuatore</summary>
+        <label>Codice SU</label><input type="text" id="mod-ente-codice-su" placeholder="Es. SU00020">
+        <label>Denominazione ente titolato</label><input type="text" id="mod-ente-denominazione" placeholder="Denominazione">
+        <label>Sede legale</label><input type="text" id="mod-ente-sede" placeholder="Indirizzo sede legale">
+        <label>Ente proponente il progetto (6C)</label><input type="text" id="mod-ente-proponente" placeholder="Es. ARCI Servizio Civile ASC APS">
+        <label>Ente attuatore (6C)</label><input type="text" id="mod-ente-attuatore" placeholder="Es. INRETE Cooperativa Sociale">
+        <label>Sede di attuazione</label><input type="text" id="mod-sede-attuazione" placeholder="Dalla voce 5.3 / Step 0">
+        <label>Bando (anno)</label><input type="text" id="mod-bando-anno" placeholder="Es. 2025">
+      </details>
+      <details style="margin-bottom:6px;">
+        <summary style="font-size:11px;font-weight:700;cursor:pointer;padding:4px 0;">🧑 Operatore volontario</summary>
+        <label>Cognome</label><input type="text" id="mod-vol-cognome">
+        <label>Nome</label><input type="text" id="mod-vol-nome">
+        <label>Codice Fiscale</label><input type="text" id="mod-vol-cf">
+        <label>Data di nascita</label><input type="date" id="mod-vol-data-nascita">
+        <label>Comune/Stato straniero di nascita</label><input type="text" id="mod-vol-luogo-nascita">
+        <label>Cittadinanza</label><input type="text" id="mod-vol-cittadinanza">
+      </details>
+      <details style="margin-bottom:6px;">
+        <summary style="font-size:11px;font-weight:700;cursor:pointer;padding:4px 0;">👤 Responsabile accompagnamento</summary>
+        <label>Cognome</label><input type="text" id="mod-resp-cognome">
+        <label>Nome</label><input type="text" id="mod-resp-nome">
+        <label>Codice Fiscale</label><input type="text" id="mod-resp-cf">
+        <label>Ruolo</label><input type="text" id="mod-resp-ruolo" placeholder="Es. OLP / Tutor">
+      </details>
+      <details style="margin-bottom:6px;">
+        <summary style="font-size:11px;font-weight:700;cursor:pointer;padding:4px 0;">📋 Progetto e rilascio</summary>
+        <label>Codice identificativo progetto</label><input type="text" id="mod-prog-codice" placeholder="Codice Helios">
+        <label>Titolo del progetto</label><input type="text" id="mod-prog-titolo" placeholder="Dallo Step 0">
+        <label>Settore SCU</label>
+        <select id="mod-prog-settore">
+          <option value="">—</option>
+          <option value="A">A — Assistenza</option>
+          <option value="B">B — Protezione Civile</option>
+          <option value="C">C — Patrimonio ambientale e riqualificazione urbana</option>
+          <option value="D">D — Patrimonio storico, artistico e culturale</option>
+          <option value="E">E — Educazione e promozione culturale…</option>
+          <option value="F">F — Agricoltura / agricoltura sociale e biodiversità</option>
+          <option value="G">G — Promozione della pace e diritti umani</option>
+        </select>
+        <label>Area d'intervento SCU</label><input type="text" id="mod-prog-area" placeholder="Es. Animazione culturale verso i giovani">
+        <label>Data inizio servizio</label><input type="date" id="mod-prog-inizio">
+        <label>Data fine servizio</label><input type="date" id="mod-prog-fine">
+        <label>Moduli formazione specifica (6C)</label><textarea id="mod-moduli" style="min-height:50px;font-size:11px;" placeholder="Elenco moduli, separati da ;"></textarea>
+        <label>Luogo di rilascio</label><input type="text" id="mod-ril-luogo" placeholder="Es. Lamezia Terme">
+        <label>Data di rilascio</label><input type="date" id="mod-ril-data">
+        <label>Codice identificativo documento</label><input type="text" id="mod-ril-codice" placeholder="auto se vuoto">
+      </details>
+      <button class="btn btn-success" style="width:100%;margin-bottom:6px;" onclick="downloadModelloTrasparenza()">📄 All. 6D — Documento di trasparenza .docx</button>
+      <button class="btn btn-success" style="width:100%;" onclick="downloadAttestato()">🎓 All. 6C — Attestato specifico .docx</button>
+    </div>
+
     <div class="section" style="background:var(--verde-sfondo);border-left:3px solid var(--verde);">
       <div class="section-title" style="color:var(--verde);">📋 DOCUMENTO DI TRASPARENZA</div>
       <div style="font-size:11px;color:#1b5e20;margin-bottom:10px;line-height:1.5;">Genera il <strong>Documento completo</strong> (Sez. 1–7) con la Sezione 4 interamente popolata: 4.1 ADA, 4.2 DigComp, 4.3 LifeComp, 4.4 EntreComp, EU8.</div>
@@ -788,7 +902,7 @@ function renderMappingCards() {
           <button class="coverage-btn ${isTotale?'active-totale':''}" onclick="setCoverage('${ak}',${idx},'totale')">✅ Totale</button>
           <button class="coverage-btn ${isParziale?'active-parziale':''}" onclick="setCoverage('${ak}',${idx},'parziale')">⚠️ Parziale</button>
         </div>
-        ${isTotale||isParziale?`<input class="attivita-input" placeholder="Attività del RA sviluppata dal volontario..." value="${r.attivita||''}" onchange="setRAAttivita('${ak}',${idx},this.value)">`:``}
+        ${isTotale||isParziale?(r.attivitaList&&r.attivitaList.length?_raAttListHtml(ak,idx,r):`<input class="attivita-input" placeholder="Attività del RA sviluppata dal volontario..." value="${(r.attivita||'').replace(/"/g,'&quot;')}" onchange="setRAAttivita('${ak}',${idx},this.value)">`):``}
       </div>`;
     }).join('');
 
@@ -1226,8 +1340,10 @@ function downloadPdf(){
 let currentStep=1;
 function goStep(n){
   currentStep=n;
-  for(let i=1;i<=4;i++){
-    document.getElementById(`step-tab-${i}`).className='step'+(i===n?' active':'')+(i<n?' done':'');
+  for(let i=0;i<=4;i++){
+    const tab=document.getElementById(`step-tab-${i}`);
+    if(!tab) continue;
+    tab.className='step'+(i===n?' active':'')+(i<n?' done':'');
     document.getElementById(`step-num-${i}`).textContent=i<n?'✓':i;
     document.getElementById(`screen-${i}`).style.display=i===n?'flex':'none';
   }
@@ -1247,11 +1363,441 @@ document.addEventListener('DOMContentLoaded', refreshLists);
 // ==================== AI ENDPOINT ====================
 const API_URL = '/api/chat';
 
-async function callAI(messages, systemPrompt, maxTokens=1500) {
+// ==================== STEP 0 — PROGETTO SCU (estrazione 5.1/5.3 + catalogo ADA settori) ====================
+let PROJECT = null;            // progetto applicato al percorso
+let PROGETTO_RAW = { full:'', v51:'', v53:'', titolo:'', ente:'' };
+let PROGETTO_PARSED = null;    // output AI strutturato
+let CATALOGO = null;           // ada_catalogo_scu.json (lazy)
+let _selSedeIdx = 0;
+let _attChecked = {};          // "sede-att" -> bool
+
+const SETTORI_SCU = {
+  A:'Assistenza',
+  B:'Protezione Civile',
+  C:'Patrimonio ambientale e riqualificazione urbana',
+  D:'Patrimonio storico, artistico e culturale',
+  E:'Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport',
+  F:'Agricoltura in zona di montagna, agricoltura sociale e biodiversità',
+  G:'Promozione della pace tra i popoli, della nonviolenza e della difesa non armata; promozione e tutela dei diritti umani; cooperazione allo sviluppo'
+};
+
+function _escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function _loadPdfJs(){
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      res(window.pdfjsLib);
+    };
+    s.onerror = () => rej(new Error('Impossibile caricare pdf.js'));
+    document.head.appendChild(s);
+  });
+}
+
+function handleProjectDrop(e){
+  e.preventDefault();
+  e.currentTarget.style.borderColor = 'var(--bordo)';
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) handleProjectFile(f);
+}
+
+async function handleProjectFile(file){
+  const nameEl = document.getElementById('prog-file-name');
+  const statusEl = document.getElementById('prog-extract-status');
+  nameEl.textContent = file.name;
+  statusEl.innerHTML = '<span class="ai-spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></span> Lettura del file in corso…';
+  try {
+    let text = '';
+    if (/\.pdf$/i.test(file.name)) {
+      const pdfjs = await _loadPdfJs();
+      const buf = await file.arrayBuffer();
+      const doc = await pdfjs.getDocument({ data: buf }).promise;
+      const parts = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const tc = await page.getTextContent();
+        let last = null, line = [];
+        const lines = [];
+        tc.items.forEach(it => {
+          const y = Math.round(it.transform[5]);
+          if (last !== null && Math.abs(y - last) > 4) { lines.push(line.join(' ')); line = []; }
+          line.push(it.str); last = y;
+        });
+        if (line.length) lines.push(line.join(' '));
+        parts.push(lines.join('\n'));
+      }
+      text = parts.join('\n');
+    } else {
+      text = await file.text();
+    }
+    PROGETTO_RAW.full = text;
+    const v = estraiVoci(text);
+    PROGETTO_RAW.v51 = v.v51; PROGETTO_RAW.v53 = v.v53;
+    PROGETTO_RAW.titolo = v.titolo; PROGETTO_RAW.ente = v.ente;
+    renderEstrattoStatus();
+  } catch (e) {
+    statusEl.innerHTML = '<span style="color:#c62828;">⚠️ Errore lettura file: ' + _escH(e.message) + '</span><br>Usa il riquadro "incolla il testo" qui sotto.';
+  }
+}
+
+function usaTestoIncollato(){
+  const t = document.getElementById('prog-paste').value.trim();
+  if (t.length < 200) { alert('Incolla un testo più lungo (almeno le attività della voce 5.3).'); return; }
+  PROGETTO_RAW.full = t;
+  const v = estraiVoci(t);
+  // se i marcatori non ci sono, considera tutto il testo come voce 5.3
+  if (!v.v51 && !v.v53) v.v53 = t;
+  PROGETTO_RAW.v51 = v.v51; PROGETTO_RAW.v53 = v.v53;
+  if (v.titolo) PROGETTO_RAW.titolo = v.titolo;
+  if (v.ente) PROGETTO_RAW.ente = v.ente;
+  document.getElementById('prog-file-name').textContent = '(testo incollato)';
+  renderEstrattoStatus();
+}
+
+function estraiVoci(text){
+  let t = String(text || '').replace(/\r/g, '');
+  // normalizza artefatti markdown (conversioni pdf/docx -> md: pandoc, Word, markitdown...)
+  t = t.replace(/\\([*()_#.\[\]-])/g, '$1');   // unescape \* \( \) \. ...
+  t = t.replace(/^#{1,6}\s+/gm, '');             // marcatori di intestazione
+  t = t.replace(/\*\*([^*\n]+)\*\*/g, '$1'); // grassetto **x**
+  t = t.replace(/__([^_\n]+)__/g, '$1');         // grassetto __x__
+  const cut = (startRe, endRes) => {
+    const m = t.match(startRe);
+    if (!m) return '';
+    const rest = t.slice(m.index);
+    let end = rest.length;
+    endRes.forEach(re => {
+      const m2 = rest.slice(50).match(re);
+      if (m2 && m2.index + 50 < end) end = m2.index + 50;
+    });
+    return rest.slice(0, end);
+  };
+  const v51 = cut(/5\.1\)\s*Compless[oa] delle attivit/i, [/5\.2\)\s*Tempi di realizzazione/i, /5\.3\)\s*Ruolo ed attivit/i]);
+  const v53 = cut(/5\.3\)\s*Ruolo ed attivit/i, [/5\.4\)/, /\n\s*6\)\s/, /5\.5\)/]);
+  const pick = (re) => {
+    const m = t.match(re);
+    if (!m) return '';
+    // l'intestazione delle voci dell'Allegato 3A termina con "(*)" (anche su più righe)
+    const after = t.slice(m.index, m.index + 700).split('\n');
+    let started = false;
+    for (let li = 0; li < after.length; li++) {
+      const s = after[li].trim();
+      if (!started) {
+        if (/\(\*\)\s*$/.test(s) || li >= 3) started = true;
+        continue;
+      }
+      if (s.length >= 3 && !/^Informazioni/i.test(s) && !/\(\*\)\s*$/.test(s)) return s.slice(0, 150);
+    }
+    return '';
+  };
+  return { v51, v53, titolo: pick(/\b2\)\s*Titolo del progetto/), ente: pick(/\b1\)\s*Denominazione e codice SU/) };
+}
+
+function renderEstrattoStatus(){
+  const el = document.getElementById('prog-extract-status');
+  const chip = (ok, label) => `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin:0 4px 4px 0;background:${ok ? 'var(--verde-sfondo)' : '#fff3e0'};color:${ok ? '#1b5e20' : '#7a4a00'};">${label}</span>`;
+  const r = PROGETTO_RAW;
+  el.innerHTML =
+    chip(!!r.v51, r.v51 ? `Voce 5.1 ✓ (${Math.round(r.v51.length / 1000)}k)` : 'Voce 5.1 non trovata') +
+    chip(!!r.v53, r.v53 ? `Voce 5.3 ✓ (${Math.round(r.v53.length / 1000)}k)` : 'Voce 5.3 non trovata') +
+    (r.titolo ? chip(true, '📌 ' + _escH(r.titolo.slice(0, 40))) : '') +
+    (r.ente ? chip(true, '🏛️ ' + _escH(r.ente.slice(0, 40))) : '') +
+    (!r.v51 && !r.v53 ? '<div style="color:#c62828;margin-top:4px;">Marcatori "5.1)" / "5.3)" non trovati: il PDF potrebbe essere una scansione. Incolla il testo manualmente.</div>' : '');
+}
+
+const PROGETTO_SYS = `Sei un analista esperto di progetti di Servizio Civile Universale italiani (scheda progetto Allegato 3A).
+Ricevi il testo delle voci 5.1 (complesso delle attività) e 5.3 (ruolo ed attività previste per gli operatori volontari).
+
+COMPITO: struttura i dati in JSON.
+
+REGOLE:
+- Identifica ogni SEDE DI ATTUAZIONE presente nella voce 5.3 (le sedi dove operano i volontari). Se la 5.3 non distingue sedi, crea un'unica sede "Tutte le sedi".
+- Per ogni sede elenca le ATTIVITÀ PREVISTE PER GLI OPERATORI VOLONTARI (dalla 5.3). Quando possibile collega ciascuna all'Azione/Attività della voce 5.1 nel campo "rif" (es. "Azione 2 / Att. 2.1").
+- Per ogni attività: "titolo" conciso (max 80 caratteri) e "descrizione" operativa (cosa fa concretamente il volontario, 1-3 frasi, verbi d'azione).
+- "ruolo": sintesi del ruolo dei volontari in quella sede (max 300 caratteri).
+- "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
+- Se titolo/ente sono indicati nel messaggio, riportali; altrimenti deducili dal testo.
+
+OUTPUT — SOLO JSON, nessun testo prima o dopo:
+{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"..."}]}]}`;
+
+function _tryParseJson(raw){
+  let s = null;
+  const cb = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (cb) s = cb[1].trim();
+  else { const a = raw.indexOf('{'), b = raw.lastIndexOf('}'); if (a !== -1 && b > a) s = raw.slice(a, b + 1); }
+  if (!s) throw new Error('Risposta AI non valida');
+  try { return JSON.parse(s); } catch (e) {
+    // tentativo di riparazione: taglia all'ultima struttura chiusa
+    for (const tail of ['}]}]}', '}]}', '}}', '}']) {
+      const i = s.lastIndexOf(tail);
+      if (i > 0) { try { return JSON.parse(s.slice(0, i + tail.length)); } catch (e2) {} }
+    }
+    throw new Error('JSON non interpretabile');
+  }
+}
+
+async function analizzaProgetto(){
+  const r = PROGETTO_RAW;
+  if (!r.v53 && !r.v51) { alert('Prima carica il PDF del progetto o incolla il testo delle voci 5.1/5.3.'); return; }
+  const btn = document.getElementById('btn-analizza-prog');
+  const icon = document.getElementById('analizza-prog-icon');
+  const label = document.getElementById('analizza-prog-label');
+  btn.disabled = true;
+  icon.outerHTML = '<span id="analizza-prog-icon" class="ai-spinner"></span>';
+  label.textContent = 'Analisi del progetto in corso…';
+  const box = document.getElementById('prog-result');
+  box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--grigio);"><div class="ai-spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px;"></div><div>Estrazione sedi, azioni e attività dei volontari…<br><span style="font-size:11px;">voce 5.3' + (r.v51 ? ' + contesto 5.1' : '') + '</span></div></div>';
+  try {
+    const v53 = r.v53.slice(0, 60000);
+    const v51 = r.v51.slice(0, 90000);
+    const msg = `${r.titolo ? 'TITOLO (voce 2): ' + r.titolo + '\n' : ''}${r.ente ? 'ENTE (voce 1): ' + r.ente + '\n' : ''}
+=== VOCE 5.3 — RUOLO E ATTIVITÀ DEGLI OPERATORI VOLONTARI ===
+${v53 || '(non disponibile)'}
+
+=== VOCE 5.1 — COMPLESSO DELLE ATTIVITÀ (contesto) ===
+${v51 || '(non disponibile)'}
+
+Restituisci SOLO il JSON.`;
+    const raw = await callAI([{ role: 'user', content: msg }], PROGETTO_SYS, 8000, 'claude-sonnet-4-6');
+    const parsed = _tryParseJson(raw);
+    if (!parsed.sedi || !parsed.sedi.length) throw new Error('Nessuna sede/attività individuata nella voce 5.3');
+    PROGETTO_PARSED = parsed;
+    _selSedeIdx = 0; _attChecked = {};
+    renderProgettoUI();
+  } catch (e) {
+    box.innerHTML = '<div class="warn-box" style="margin:20px;">⚠️ Errore analisi progetto: ' + _escH(e.message) + '.<br>Riprova, oppure incolla solo la voce 5.3 nel riquadro a sinistra.</div>';
+  } finally {
+    btn.disabled = false;
+    document.getElementById('analizza-prog-icon').outerHTML = '<span id="analizza-prog-icon">🤖</span>';
+    document.getElementById('analizza-prog-label').textContent = 'Analizza progetto (voci 5.1 + 5.3) →';
+  }
+}
+
+function renderProgettoUI(){
+  const p = PROGETTO_PARSED;
+  const box = document.getElementById('prog-result');
+  const sett = (p.settore || 'E').toUpperCase();
+  const settOpts = Object.keys(SETTORI_SCU).map(k =>
+    `<option value="${k}" ${k === sett ? 'selected' : ''}>${k} — ${_escH(SETTORI_SCU[k].slice(0, 70))}${SETTORI_SCU[k].length > 70 ? '…' : ''}</option>`).join('');
+  const sedeBtns = p.sedi.map((s, i) =>
+    `<label style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid ${i === _selSedeIdx ? 'var(--blu-chiaro)' : 'var(--bordo)'};border-radius:8px;cursor:pointer;background:${i === _selSedeIdx ? '#eef4fb' : '#fff'};">
+      <input type="radio" name="prog-sede" ${i === _selSedeIdx ? 'checked' : ''} onchange="selectSede(${i})" style="margin-top:3px;">
+      <span style="font-size:12px;"><strong>${_escH(s.nome)}</strong><br><span style="color:var(--grigio);font-size:11px;">${(s.attivita || []).length} attività volontari</span></span>
+    </label>`).join('');
+  const sede = p.sedi[_selSedeIdx] || { attivita: [] };
+  const attList = (sede.attivita || []).map((a, j) => {
+    const key = _selSedeIdx + '-' + j;
+    const ck = _attChecked[key] !== false;
+    return `<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--bordo);border-radius:8px;background:${ck ? '#fff' : '#f5f5f5'};cursor:pointer;">
+      <input type="checkbox" ${ck ? 'checked' : ''} onchange="toggleAttProg('${key}', this.checked)" style="margin-top:3px;">
+      <span style="font-size:12px;line-height:1.45;">
+        ${a.rif ? `<span style="display:inline-block;background:var(--blu);color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700;margin-right:5px;vertical-align:1px;">${_escH(a.rif)}</span>` : ''}
+        <strong>${_escH(a.titolo)}</strong>
+        ${a.descrizione ? `<br><span style="color:var(--grigio);font-size:11px;">${_escH(a.descrizione)}</span>` : ''}
+      </span>
+    </label>`;
+  }).join('');
+  box.innerHTML = `
+    <div style="border:1px solid var(--bordo);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#fff;">
+      <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;">
+        <div style="flex:1;min-width:220px;"><span style="color:var(--grigio);font-size:10px;">PROGETTO</span><br><strong>${_escH(p.titolo || PROGETTO_RAW.titolo || '—')}</strong></div>
+        <div style="flex:1;min-width:220px;"><span style="color:var(--grigio);font-size:10px;">ENTE</span><br>${_escH(p.ente || PROGETTO_RAW.ente || '—')}</div>
+      </div>
+      <div style="margin-top:10px;">
+        <span style="color:var(--grigio);font-size:10px;">SETTORE SCU (modificabile — determina il catalogo ADA proposto)</span>
+        <select id="prog-settore-select" style="width:100%;margin-top:3px;">${settOpts}</select>
+        ${p.settore_motivo ? `<div style="font-size:11px;color:var(--grigio);margin-top:4px;">💡 ${_escH(p.settore_motivo)}</div>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;">
+        <div class="section-title" style="margin-bottom:8px;">🏢 Sede di attuazione del volontario</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${sedeBtns}</div>
+        ${sede.ruolo ? `<div style="font-size:11px;color:var(--grigio);margin-top:8px;line-height:1.5;"><strong>Ruolo:</strong> ${_escH(sede.ruolo)}</div>` : ''}
+      </div>
+      <div style="flex:2;min-width:300px;">
+        <div class="section-title" style="margin-bottom:8px;">✅ Attività del volontario (voce 5.3${PROGETTO_RAW.v51 ? ' ↔ 5.1' : ''})</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;padding-right:4px;">${attList || '<em style="font-size:12px;color:var(--grigio);">Nessuna attività per questa sede</em>'}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="applicaProgetto()">✓ Usa nel mappatore →</button>
+      <span style="font-size:11px;color:var(--grigio);">Le attività selezionate compongono la descrizione del percorso; il catalogo ADA del settore viene caricato per la mappatura.</span>
+    </div>`;
+}
+
+function selectSede(i){ _selSedeIdx = i; renderProgettoUI(); }
+function toggleAttProg(key, ck){ _attChecked[key] = ck; }
+
+async function ensureCatalogo(){
+  if (CATALOGO) return CATALOGO;
+  let lastErr = null;
+  for (const url of ['ada_catalogo_scu.json', '/ada_catalogo_scu.json']) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) { CATALOGO = await r.json(); return CATALOGO; }
+      lastErr = new Error('HTTP ' + r.status);
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('Catalogo non raggiungibile');
+}
+
+function applySettoreCatalog(letter){
+  if (!CATALOGO || !CATALOGO.settori || !CATALOGO.settori[letter]) return 0;
+  const sett = CATALOGO.settori[letter];
+  let added = 0;
+  (sett.ada || []).forEach(a => {
+    const ex = ADA_DB[a.codice];
+    if (ex) {
+      (a.ra || []).forEach(cr => {
+        const r = (ex.ra || []).find(x => x.code === cr.codice);
+        if (r && !r.attivitaList && cr.attivita && cr.attivita.length) r.attivitaList = cr.attivita;
+      });
+      return;
+    }
+    ADA_DB[a.codice] = {
+      code: a.codice, desc: a.titolo, sep: a.codice.split('.')[1] || '', level: null, scheda: null,
+      source: 'Atlante del Lavoro INAPP — ' + (sett.nome || ('Settore ' + letter)) + ' (SCU)',
+      framework: '', compLinks: [],
+      ra: (a.ra || []).map(r => ({ code: r.codice, desc: r.titolo, attivitaList: r.attivita || [] }))
+    };
+    added++;
+  });
+  return added;
+}
+
+function registerCatalogAda(code){
+  if (!CATALOGO || !CATALOGO.settori) return null;
+  for (const k of Object.keys(CATALOGO.settori)) {
+    const a = (CATALOGO.settori[k].ada || []).find(x => x.codice === code);
+    if (a) {
+      ADA_DB[code] = {
+        code: a.codice, desc: a.titolo, sep: a.codice.split('.')[1] || '', level: null, scheda: null,
+        source: 'Atlante del Lavoro INAPP — ' + (CATALOGO.settori[k].nome || ('Settore ' + k)) + ' (SCU)',
+        framework: '', compLinks: [],
+        ra: (a.ra || []).map(r => ({ code: r.codice, desc: r.titolo, attivitaList: r.attivita || [] }))
+      };
+      return ADA_DB[code];
+    }
+  }
+  return null;
+}
+
+async function applicaProgetto(){
+  const p = PROGETTO_PARSED;
+  if (!p) return;
+  const sede = p.sedi[_selSedeIdx];
+  if (!sede) { alert('Seleziona una sede di attuazione.'); return; }
+  const settore = (document.getElementById('prog-settore-select')?.value || p.settore || 'E').toUpperCase();
+  const atts = (sede.attivita || []).filter((a, j) => _attChecked[_selSedeIdx + '-' + j] !== false);
+  if (!atts.length) { alert('Seleziona almeno un\'attività del volontario.'); return; }
+
+  let nAdded = 0;
+  try { await ensureCatalogo(); nAdded = applySettoreCatalog(settore); }
+  catch (e) { console.warn('Catalogo ADA settori non disponibile:', e); }
+
+  PROJECT = {
+    titolo: p.titolo || PROGETTO_RAW.titolo || '', ente: p.ente || PROGETTO_RAW.ente || '',
+    settore, settoreNome: SETTORI_SCU[settore] || '', sede: sede.nome || '', ruolo: sede.ruolo || '',
+    attivita: atts
+  };
+
+  const desc = `PROGETTO SCU: ${PROJECT.titolo}\nSEDE DI ATTUAZIONE: ${PROJECT.sede}\nSETTORE SCU: ${settore} — ${PROJECT.settoreNome}` +
+    (PROJECT.ruolo ? `\nRUOLO DEI VOLONTARI: ${PROJECT.ruolo}` : '') +
+    `\n\nATTIVITÀ SVOLTE DAL/LA VOLONTARIO/A (da voce 5.3):\n` +
+    atts.map(a => `• ${a.titolo}${a.rif ? ' [' + a.rif + ']' : ''}${a.descrizione ? ': ' + a.descrizione : ''}`).join('\n');
+  document.getElementById('perc-desc').value = desc;
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; };
+  set('mod-prog-titolo', PROJECT.titolo);
+  const ss = document.getElementById('mod-prog-settore'); if (ss) ss.value = settore;
+  set('mod-sede-attuazione', PROJECT.sede);
+  set('mod-ente-proponente', PROJECT.ente);
+  set('mod-ente-attuatore', PROJECT.ente);
+  set('mod-ente-denominazione', PROJECT.ente);
+  set('vol-ente', PROJECT.ente);
+  set('perc-settore', settore + ' — ' + PROJECT.settoreNome);
+
+  const b = document.getElementById('progetto-banner');
+  if (b) {
+    b.style.display = 'block';
+    b.innerHTML = `📂 <strong>${_escH(PROJECT.titolo || 'Progetto')}</strong> · ${_escH(PROJECT.sede)} · Settore ${settore} · ${atts.length} attività` +
+      (nAdded ? ` · <span style="color:var(--verde);font-weight:600;">+${nAdded} ADA di settore caricate</span>` : '');
+  }
+  goStep(1);
+}
+
+// ---------- Ricerca nel catalogo ADA (Passo 3) ----------
+async function searchCatalogo(){
+  const q = (document.getElementById('catalogo-search')?.value || '').trim().toLowerCase();
+  const box = document.getElementById('catalogo-results');
+  if (!box) return;
+  if (q.length < 3) { box.innerHTML = ''; return; }
+  try { await ensureCatalogo(); } catch (e) { box.innerHTML = '<div style="font-size:11px;color:#c62828;">Catalogo non disponibile (ada_catalogo_scu.json)</div>'; return; }
+  const seen = new Set(); const hits = [];
+  for (const k of Object.keys(CATALOGO.settori)) {
+    for (const a of (CATALOGO.settori[k].ada || [])) {
+      if (seen.has(a.codice)) continue;
+      if (a.codice.toLowerCase().includes(q) || (a.titolo || '').toLowerCase().includes(q)) {
+        seen.add(a.codice); hits.push({ a, k });
+        if (hits.length >= 12) break;
+      }
+    }
+    if (hits.length >= 12) break;
+  }
+  box.innerHTML = hits.length ? hits.map(({ a, k }) =>
+    `<div onclick="addAdaFromCatalog('${a.codice}')" style="padding:6px 8px;border:1px solid var(--bordo);border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:11px;line-height:1.4;background:#fff;" onmouseover="this.style.background='#eef4fb'" onmouseout="this.style.background='#fff'">
+      <strong>${a.codice}</strong> <span style="color:var(--grigio);">· Sett. ${k}</span><br>${_escH((a.titolo || '').slice(0, 90))}</div>`).join('')
+    : '<div style="font-size:11px;color:var(--grigio);">Nessun risultato</div>';
+}
+
+function addAdaFromCatalog(code){
+  if (!ADA_DB[code]) registerCatalogAda(code);
+  const ada = ADA_DB[code];
+  if (!ada) { alert('ADA non trovata nel catalogo'); return; }
+  if (!mappings[code]) {
+    mappings[code] = {
+      adaKey: code, validated: false, livello: 2, attivita: '',
+      comps: [],
+      ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' }))
+    };
+  }
+  const box = document.getElementById('catalogo-results'); if (box) box.innerHTML = '';
+  const inp = document.getElementById('catalogo-search'); if (inp) inp.value = '';
+  renderMappingCards(); updateMapStats();
+}
+
+// ---------- Database ADA dinamico per i prompt AI ----------
+function buildAdaPromptDb(){
+  const lines = [];
+  Object.values(ADA_DB).forEach(a => {
+    lines.push(`${a.code} — ${a.desc}`);
+    (a.ra || []).forEach(r => {
+      const d = String(r.desc || '').replace(/^RA\d*:\s*/, '').slice(0, 110);
+      lines.push(`  ${r.code}: ${d}`);
+    });
+  });
+  return lines.join('\n');
+}
+
+function getAnalisiSys(){
+  let ctx = '';
+  if (PROJECT) {
+    ctx = `\nCONTESTO PROGETTO SCU: "${PROJECT.titolo}" — Settore ${PROJECT.settore} (${PROJECT.settoreNome}). Sede: ${PROJECT.sede}.\nDai priorità alle ADA del settore ${PROJECT.settore}; usa le ADA.QE.* per le competenze digitali trasversali.\n`;
+  }
+  return HUBS_ANALISI_HEAD + ctx + '\n' + buildAdaPromptDb() + '\n\n' + HUBS_ANALISI_TAIL;
+}
+
+
+async function callAI(messages, systemPrompt, maxTokens=1500, model) {
   const resp = await fetch(API_URL, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ messages, system: systemPrompt, max_tokens: maxTokens })
+    body: JSON.stringify({ messages, system: systemPrompt, max_tokens: maxTokens, ...(model?{model}:{}) })
   });
   if (!resp.ok) {
     const err = await resp.json().catch(()=>({error:'Errore di rete'}));
@@ -1339,87 +1885,13 @@ const ALL_COMPS = {
 };
 
 // System prompt completo per mappatura diretta attività → ADA + comp_ids
-const HUBS_ANALISI_SYS = `Sei un esperto certificatore di competenze del Servizio Civile Universale italiano, specializzato nell'Atlante del Lavoro e delle Qualificazioni INAPP e nei framework DigComp 2.2, LifeComp, EntreComp.
+const HUBS_ANALISI_HEAD = `Sei un esperto certificatore di competenze del Servizio Civile Universale italiano, specializzato nell'Atlante del Lavoro e delle Qualificazioni INAPP e nei framework DigComp 2.2, LifeComp, EntreComp.
 
 COMPITO: Analizza le attività svolte da un/a volontario/a SCU → mappa ciascuna su una ADA e relativi RA dell'Atlante INAPP → assegna le competenze-framework pertinenti.
 
-DATABASE ADA — usa SOLO questi codici:
+DATABASE ADA — usa SOLO questi codici:`;
 
-ADA.QE.01.01 — Ricerca e gestione informazioni digitali
-  RA.QE.01.01.1: Ricerca e acquisizione di dati e contenuti digitali
-  RA.QE.01.01.2: Valutazione critica dell'attendibilità delle fonti digitali
-  RA.QE.01.01.3: Gestione, organizzazione e archiviazione dati digitali
-
-ADA.QE.01.02 — Comunicazione e collaborazione digitale
-  RA.QE.01.02.1: Interazione con altri tramite tecnologie digitali
-  RA.QE.01.02.2: Condivisione di dati e contenuti digitali con altri
-  RA.QE.01.02.3: Cittadinanza digitale e sviluppo capacità personali
-  RA.QE.01.02.4: Co-creazione di dati e know-how con strumenti digitali
-  RA.QE.01.02.5: Norme comportamentali nell'uso delle tecnologie digitali
-  RA.QE.01.02.6: Gestione identità digitale e protezione dati
-
-ADA.QE.01.03 — Creazione contenuti digitali
-  RA.QE.01.03.1: Creazione e modifica di contenuti digitali
-  RA.QE.01.03.2: Rielaborazione e integrazione di contenuti digitali esistenti
-  RA.QE.01.03.3: Applicazione di copyright e licenze ai contenuti digitali
-  RA.QE.01.03.4: Sviluppo di istruzioni per sistemi informativi
-
-ADA.QE.01.04 — Sicurezza digitale
-  RA.QE.01.04.1: Protezione dispositivi e contenuti digitali
-  RA.QE.01.04.2: Protezione privacy e applicazione normative GDPR
-  RA.QE.01.04.3: Tutela salute e benessere negli ambienti digitali
-  RA.QE.01.04.4: Riduzione impatto ambientale delle tecnologie digitali
-
-ADA.QE.01.05 — Risoluzione problemi tecnici
-  RA.QE.01.05.1: Gestione e risoluzione di problemi tecnici con dispositivi
-  RA.QE.01.05.2: Personalizzazione degli ambienti digitali
-  RA.QE.01.05.3: Creazione di conoscenza con strumenti digitali
-  RA.QE.01.05.4: Aggiornamento continuo delle competenze digitali
-
-ADA.18.01.06 — Accoglienza e guida ai servizi per l'occupabilità
-  RA.18.01.06.1: Prima accoglienza nei servizi, pratiche amministrative di inserimento utenti e informazioni sulle finalità del servizio
-
-ADA.18.01.07 — Orientamento informativo
-  RA.18.01.07.1: Incontri informativi su mercato del lavoro e offerta formativa
-  RA.18.01.07.2: Iniziative di orientamento in centri dedicati e stand fieristici
-  RA.18.01.07.3: Gestione bacheche fisiche e virtuali con fonti informative
-
-ADA.18.01.08 — Analisi della domanda e patto di servizio
-  RA.18.01.08.1: Analisi dei bisogni della persona e indirizzamento ai servizi
-  RA.18.01.08.2: Informazioni su opportunità formative e professionali, supporto CV
-  RA.18.01.08.3: Predisposizione del patto di servizio e piano di azione
-
-ADA.18.01.09 — Consulenza orientativa e bilancio di competenze
-  RA.18.01.09.1: Progettazione di interventi consulenziali individuali e di gruppo
-  RA.18.01.09.2: Ricostruzione del patrimonio di competenze della persona
-  RA.18.01.09.3: Accompagnamento nella costruzione del progetto professionale
-  RA.18.01.09.4: Documentazione per monitoraggio e valutazione del servizio
-
-ADA.18.01.10 — Supporto e accompagnamento alle transizioni e all'inserimento lavorativo
-  RA.18.01.10.1: Monitoraggio delle fasi di transizione tra cicli di studio
-  RA.18.01.10.2: Azioni di prevenzione del disagio nelle fasi di transizione
-  RA.18.01.10.3: Percorsi personalizzati per soggetti in difficoltà formative/lavorative
-  RA.18.01.10.4: Accompagnamento all'inserimento lavorativo e piani individualizzati
-
-ADA.18.01.11 — Personalizzazione degli interventi formativi
-  RA.18.01.11.1: Valutazione coerenza intervento formativo con competenze degli utenti
-  RA.18.01.11.2: Patto formativo con gli utenti, motivazioni e aspettative
-  RA.18.01.11.3: Valutazione e riconoscimento di crediti formativi
-
-ADA.18.01.13 — Erogazione delle attività didattiche
-  RA.18.01.13.1: Conduzione sessioni formative, predisposizione setting e materiali
-  RA.18.01.13.2: Gestione della relazione con gli utenti in fase di apprendimento
-
-ADA.18.01.14 — Tutoraggio in apprendimento
-  RA.18.01.14.1: Supporto ai soggetti in formazione su programmi, materiali e scadenze
-  RA.18.01.14.2: Organizzazione attività formativa, gestione modulistica e aule
-  RA.18.01.14.3: Supporto al docente, riproduzione e distribuzione materiali didattici
-
-ADA.18.01.17 — Supporto all'individuazione e messa in trasparenza delle competenze
-  RA.18.01.17.1: Gestione del processo di individuazione competenze tramite colloqui
-  RA.18.01.17.2: Supporto composizione del dossier documentale delle competenze
-
-COMP_IDS DA USARE (solo questi, nei campi comp_ids):
+const HUBS_ANALISI_TAIL = `COMP_IDS DA USARE (solo questi, nei campi comp_ids):
 DigComp: dc1, dc2, dc3, dc4, dc5
 LifeComp: lc1 (autoregolazione), lc3 (empatia), lc4 (comunicazione), lc5 (collaborazione), lc6 (crescita), lc7 (pensiero critico)
 EntreComp: ec1 (creatività), ec3 (motivazione), ec4 (mobilitare risorse), ec5 (iniziativa), ec6 (pianificazione), ec7 (lavorare con altri)
@@ -1450,6 +1922,7 @@ OUTPUT — RESTITUISCI SOLO JSON, nessun testo prima o dopo:
     }
   ]
 }`;
+// HUBS_ANALISI_SYS è ora generato dinamicamente da getAnalisiSys() (catalogo ADA del settore attivo)
 
 async function analizzaAttivita() {
   const desc = document.getElementById('perc-desc').value.trim();
@@ -1476,8 +1949,9 @@ async function analizzaAttivita() {
   try {
     const raw = await callAI(
       [{role:'user', content: userMsg}],
-      HUBS_ANALISI_SYS,
-      2000
+      getAnalisiSys(),
+      3000,
+      PROJECT ? 'claude-sonnet-4-6' : undefined
     );
 
     // Robust JSON extraction
@@ -1514,7 +1988,8 @@ function applyFullMappatura(parsed) {
 
   (parsed.mappatura || []).forEach(item => {
     const adaKey = item.ada_code;
-    const ada = ADA_DB[adaKey];
+    let ada = ADA_DB[adaKey];
+    if (!ada && CATALOGO) ada = registerCatalogAda(adaKey);
     const livello = Math.min(4, Math.max(1, item.livello || 2));
 
     // Popola selections dai comp_ids
@@ -2337,6 +2812,451 @@ function applyAgenteAll() {
   document.getElementById('agente-suggestion-bar').style.display = 'none';
   agenteLastSuggestions = null;
 }
+
+// ==================== ENGINE OOXML (portato da HubS_Sistema.html, SPEC_FIX D1-D4 già applicati) ====================
+function _loadJSZip() {
+  if (window.JSZip) return window.JSZip;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => res(window.JSZip);
+    s.onerror = () => rej(new Error('Impossibile caricare JSZip'));
+    document.head.appendChild(s);
+  });
+}
+function _x(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _wH(text, level) {
+  const sz={1:32,2:26,3:22}[level]||20;
+  const center=(level<=2)?'<w:jc w:val="center"/>':'';
+  const border=(level===3)?'<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="2" w:color="333333"/></w:pBdr>':'';
+  const sp={1:'w:before="240" w:after="120"',2:'w:before="160" w:after="80"',3:'w:before="140" w:after="60"'}[level]||'w:before="100" w:after="60"';
+  return `<w:p><w:pPr>${border}<w:spacing ${sp}/>${center}</w:pPr><w:r><w:rPr><w:b/><w:bCs/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
+}
+function _wP(text, opts) {
+  const o=opts||{};
+  const b=o.bold?'<w:b/><w:bCs/>':'';
+  const i=o.italic?'<w:i/>':'';
+  const sz=o.sz?`<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>`:'' ;
+  const col=o.color?`<w:color w:val="${o.color}"/>`:'';
+  const al=o.align?`<w:jc w:val="${o.align}"/>`:'';
+  const sp=o.spacing?`<w:spacing ${o.spacing}/>`:'';
+  const pBdr=o.topBorder?'<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="DDDDDD"/></w:pBdr>':'';
+  return `<w:p><w:pPr>${pBdr}${sp}${al}</w:pPr><w:r><w:rPr>${b}${i}${sz}${col}</w:rPr><w:t xml:space="preserve">${_x(text)}</w:t></w:r></w:p>`;
+}
+function _wBr() { return '<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>'; }
+function _wTcBorders() {
+  return '<w:tcBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/></w:tcBorders>';
+}
+function _wTc(text, opts) {
+  const o=opts||{};
+  const fill=o.header?'EEEEEE':(o.fill||'FFFFFF');
+  const w=o.w?`<w:tcW w:w="${o.w}" w:type="pct"/>`:'';
+  const vAlign=o.vAlign?`<w:vAlign w:val="${o.vAlign}"/>`:'';
+  const gs=o.gridSpan?`<w:gridSpan w:val="${o.gridSpan}"/>`:'';
+  const tcPr=`<w:tcPr>${w}${gs}${_wTcBorders()}<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>${vAlign}</w:tcPr>`;
+  const bold=(o.header||o.bold)?'<w:b/><w:bCs/>':'';
+  const sz=`<w:sz w:val="${o.sz||18}"/><w:szCs w:val="${o.sz||18}"/>`;
+  const lines=String(text||'—').split('\n');
+  const runs=lines.map((l,i)=>i===0
+    ?`<w:r><w:rPr>${bold}${sz}</w:rPr><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
+    :`<w:r><w:rPr>${bold}${sz}</w:rPr><w:br/><w:t xml:space="preserve">${_x(l)}</w:t></w:r>`
+  ).join('');
+  return `<w:tc>${tcPr}<w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>${runs}</w:p></w:tc>`;
+}
+function _wCellMar() { // margini interni delle celle (respiro del testo)
+  return '<w:tblCellMar><w:top w:w="80" w:type="dxa"/><w:left w:w="110" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="110" w:type="dxa"/></w:tblCellMar>';
+}
+function _wGrid(cols) { // cols = pesi relativi delle colonne; tblGrid è obbligatorio per ISO 29500 (Word ripara i file senza)
+  const TOT=9638; const sum=cols.reduce((a,b)=>a+b,0);
+  return '<w:tblGrid>'+cols.map(c=>`<w:gridCol w:w="${Math.round(TOT*c/sum)}"/>`).join('')+'</w:tblGrid>';
+}
+function _wKVTable(rows) {
+  const trs=rows.map(([k,v])=>`<w:tr>${_wTc(k,{bold:true,fill:'F5F5F5',w:2000})}${_wTc(v,{w:3000})}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid([2,3])}${trs}</w:tbl>`;
+}
+function _wDataTable(hdrs, rows) {
+  const hTr=`<w:tr>${hdrs.map(h=>_wTc(h,{header:true})).join('')}</w:tr>`;
+  const bTrs=rows.map(row=>`<w:tr>${row.map((c,i)=>_wTc(c||'—')).join('')}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid(hdrs.map(()=>1))}${hTr}${bTrs}</w:tbl>`;
+}
+function _wSigTable(tutor, vol, luogo, data) {
+  const sigCol=(label,name)=>
+    `<w:tc><w:tcPr><w:tcW w:w="2500" w:type="pct"/>${_wTcBorders()}</w:tcPr>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="888888"/></w:rPr>`+
+    `<w:t xml:space="preserve">${_x(label)}</w:t></w:r></w:p>`+
+    `<w:p><w:pPr><w:spacing w:before="400"/></w:pPr><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>`+
+    `<w:t xml:space="preserve">______________________</w:t></w:r></w:p>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="444444"/></w:rPr>`+
+    `<w:t xml:space="preserve">${_x(name)}</w:t></w:r></w:p></w:tc>`;
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>`+
+    `${_wGrid([1,1])}`+
+    `<w:tr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:gridSpan w:val="2"/>${_wTcBorders()}</w:tcPr>`+
+    `<w:p><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>`+
+    `<w:t xml:space="preserve">Luogo e data: ${_x(luogo)}, ${_x(data)}</w:t></w:r></w:p></w:tc></w:tr>`+
+    `<w:tr>${sigCol('Responsabile / Tutor:',tutor)}${sigCol('Volontario/a:',vol)}</w:tr></w:tbl>`;
+}
+async function _assembleDocx(bodyXml, title) {
+  const JSZip = await _loadJSZip();
+  const z = new JSZip();
+  z.file('[Content_Types].xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+    '<Default Extension="xml" ContentType="application/xml"/>'+
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+    '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
+    '</Types>', {createFolders:false});
+  z.file('_rels/.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+    '</Relationships>', {createFolders:false});
+  z.file('word/_rels/document.xml.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+    '</Relationships>', {createFolders:false});
+  z.file('word/styles.xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+    '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>'+
+    '<w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:rPrDefault></w:docDefaults>'+
+    '<w:style w:type="table" w:styleId="TableGrid"><w:name w:val="Table Grid"/>'+
+    '<w:tblPr><w:tblBorders>'+
+    '<w:top w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:left w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:right w:val="single" w:sz="4" w:color="AAAAAA"/>'+
+    '<w:insideH w:val="single" w:sz="4" w:color="CCCCCC"/>'+
+    '<w:insideV w:val="single" w:sz="4" w:color="CCCCCC"/>'+
+    '</w:tblBorders></w:tblPr></w:style></w:styles>', {createFolders:false});
+  z.file('word/document.xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+    `<w:body>${bodyXml}`+
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'+
+    '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+
+    '</w:body></w:document>', {createFolders:false});
+  return z.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+
+// ---------- helper: lista attività RA con checkbox (catalogo Atlante) ----------
+function _raAttListHtml(ak, idx, r){
+  const sel = (r.attivita || '').split(' • ').filter(Boolean);
+  return '<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;">' +
+    '<span style="font-size:10px;color:var(--grigio);">Attività del RA coperte (dall\'Atlante):</span>' +
+    r.attivitaList.map((a, ai) =>
+      `<label style="font-size:11px;display:flex;gap:6px;align-items:flex-start;font-weight:400;cursor:pointer;"><input type="checkbox" style="margin-top:2px;" ${sel.includes(a) ? 'checked' : ''} onchange="toggleRAAtt('${ak}',${idx},${ai},this.checked)"><span>${_escH(a)}</span></label>`).join('') +
+    '</div>';
+}
+function toggleRAAtt(ak, idx, ai, checked){
+  const ra = mappings[ak]?.ra?.[idx]; if (!ra) return;
+  const sel = new Set((ra.attivita || '').split(' • ').filter(Boolean));
+  const item = ra.attivitaList[ai];
+  if (checked) sel.add(item); else sel.delete(item);
+  ra.attivita = Array.from(sel).join(' • ');
+}
+
+// ==================== MODELLI UFFICIALI — Allegato 6D (Documento di trasparenza) e 6C (Attestato specifico) ====================
+
+function _modV(id, fb){ const v = document.getElementById(id)?.value?.trim(); return v || fb || ''; }
+function _dIT(v){ if (!v) return ''; const d = new Date(v + 'T00:00:00'); return isNaN(d) ? v : d.toLocaleDateString('it-IT'); }
+function _uline(v, len){ return (v && String(v).trim()) ? String(v).trim() : '_'.repeat(len || 26); }
+function _ymd(){ const d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
+function _saveBlob(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function _cleanRa(d){ return String(d || '').replace(/^RA\d*:\s*/, ''); }
+
+function syncLegacyFields(){
+  const setIf = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  const nomeFull = (_modV('mod-vol-nome') + ' ' + _modV('mod-vol-cognome')).trim();
+  if (nomeFull) setIf('vol-nome', nomeFull);
+  const tutorFull = (_modV('mod-resp-nome') + ' ' + _modV('mod-resp-cognome')).trim();
+  if (tutorFull) setIf('vol-tutor', tutorFull);
+  setIf('perc-inizio', _modV('mod-prog-inizio'));
+  setIf('perc-fine', _modV('mod-prog-fine'));
+  setIf('vol-ente', _modV('mod-ente-denominazione'));
+}
+
+function _collectModelliBlocks(){
+  // blocchi ADA "di settore" (non QE) + manuali; blocchi DigComp = ADA.QE
+  const all = Object.values(mappings);
+  const validated = all.filter(m => m.validated);
+  let useAll = false;
+  if (!validated.length && all.length) {
+    useAll = confirm('Nessuna ADA risulta validata nel Passo 3.\nIncludere comunque TUTTE le proposte di mappatura nel documento?');
+    if (!useAll) return null;
+  }
+  const pool = validated.length ? validated : (useAll ? all : []);
+  const isQE = m => String(ADA_DB[m.adaKey]?.sep || m.adaKey).indexOf('QE') === 0;
+  return {
+    settore: pool.filter(m => !isQE(m)),
+    digcomp: pool.filter(isQE),
+    manuali: manualADAs.filter(m => m.validated).concat(manualADAs.filter(m => !m.validated))
+  };
+}
+
+const _LVL_DESC = { 1: 'Esecutivo con istruzioni', 2: 'Autonomia operativa con supervisione', 3: 'Autonomia realizzativa', 4: 'Expertise tecnico' };
+
+function _esperienzeText(){
+  if (PROJECT && PROJECT.attivita && PROJECT.attivita.length) {
+    return PROJECT.attivita.map(a => `${a.titolo}${a.descrizione ? ': ' + a.descrizione : ''}`).join(' • ').slice(0, 900);
+  }
+  return (document.getElementById('perc-desc')?.value || '').slice(0, 600);
+}
+
+async function downloadModelloTrasparenza(){
+  try {
+    syncLegacyFields();
+    const blocks = _collectModelliBlocks();
+    if (!blocks) return;
+    if (!blocks.settore.length && !blocks.digcomp.length && !blocks.manuali.length) {
+      alert('Nessuna mappatura ADA disponibile. Completa il Passo 3 prima di generare il modello.'); return;
+    }
+    const oggi = new Date().toLocaleDateString('it-IT');
+    const codiceId = _modV('mod-ril-codice') || ('HUBS-DT-' + _ymd() + '-' + Math.random().toString(16).slice(2, 6).toUpperCase());
+
+    let xml = '';
+    xml += _wH('Documento di trasparenza', 1);
+    xml += _wP('reso ai sensi del Decreto legislativo 16 gennaio 2013 n. 13 e del Decreto del Ministero del lavoro e delle politiche sociali n. 115 del 9 luglio 2024, articolo 8', { align: 'center', italic: true, sz: 18 });
+    xml += _wP('Servizio civile universale — Decreto legislativo 6 marzo 2017, n. 40, e successive modificazioni', { align: 'center', sz: 18 });
+    xml += _wBr();
+
+    xml += _wH('Ente di Servizio civile universale titolato', 3);
+    xml += _wKVTable([
+      ['Codice SU', _uline(_modV('mod-ente-codice-su'))],
+      ['Denominazione', _uline(_modV('mod-ente-denominazione'))],
+      ['Sede legale', _uline(_modV('mod-ente-sede'))]
+    ]);
+    xml += _wBr();
+
+    xml += _wH("Dati identificativi dell'operatore volontario beneficiario", 3);
+    xml += _wKVTable([
+      ['Cognome', _uline(_modV('mod-vol-cognome'))],
+      ['Nome', _uline(_modV('mod-vol-nome'))],
+      ['Codice Fiscale', _uline(_modV('mod-vol-cf'))],
+      ['Data nascita', _uline(_dIT(_modV('mod-vol-data-nascita')))],
+      ['Comune/Stato straniero nascita', _uline(_modV('mod-vol-luogo-nascita'))],
+      ['Cittadinanza', _uline(_modV('mod-vol-cittadinanza'))]
+    ]);
+    xml += _wBr();
+
+    xml += _wH('Dati identificativi del responsabile della funzione di accompagnamento e supporto', 3);
+    xml += _wKVTable([
+      ['Cognome', _uline(_modV('mod-resp-cognome'))],
+      ['Nome', _uline(_modV('mod-resp-nome'))],
+      ['Codice Fiscale', _uline(_modV('mod-resp-cf'))],
+      ['Ruolo', _uline(_modV('mod-resp-ruolo'))]
+    ]);
+    xml += _wBr();
+
+    const sett = _modV('mod-prog-settore') || (PROJECT?.settore || '');
+    const settNome = sett && SETTORI_SCU[sett] ? (sett + ' — ' + SETTORI_SCU[sett]) : _uline(sett);
+    xml += _wH('Dati progetto di Servizio civile universale', 3);
+    xml += _wKVTable([
+      ['Codice identificativo del progetto', _uline(_modV('mod-prog-codice'))],
+      ['Titolo del progetto', _uline(_modV('mod-prog-titolo', PROJECT?.titolo))],
+      ['Settore SCU', settNome],
+      ["Area d'intervento SCU", _uline(_modV('mod-prog-area'))],
+      ['Data inizio servizio', _uline(_dIT(_modV('mod-prog-inizio')))],
+      ['Data fine servizio', _uline(_dIT(_modV('mod-prog-fine')))]
+    ]);
+    xml += _wBr();
+
+    // ---- SEZIONE COMPETENZE: un blocco per ogni attività/ADA (Atlante) ----
+    xml += _wH('Competenze', 2);
+    xml += _wP("Un blocco per ogni attività individuata in sede di progettazione ed effettivamente esercitata dall'operatore volontario.", { italic: true, sz: 16, color: '666666' });
+
+    const esper = _esperienzeText();
+    const adaBlock = (m, i) => {
+      const ada = ADA_DB[m.adaKey] || {};
+      const rows = [
+        ["Attività svolta dall'OV", _uline(m.attivita || ada.desc)],
+        ['Attività di servizio (esperienze)', _uline(esper)],
+        ['ADA', (ada.code || m.adaKey) + ' — ' + (ada.desc || '')]
+      ];
+      const raCov = (m.ra || []).filter(r => r.coverage);
+      const raList = raCov.length ? raCov : (m.ra || []);
+      raList.forEach((r, ri) => {
+        rows.push(['Risultato Atteso (RA) ' + (ri + 1), r.code + ' — ' + _cleanRa(r.desc)]);
+        rows.push(['Livello di realizzazione (1-4)', m.livello ? (m.livello + ' — ' + (_LVL_DESC[m.livello] || '')) : '____']);
+        rows.push(['Copertura del RA', r.coverage === 'totale' ? 'Totale' : r.coverage === 'parziale' ? 'Parziale' : '____ (Totale/Parziale)']);
+        rows.push(['Attività del RA', _uline(r.attivita)]);
+      });
+      return _wH((i + 1) + '. ' + (ada.code || m.adaKey), 3) + _wKVTable(rows) + _wBr();
+    };
+    blocks.settore.forEach((m, i) => { xml += adaBlock(m, i); });
+    blocks.manuali.forEach((m, j) => {
+      const rows = [
+        ["Attività svolta dall'OV", _uline(m.desc)],
+        ['Attività di servizio (esperienze)', _uline(esper)],
+        ['ADA', (m.code || '____') + (m.desc ? ' — ' + m.desc : '')]
+      ];
+      (m.ra || []).forEach((r, ri) => {
+        rows.push(['Risultato Atteso (RA) ' + (ri + 1), (r.code || '____') + (r.desc ? ' — ' + _cleanRa(r.desc) : '')]);
+        rows.push(['Livello di realizzazione (1-4)', '____']);
+        rows.push(['Copertura del RA', '____ (Totale/Parziale)']);
+        rows.push(['Attività del RA', '______________________']);
+      });
+      xml += _wH((blocks.settore.length + j + 1) + '. ' + (m.code || 'ADA (inserimento manuale)'), 3) + _wKVTable(rows) + _wBr();
+    });
+
+    // ---- DigComp (ADA.QE) ----
+    if (blocks.digcomp.length) {
+      xml += _wH('Competenze quadro DigComp', 2);
+      blocks.digcomp.forEach(m => {
+        const ada = ADA_DB[m.adaKey] || {};
+        const rows = [['Competenza quadro DigComp', (ada.code || m.adaKey) + ' — ' + (ada.desc || '')]];
+        const raCov = (m.ra || []).filter(r => r.coverage);
+        const raList = raCov.length ? raCov : (m.ra || []);
+        raList.forEach((r, ri) => {
+          rows.push(['Risultato Atteso (RA) ' + (ri + 1), r.code + ' — ' + _cleanRa(r.desc)]);
+          rows.push(['Copertura del RA', r.coverage === 'totale' ? 'Totale' : r.coverage === 'parziale' ? 'Parziale' : '____ (Totale/Parziale)']);
+          rows.push(['Attività del RA', _uline(r.attivita)]);
+        });
+        xml += _wKVTable(rows) + _wBr();
+      });
+    }
+
+    // ---- LifeComp / EntreComp dalle selezioni ----
+    const selIds = Object.keys(selections || {});
+    const lcSel = selIds.filter(id => id.startsWith('lc'));
+    const ecSel = selIds.filter(id => id.startsWith('ec'));
+    if (lcSel.length) {
+      xml += _wH('Competenze quadro LifeComp', 2);
+      lcSel.forEach(id => {
+        const item = (typeof LIFECOMP_ITEMS !== 'undefined' ? LIFECOMP_ITEMS : []).find(x => x.id === id) || {};
+        const lvl = selections[id]?.level;
+        xml += _wKVTable([
+          ['Competenza quadro LifeComp', selections[id]?.compName || ALL_COMPS[id] || id],
+          ['Area di competenza', item.area || '—'],
+          ['Competenza', item.desc || selections[id]?.compName || ''],
+          ['Livello di padronanza', lvl ? (lvl + ' — ' + (_LVL_DESC[lvl] || '')) : '____']
+        ]) + _wBr();
+      });
+    }
+    if (ecSel.length) {
+      xml += _wH('Competenze quadro EntreComp', 2);
+      const EC_AREA = { ec1: 'Idee e opportunità', ec2: 'Idee e opportunità', ec3: 'Risorse', ec4: 'Risorse', ec5: 'In azione', ec6: 'In azione', ec7: 'In azione' };
+      ecSel.forEach(id => {
+        const item = (typeof ENTRECOMP_ITEMS !== 'undefined' ? ENTRECOMP_ITEMS : []).find(x => x.id === id) || {};
+        const lvl = selections[id]?.level;
+        xml += _wKVTable([
+          ['Competenza quadro EntreComp', selections[id]?.compName || ALL_COMPS[id] || id],
+          ['Priorità tematica', item.area || EC_AREA[id] || '—'],
+          ['Competenza', item.desc || selections[id]?.compName || ''],
+          ['Livello di padronanza', lvl ? (lvl + ' — ' + (_LVL_DESC[lvl] || '')) : '____']
+        ]) + _wBr();
+      });
+    }
+
+    // ---- Evidenze + rilascio + firme ----
+    xml += _wH('Evidenze a supporto', 3);
+    xml += _wKVTable([['Evidenze a supporto', "Attestato specifico di Servizio civile universale rilasciato dall'ente (Allegato 6C), allegato al presente documento." + (PROJECT?.titolo ? ' Progetto: ' + PROJECT.titolo + '.' : '')]]);
+    xml += _wBr();
+    xml += _wH('Rilascio documento di trasparenza', 3);
+    xml += _wKVTable([
+      ['Luogo e data di rilascio', (_modV('mod-ril-luogo') ? _modV('mod-ril-luogo') + ', ' : '') + (_dIT(_modV('mod-ril-data')) || oggi)],
+      ['Codice identificativo', codiceId]
+    ]);
+    xml += _wBr() + _wBr();
+    xml += _wP('Firma del responsabile della funzione di accompagnamento', { sz: 18 });
+    xml += _wP('____________________________________', { spacing: 'w:before="160" w:after="240"' });
+    xml += _wP("Firma dell'operatore volontario beneficiario", { sz: 18 });
+    xml += _wP('____________________________________', { spacing: 'w:before="160" w:after="120"' });
+
+    const blob = await _assembleDocx(xml, 'Documento di trasparenza');
+    const cogn = (_modV('mod-vol-cognome') || 'OV').replace(/\s+/g, '_');
+    _saveBlob(blob, `HubS_All6D_DocumentoTrasparenza_${cogn}_${_ymd()}.docx`);
+  } catch (e) {
+    alert('Errore generazione Documento di trasparenza: ' + e.message);
+  }
+}
+
+async function downloadAttestato(){
+  try {
+    syncLegacyFields();
+    const blocks = _collectModelliBlocks() || { settore: [], digcomp: [], manuali: [] };
+    const sett = _modV('mod-prog-settore') || (PROJECT?.settore || '');
+    const settNome = sett && SETTORI_SCU[sett] ? (sett + ' — ' + SETTORI_SCU[sett]) : _uline(sett, 18);
+
+    let xml = '';
+    xml += _wP('[Spazio per i loghi: ente proponente il progetto · ente attuatore · Servizio Civile Universale]', { align: 'center', italic: true, sz: 14, color: '999999' });
+    xml += _wH('Attestato specifico', 1);
+    xml += _wP('come evidenza del documento di messa in trasparenza', { align: 'center', italic: true, sz: 18 });
+    xml += _wBr();
+
+    xml += _wP(`L'${_uline(_modV('mod-ente-proponente'), 30)} per il progetto di servizio civile “${_uline(_modV('mod-prog-titolo', PROJECT?.titolo), 24)}” realizzato da ${_uline(_modV('mod-ente-attuatore'), 30)} presso ${_uline(_modV('mod-sede-attuazione', PROJECT?.sede), 30)} nell'ambito del Settore d'impiego ${settNome} e nell'area di intervento ${_uline(_modV('mod-prog-area'), 24)}`, { sz: 20 });
+    xml += _wBr();
+    xml += _wH('ATTESTA CHE', 2);
+
+    xml += _wP(`L'operatore volontario ${_uline(_modV('mod-vol-cognome'), 18)} ${_uline(_modV('mod-vol-nome'), 18)} nato/a il ${_uline(_dIT(_modV('mod-vol-data-nascita')), 12)} a ${_uline(_modV('mod-vol-luogo-nascita'), 20)} con codice fiscale ${_uline(_modV('mod-vol-cf'), 18)} ha superato le selezioni svolte dall'ente in relazione al Bando ${_uline(_modV('mod-bando-anno'), 8)} del Dipartimento per le politiche giovanili e il servizio civile universale ed è risultato idoneo per lo svolgimento del servizio civile universale per il progetto sopra indicato. Il servizio ha avuto inizio il ${_uline(_dIT(_modV('mod-prog-inizio')), 12)} ed è terminato il ${_uline(_dIT(_modV('mod-prog-fine')), 12)}.`, { sz: 20 });
+    xml += _wBr();
+    xml += _wP("L'operatore volontario ha svolto le attività formative e progettuali previste nel progetto sopra citato ed ha avuto l'opportunità di sviluppare conoscenze e capacità; in particolare:", { sz: 20 });
+    xml += _wBr();
+
+    // ---- conoscenze e capacità connesse alle attività di progetto (Atlante + quadri europei) ----
+    const items = blocks.settore.concat(blocks.digcomp);
+    if (items.length) {
+      items.forEach(m => {
+        const ada = ADA_DB[m.adaKey] || {};
+        xml += _wP(`• capacità e conoscenze riferite all'ADA ${ada.code || m.adaKey} — ${ada.desc || ''} (Atlante del lavoro e delle qualificazioni INAPP)${m.livello ? ' — livello di realizzazione ' + m.livello + ' (' + (_LVL_DESC[m.livello] || '') + ')' : ''};`, { sz: 20 });
+        (m.ra || []).filter(r => r.coverage).forEach(r => {
+          xml += _wP(`   – ${r.code}: ${_cleanRa(r.desc)} (copertura ${r.coverage})${r.attivita ? ' — attività: ' + r.attivita : ''};`, { sz: 18, color: '444444' });
+        });
+      });
+    } else {
+      xml += _wP('• __________________________________________________________________;', { sz: 20 });
+      xml += _wP('• __________________________________________________________________;', { sz: 20 });
+    }
+    const selIds = Object.keys(selections || {});
+    const byFw = [['DigComp 2.2', selIds.filter(i => i.startsWith('dc'))], ['LifeComp', selIds.filter(i => i.startsWith('lc'))], ['EntreComp', selIds.filter(i => i.startsWith('ec'))], ['Competenze chiave UE', selIds.filter(i => i.startsWith('eu'))]];
+    byFw.forEach(([fw, ids]) => {
+      if (ids.length) xml += _wP(`• competenze del quadro europeo ${fw}: ${ids.map(i => selections[i]?.compName || ALL_COMPS[i] || i).join('; ')};`, { sz: 20 });
+    });
+    xml += _wBr();
+
+    // ---- voci fisse del modello 6C ----
+    xml += _wP('• conoscenze di carattere generale in un processo di formazione comune: valori e identità del servizio civile, la cittadinanza attiva, il giovane volontario nel sistema del servizio civile, acquisendo capacità di agire in coerenza con i principi del Servizio Civile Universale e di riconoscere il proprio ruolo nel sistema;', { sz: 20 });
+    xml += _wP("• conoscenze sui rischi connessi all'impiego dei volontari nei progetti di servizio civile (ai sensi del d.lgs. n. 81/2008), applicando le principali indicazioni in materia di salute e sicurezza sul lavoro previste dal d.lgs. 81/2008, riconoscendo situazioni di rischio e adottando comportamenti adeguati;", { sz: 20 });
+    xml += _wP("• conoscenza dell'ente e del suo funzionamento, comprendendone struttura, ruoli e modalità operative;", { sz: 20 });
+    xml += _wP("• conoscenza dell'area d'intervento del progetto;", { sz: 20 });
+    xml += _wP('• migliore conoscenza del territorio in cui si realizza il progetto;', { sz: 20 });
+    xml += _wP("• capacità di gestione del tempo in relazione all'orario di servizio;", { sz: 20 });
+    xml += _wP(`• altre conoscenze nell'ambito della formazione specifica e, in particolare, sui seguenti moduli di formazione: ${_uline(_modV('mod-moduli'), 60)}`, { sz: 20 });
+    xml += _wBr();
+
+    xml += _wP("Il progetto inoltre ha investito sullo sviluppo delle seguenti competenze chiave per l'apprendimento permanente (Raccomandazione del Consiglio UE del 22 maggio 2018 — 2018/C 189/01) dell'operatore volontario del Servizio Civile:", { sz: 20 });
+    xml += _wP('Competenze personali, sociali e la capacità di imparare a imparare.', { bold: true, sz: 20 });
+    xml += _wP("Queste consistono nella capacità di riflettere su sé stessi, di gestire efficacemente il tempo e le informazioni, di lavorare con gli altri in maniera costruttiva, di mantenersi resilienti e di gestire il proprio apprendimento e la propria carriera. Comprendono la capacità di far fronte all'incertezza e alla complessità, di imparare a imparare, di favorire il proprio benessere fisico ed emotivo, di mantenere la salute fisica e mentale, nonché di essere in grado di condurre una vita attenta alla salute e orientata al futuro, di empatizzare e di gestire il conflitto in un contesto favorevole e inclusivo.", { sz: 18 });
+    xml += _wP('Competenze in materia di cittadinanza.', { bold: true, sz: 20 });
+    xml += _wP("Queste si riferiscono alla capacità di agire da cittadini responsabili e di partecipare pienamente alla vita civica e sociale, in base alla comprensione delle strutture e dei concetti sociali, economici, giuridici e politici oltre che dell'evoluzione a livello globale e della sostenibilità.", { sz: 18 });
+    xml += _wBr();
+    xml += _wP("Eventuali allegati relativi a documenti, testimonianze, attestazioni, dichiarazioni, materiali di progetto, prodotti realizzati dall'OV comprovanti l'esperienza SCU svolta:", { sz: 20 });
+    xml += _wP('• Documento di trasparenza (Allegato 6D) reso ai sensi del D.lgs. 13/2013 e del D.M. 115/2024.', { sz: 20 });
+    xml += _wBr();
+    xml += _wP(`Luogo e data: ${_modV('mod-ril-luogo') ? _modV('mod-ril-luogo') + ', ' : ''}${_dIT(_modV('mod-ril-data')) || '____________________'}`, { sz: 20 });
+    xml += _wBr() + _wBr();
+
+    // firma a due colonne come da modello 6C
+    const firmaTbl =
+      `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid([1, 1])}` +
+      `<w:tr>${_wTc("Per l'ente attuatore\nL'OLP / Il Legale rappresentante dell'ente\n\n____________________________", { sz: 18 })}` +
+      `${_wTc("Per l'ente proponente il progetto\nIl Legale rappresentante dell'ente / Il Coordinatore responsabile\n\n____________________________", { sz: 18 })}</w:tr></w:tbl>`;
+    xml += firmaTbl;
+
+    const blob = await _assembleDocx(xml, 'Attestato specifico');
+    const cogn = (_modV('mod-vol-cognome') || 'OV').replace(/\s+/g, '_');
+    _saveBlob(blob, `HubS_All6C_AttestatoSpecifico_${cogn}_${_ymd()}.docx`);
+  } catch (e) {
+    alert('Errore generazione Attestato specifico: ' + e.message);
+  }
+}
+
 </script>
 
 <!-- ====== AGENTE CHAT PANEL HTML ====== -->
