@@ -536,6 +536,30 @@ details[open]{background:#fff}
   </div>
 </div>
 
+<!-- SCREEN 5 — ADA SCU (catalogo Dipartimento per settore) -->
+<div class="screen" id="screen-5">
+  <div class="panel-left">
+    <div class="section">
+      <div class="section-title"><i class="fa-solid fa-sitemap" aria-hidden="true"></i> Settori SCU (elenco Dipartimento)</div>
+      <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">Le ADA dell'Atlante INAPP già filtrate per settore dal Dipartimento, più il Quadro DigComp trasversale.</div>
+      <div id="cat-settori" style="display:flex;flex-direction:column;gap:5px;"></div>
+    </div>
+    <div class="section">
+      <label>Filtra nel settore</label>
+      <input type="text" id="cat-query" placeholder="Codice o parola chiave…" oninput="renderCatalogoSCU()">
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="section-header">
+      <div>
+        <h2 id="cat-title">ADA SCU — catalogo del Dipartimento</h2>
+        <p id="cat-sub">Espandi un'ADA per vedere Risultati Attesi e attività; "Aggiungi" la porta nella mappatura.</p>
+      </div>
+    </div>
+    <div id="cat-ada-list"></div>
+  </div>
+</div>
+
 <!-- SCREEN 4 -->
 <div class="screen" id="screen-4">
   <div class="panel-left">
@@ -1698,11 +1722,11 @@ function downloadPdf(){
 // ==================== NAVIGATION ====================
 let currentStep = 0;
 // ==================== NAVIGAZIONE A 3 FASE (route) — gli indici interni 0..4 restano per compatibilità ====================
-const ROUTE_OF = { 0: 0, 1: 0, 2: 1, 3: 1, 4: 2 };          // screen interno -> fase
+const ROUTE_OF = { 0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 1 };    // screen interno -> fase
 const ROUTE_DEFAULT_SCREEN = { 0: 0, 1: 3, 2: 4 };           // fase -> screen di default
 const ROUTE_SUBS = {
   0: [[0, 'fa-file-import', 'Da progetto (3A)'], [1, 'fa-pen', 'Descrizione libera']],
-  1: [[3, 'fa-diagram-project', 'Mappatura ADA'], [2, 'fa-table-cells', 'Quadri europei']],
+  1: [[3, 'fa-diagram-project', 'Mappatura ADA'], [2, 'fa-table-cells', 'Quadri europei'], [5, 'fa-sitemap', 'ADA SCU']],
   2: []
 };
 function _routeStato(r){
@@ -1740,9 +1764,9 @@ function _renderSubbar(route, screen){
 }
 function goStep(n){
   const route = ROUTE_OF[n] ?? 0;
-  if (n !== 2 && _routeLocked(route)) { _hint(ROUTE_HINTS[route] || 'Fase non ancora disponibile.'); updateNav(); return; } // i Quadri europei (screen 2) restano sempre accessibili come ingresso manuale
+  if (n !== 2 && n !== 5 && _routeLocked(route)) { _hint(ROUTE_HINTS[route] || 'Fase non ancora disponibile.'); updateNav(); return; } // Quadri europei (2) e catalogo ADA SCU (5) sempre accessibili come consultazione/ingresso
   currentStep = n;
-  for (let i = 0; i <= 4; i++) {
+  for (let i = 0; i <= 5; i++) {
     const sc = document.getElementById(`screen-${i}`);
     if (sc) { sc.classList.toggle('active', i === n); sc.style.display = i === n ? 'flex' : 'none'; }
   }
@@ -1758,6 +1782,7 @@ function goStep(n){
   toggleSidebar(false);
   if (n === 3) { generateMappings(); }
   if (n === 4) { generateExport(); }
+  if (n === 5) { ensureCatalogo().then(() => renderCatalogoSCU()).catch(e => { const el = document.getElementById('cat-ada-list'); if (el) el.innerHTML = '<div class="warn-box">Catalogo non disponibile: ' + _escH(e.message) + '</div>'; }); }
 }
 function updateNav(route){
   if (route === undefined) route = ROUTE_OF[currentStep] ?? 0;
@@ -2757,6 +2782,91 @@ function addAdaFromCatalog(code){
   const box = document.getElementById('catalogo-results'); if (box) box.innerHTML = '';
   const inp = document.getElementById('catalogo-search'); if (inp) inp.value = '';
   renderMappingCards(); updateMapStats();
+}
+
+// ==================== ADA SCU — browser del catalogo Dipartimento per settore ====================
+let _catSettore = null;     // lettera attiva ('A'..'G') oppure 'QE'
+let _catOpen = new Set();   // ADA espanse
+
+function _catDati(sett){
+  if (sett === 'QE') return (CATALOGO?.digcomp?.ada) || [];
+  return (CATALOGO?.settori?.[sett]?.ada) || [];
+}
+
+function apriCatalogoSettore(sett){
+  _catSettore = sett;
+  _catOpen = new Set();
+  const q = document.getElementById('cat-query'); if (q) q.value = '';
+  renderCatalogoSCU();
+}
+
+function toggleCatAda(code){
+  if (_catOpen.has(code)) _catOpen.delete(code); else _catOpen.add(code);
+  renderCatalogoSCU();
+}
+
+function renderCatalogoSCU(){
+  if (!CATALOGO) return;
+  const settProgetto = PROJECT?.settore || SETTORE_ATTIVO || PROGETTO_RAW.settore || null;
+  if (!_catSettore) _catSettore = settProgetto || 'A';
+
+  // nav settori
+  const nav = document.getElementById('cat-settori');
+  if (nav) {
+    const voci = Object.keys(SETTORI_SCU).map(k => ({ k, nome: SETTORI_SCU[k], n: (CATALOGO.settori[k]?.ada || []).length }));
+    voci.push({ k: 'QE', nome: 'Quadro DigComp — ADA digitali trasversali', n: (CATALOGO.digcomp?.ada || []).length });
+    nav.innerHTML = voci.map(v => `
+      <button class="tab ${v.k === _catSettore ? 'active' : ''}" style="border-radius:8px;justify-content:flex-start;text-align:left;display:flex;gap:8px;align-items:center;width:100%;" onclick="apriCatalogoSettore('${v.k}')">
+        <span style="font-weight:800;min-width:22px;">${v.k === 'QE' ? '<i class=\'fa-solid fa-microchip\' aria-hidden=\'true\'></i>' : v.k}</span>
+        <span style="flex:1;font-weight:600;font-size:.74rem;white-space:normal;line-height:1.3;">${_escH(v.nome.length > 52 ? v.nome.slice(0, 52) + '…' : v.nome)}${v.k === settProgetto ? ' <span style=\'color:var(--c-a2);font-weight:800;\'>✓ progetto</span>' : ''}</span>
+        <span class="badge" style="background:var(--grey);color:var(--sub);">${v.n}</span>
+      </button>`).join('');
+  }
+
+  // intestazione
+  const titolo = document.getElementById('cat-title');
+  const sotto = document.getElementById('cat-sub');
+  const fonteLbl = _catSettore === 'QE'
+    ? 'Quadro DigComp 2.1 ↔ ADA del Dipartimento SCU — trasversali digitali'
+    : 'Elenco Dipartimento SCU — ' + (CATALOGO.settori[_catSettore]?.nome || ('Settore ' + _catSettore));
+  if (titolo) titolo.textContent = _catSettore === 'QE' ? 'ADA digitali — Quadro DigComp' : ('ADA SCU — Settore ' + _catSettore);
+  if (sotto) sotto.textContent = fonteLbl + ' · Atlante del Lavoro INAPP';
+
+  // elenco ADA
+  const q = (document.getElementById('cat-query')?.value || '').trim().toLowerCase();
+  let dati = _catDati(_catSettore);
+  if (q.length >= 2) dati = dati.filter(a => a.codice.toLowerCase().includes(q) || (a.titolo || '').toLowerCase().includes(q));
+  const list = document.getElementById('cat-ada-list');
+  if (!list) return;
+  if (!dati.length) { list.innerHTML = '<div class="empty-mapping">Nessuna ADA corrispondente nel settore.</div>'; return; }
+
+  list.innerHTML = dati.map(a => {
+    const inMappa = !!mappings[a.codice];
+    const aperta = _catOpen.has(a.codice);
+    const nAtt = (a.ra || []).reduce((s, r) => s + (r.attivita || []).length, 0);
+    const corpo = !aperta ? '' : `
+      <div class="ada-card-body">
+        ${(a.ra || []).map(r => `
+          <div class="ra-item" style="margin-bottom:8px;">
+            <span class="ra-code">${r.codice}</span>
+            <div class="ra-desc" style="font-weight:600;">${_escH(String(r.titolo || '').replace(/^RA\d*:\s*/, ''))}</div>
+            ${(r.attivita || []).length ? `<ul style="margin:6px 0 0 18px;font-size:.76rem;color:var(--sub);">${(r.attivita || []).map(t => `<li>${_escH(t)}</li>`).join('')}</ul>` : ''}
+          </div>`).join('')}
+      </div>`;
+    return `
+      <div class="ada-card ${inMappa ? 'validated' : ''}" style="margin-bottom:10px;">
+        <div class="ada-card-header" style="cursor:pointer;" onclick="toggleCatAda('${a.codice}')">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">
+            <span class="ada-code">${a.codice}</span>
+            <span class="ada-title" style="flex:1;">${_escH(a.titolo || '')}</span>
+            <span class="badge" style="background:var(--grey);color:var(--sub);">${(a.ra || []).length} RA · ${nAtt} attività</span>
+            ${inMappa ? '<span class="validated-badge">in mappatura</span>' : `<button class="btn btn-success btn-sm" onclick="event.stopPropagation();addAdaFromCatalog('${a.codice}');renderCatalogoSCU();_hint('${a.codice} aggiunta alla mappatura.');">+ Aggiungi</button>`}
+            <i class="fa-solid fa-chevron-${aperta ? 'up' : 'down'}" style="color:var(--sub);font-size:.75rem;" aria-hidden="true"></i>
+          </div>
+        </div>
+        ${corpo}
+      </div>`;
+  }).join('');
 }
 
 // ---------- Database ADA dinamico per i prompt AI ----------
