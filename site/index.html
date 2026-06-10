@@ -1123,7 +1123,7 @@ h3{font-size:1.08rem;font-weight:600;margin-bottom:10px}
     <div class="card-title card-title-patto"><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Bozza Patto di Servizio — Modulo 02</div>
     <div class="flex gap12" style="margin-bottom:16px;flex-wrap:wrap">
       <button class="btn btn-a1" onclick="renderPattoPreview()"><i class="fa-solid fa-rotate"></i> Aggiorna anteprima</button>
-      <button class="btn btn-a1" onclick="downloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
+      <button class="btn btn-a1" onclick="guardedDownloadPattoDocx()"><i class="fa-regular fa-file-word"></i> Scarica DOCX</button>
       <button class="btn btn-outline" onclick="downloadPattoPdf()"><i class="fa-solid fa-print"></i> Stampa / PDF</button>
     </div>
     <div id="patto-preview-container"></div>
@@ -2283,21 +2283,27 @@ function checkA5Readiness() {
 
 // ── GUARDED EXPORT ──────────────────────────────────────────
 function guardedDownloadDocx() {
-  collectA5();
-  const issues = [];
-  if(!S.a1.vol.nome || !S.a1.ente.denominazione) issues.push('• Dati volontario/ente incompleti');
-  const adaVal = Object.values(S.a4.mappings).filter(m=>m.validated).length;
-  if(!adaVal) issues.push('• Nessuna ADA validata in Fase 4');
-  const prev = parseFloat(S.a1.percorso?.orePreviste)||0;
-  const svolte = parseFloat(S.a1.percorso?.oreSvolte)||0;
-  const perc = prev>0?Math.round(svolte/prev*100):0;
-  if(perc>0 && perc<75) issues.push('• Presenza sotto il 75% ('+perc+'%)');
-  if(issues.length) {
-    const cont = confirm('⚠ Criticità rilevate prima dell\'export:\n\n'+issues.join('\n')+'\n\nProcedere comunque con il download?');
-    if(!cont) return;
+  try {
+    collectA5();
+    const issues = [];
+    if(!S.a1.vol.nome || !S.a1.ente.denominazione) issues.push('\u2022 Dati volontario/ente incompleti');
+    const adaVal = Object.values(S.a4.mappings).filter(m=>m.validated).length;
+    if(!adaVal) issues.push('\u2022 Nessuna ADA validata in Fase 4');
+    const prev = parseFloat(S.a1.percorso?.orePreviste)||0;
+    const svolte = parseFloat(S.a1.percorso?.oreSvolte)||0;
+    const perc = prev>0?Math.round(svolte/prev*100):0;
+    if(perc>0 && perc<75) issues.push('\u2022 Presenza sotto il 75% ('+perc+'%)');
+    if(issues.length) {
+      const cont = confirm('\u26a0 Criticit\u00e0 rilevate prima dell\'export:\n\n'+issues.join('\n')+'\n\nProcedere comunque con il download?');
+      if(!cont) return;
+    }
+    downloadDocx().catch(err => alert('Errore DOCX: '+err.message));
+  } catch(err) {
+    alert('Errore DOCX: '+err.message);
   }
-  downloadDocx();
 }
+function guardedDownloadPattoDocx() { downloadPattoDocx().catch(err=>alert('Errore Patto DOCX: '+err.message)); }
+
 
 
 // ── EQVAL HELPERS ───────────────────────────────────────────
@@ -2731,104 +2737,103 @@ async function _assembleDocx(bodyXml, title) {
 
 
 async function downloadPattoDocx() {
-  collectA1();
-  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
-  const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
-  const dataOggi=today();
-  const FREQ={mensile:'Mensile',bimestrale:'Bimestrale',bisogno:'Al bisogno'};
-  const MOD={presenza:'Colloquio individuale in presenza',distanza:'Colloquio a distanza (video call)',campo:'Osservazione sul campo',diario:'Diario di bordo con feedback scritto'};
-  const CT_LABELS={comm:'Comunicazione',dig:'Competenza digitale (DigComp)',imparare:'Imparare ad imparare (LifeComp)',sociali:'Competenze sociali e civiche',spirito:'Spirito di iniziativa (EntreComp)',cultura:'Consapevolezza culturale'};
-  const VMET={colloquio:'Colloquio finale di emersione',autoval:'Autovalutazione finale',dossier:'Revisione Dossier Evidenze',documento:'Compilazione Documento di Trasparenza'};
-
-  let b='';
-  b+=_wH('PROGETTO PERSONALIZZATO — PATTO DI SERVIZIO',1);
-  b+=_wH('HubS – Spazi di Innovazione Sociale — Modulo 02',2);
-  b+=_wP('Rif. Art. 5, comma 1, lett. b) — D.I. 31 luglio 2025',{italic:true,sz:16,color:'666666',align:'center'});
-  b+=_wBr();
-
-  b+=_wH('Sezione A — Parti del Progetto',3);
-  b+=_wKVTable([
-    ['Ente di accoglienza', (e.denominazione||'___')+' ('+(e.tipo||'___')+')'],
-    ['Tutor / Responsabile', e.tutor||'___'],
-    ['Volontario/a', (v.cognome||'___')+' '+(v.nome||'___')],
-    ['Codice progetto HubS', e.codice||'___'],
-    ['Data di sottoscrizione', fmtDate(S.a1.dataRotte)||'___'],
-  ]);
-  b+=_wBr();
-
-  b+=_wH('Sezione B — Obiettivi del Percorso',3);
-  b+=_wP('Obiettivo generale: '+(S.a1.obiettivoGenerale||'___'),{bold:true});
-  const objs=(S.a1.obiettivi||[]).filter(Boolean);
-  if(objs.length) b+=_wDataTable(['#','Obiettivo specifico'],objs.map((o,i)=>[(i+1).toString(),o]));
-  const cts=(S.a1.competenzeTarget||[]);
-  if(cts.length) {
-    b+=_wP('Competenze chiave europee target:',{bold:true,sz:18});
-    b+=_wDataTable(['Competenza'],cts.map(c=>[(CT_LABELS[c]||c)]));
-  }
-  b+=_wBr();
-
-  b+=_wH('Sezione C — Piano delle Attività',3);
-  b+=_wP('Totale ore ≥ 60 in 12 mesi. Presenza minima: 75%',{italic:true,sz:16,color:'666666'});
-  const pa=(S.a1.pianoAttivita||[]).filter(r=>r.attivita);
-  b+=_wDataTable(['#','Attività','Area di competenza','Ore'],
-    pa.length?pa.map((r,i)=>[(i+1).toString(),r.attivita,r.area||'—',String(r.ore||'—')]):
-    [['—','Piano attività non compilato','','']]);
-  b+=_wBr();
-
-  const cal=S.a1.calendario||[];
-  if(cal.length){
-    b+=_wH('Sezione D — Calendario Indicativo',3);
-    b+=_wDataTable(['Mese','Attività previste','Ore'],cal.map(r=>[r.mese,r.attivita||'—',String(r.ore||'—')]));
-    b+=_wBr();
-  }
-
-  b+=_wH('Sezione E — Piano di Tutoraggio',3);
-  b+=_wKVTable([['Frequenza colloqui', FREQ[S.a1.tutoraggioFreq]||'___']]);
-  const mods=(S.a1.tutoraggioModalita||[]);
-  if(mods.length) b+=_wDataTable(['Modalità'],mods.map(m=>[(MOD[m]||m)]));
-  b+=_wBr();
-
-  const ada=(S.a1.adaPrelim||[]).filter(r=>r.codice||r.descrizione);
-  b+=_wH('Sezione F — Mappatura Normativa Preliminare',3);
-  b+=_wP('Identificazione orientativa delle ADA — da validare al termine del percorso',{italic:true,sz:16,color:'666666'});
-  b+=_wDataTable(['Codice ADA','Descrizione ADA','Pertinenza'],
-    ada.length?ada.map(r=>[r.codice||'—',r.descrizione||'—',r.pertinenza||'—']):
-    [['—','Da compilare','—']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione G — Modalità di Valutazione Finale',3);
-  const vm=(S.a1.valutazioneMetodi||[]);
-  if(vm.length) b+=_wDataTable(['Metodo di valutazione'],vm.map(m=>[(VMET[m]||m)]));
-  b+=_wKVTable([['Data prevista conclusione', fmtDate(S.a1.dataConclusioneStimata)||'___']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione H — Impegni del Volontario',3);
-  b+=_wDataTable(['Impegno'],[
-    ['Partecipare alle attività secondo il calendario concordato con l\'ente'],
-    ['Raggiungere la soglia minima di presenze (75% delle ore previste)'],
-    ['Partecipare ai colloqui di tutoraggio previsti (min. 3)'],
-    ['Collaborare alla costruzione del Dossier delle Evidenze (Fase 3)'],
-    ['Partecipare al processo di autovalutazione delle competenze (Fase 2)'],
-    ['Comunicare tempestivamente eventuali impedimenti o variazioni al tutor'],
-  ]);
-  b+=_wBr();
-
-  b+=_wH('Sezione I — Dichiarazioni e Firme',3);
-  b+=_wP('Le parti dichiarano di aver preso visione del presente progetto personalizzato e di accettarne i contenuti ai sensi del D.I. 31 luglio 2025.',{sz:18});
-  b+=_wBr();
-  b+=_wSigTable(e.tutor||'___',(v.nome||'')+ ' '+(v.cognome||'___'),p.luogo||e.indirizzo||'___',dataOggi);
-  b+=_wBr();
-  b+=_wP('Documento generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
-
   try {
+  
+    collectA1();
+    const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+    const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
+    const dataOggi=today();
+    const FREQ={mensile:'Mensile',bimestrale:'Bimestrale',bisogno:'Al bisogno'};
+    const MOD={presenza:'Colloquio individuale in presenza',distanza:'Colloquio a distanza (video call)',campo:'Osservazione sul campo',diario:'Diario di bordo con feedback scritto'};
+    const CT_LABELS={comm:'Comunicazione',dig:'Competenza digitale (DigComp)',imparare:'Imparare ad imparare (LifeComp)',sociali:'Competenze sociali e civiche',spirito:'Spirito di iniziativa (EntreComp)',cultura:'Consapevolezza culturale'};
+    const VMET={colloquio:'Colloquio finale di emersione',autoval:'Autovalutazione finale',dossier:'Revisione Dossier Evidenze',documento:'Compilazione Documento di Trasparenza'};
+  
+    let b='';
+    b+=_wH('PROGETTO PERSONALIZZATO — PATTO DI SERVIZIO',1);
+    b+=_wH('HubS – Spazi di Innovazione Sociale — Modulo 02',2);
+    b+=_wP('Rif. Art. 5, comma 1, lett. b) — D.I. 31 luglio 2025',{italic:true,sz:16,color:'666666',align:'center'});
+    b+=_wBr();
+  
+    b+=_wH('Sezione A — Parti del Progetto',3);
+    b+=_wKVTable([
+      ['Ente di accoglienza', (e.denominazione||'___')+' ('+(e.tipo||'___')+')'],
+      ['Tutor / Responsabile', e.tutor||'___'],
+      ['Volontario/a', (v.cognome||'___')+' '+(v.nome||'___')],
+      ['Codice progetto HubS', e.codice||'___'],
+      ['Data di sottoscrizione', fmtDate(S.a1.dataRotte)||'___'],
+    ]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione B — Obiettivi del Percorso',3);
+    b+=_wP('Obiettivo generale: '+(S.a1.obiettivoGenerale||'___'),{bold:true});
+    const objs=(S.a1.obiettivi||[]).filter(Boolean);
+    if(objs.length) b+=_wDataTable(['#','Obiettivo specifico'],objs.map((o,i)=>[(i+1).toString(),o]));
+    const cts=(S.a1.competenzeTarget||[]);
+    if(cts.length) {
+      b+=_wP('Competenze chiave europee target:',{bold:true,sz:18});
+      b+=_wDataTable(['Competenza'],cts.map(c=>[(CT_LABELS[c]||c)]));
+    }
+    b+=_wBr();
+  
+    b+=_wH('Sezione C — Piano delle Attività',3);
+    b+=_wP('Totale ore ≥ 60 in 12 mesi. Presenza minima: 75%',{italic:true,sz:16,color:'666666'});
+    const pa=(S.a1.pianoAttivita||[]).filter(r=>r.attivita);
+    b+=_wDataTable(['#','Attività','Area di competenza','Ore'],
+      pa.length?pa.map((r,i)=>[(i+1).toString(),r.attivita,r.area||'—',String(r.ore||'—')]):
+      [['—','Piano attività non compilato','','']]);
+    b+=_wBr();
+  
+    const cal=S.a1.calendario||[];
+    if(cal.length){
+      b+=_wH('Sezione D — Calendario Indicativo',3);
+      b+=_wDataTable(['Mese','Attività previste','Ore'],cal.map(r=>[r.mese,r.attivita||'—',String(r.ore||'—')]));
+      b+=_wBr();
+    }
+  
+    b+=_wH('Sezione E — Piano di Tutoraggio',3);
+    b+=_wKVTable([['Frequenza colloqui', FREQ[S.a1.tutoraggioFreq]||'___']]);
+    const mods=(S.a1.tutoraggioModalita||[]);
+    if(mods.length) b+=_wDataTable(['Modalità'],mods.map(m=>[(MOD[m]||m)]));
+    b+=_wBr();
+  
+    const ada=(S.a1.adaPrelim||[]).filter(r=>r.codice||r.descrizione);
+    b+=_wH('Sezione F — Mappatura Normativa Preliminare',3);
+    b+=_wP('Identificazione orientativa delle ADA — da validare al termine del percorso',{italic:true,sz:16,color:'666666'});
+    b+=_wDataTable(['Codice ADA','Descrizione ADA','Pertinenza'],
+      ada.length?ada.map(r=>[r.codice||'—',r.descrizione||'—',r.pertinenza||'—']):
+      [['—','Da compilare','—']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione G — Modalità di Valutazione Finale',3);
+    const vm=(S.a1.valutazioneMetodi||[]);
+    if(vm.length) b+=_wDataTable(['Metodo di valutazione'],vm.map(m=>[(VMET[m]||m)]));
+    b+=_wKVTable([['Data prevista conclusione', fmtDate(S.a1.dataConclusioneStimata)||'___']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione H — Impegni del Volontario',3);
+    b+=_wDataTable(['Impegno'],[
+      ['Partecipare alle attività secondo il calendario concordato con l\'ente'],
+      ['Raggiungere la soglia minima di presenze (75% delle ore previste)'],
+      ['Partecipare ai colloqui di tutoraggio previsti (min. 3)'],
+      ['Collaborare alla costruzione del Dossier delle Evidenze (Fase 3)'],
+      ['Partecipare al processo di autovalutazione delle competenze (Fase 2)'],
+      ['Comunicare tempestivamente eventuali impedimenti o variazioni al tutor'],
+    ]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione I — Dichiarazioni e Firme',3);
+    b+=_wP('Le parti dichiarano di aver preso visione del presente progetto personalizzato e di accettarne i contenuti ai sensi del D.I. 31 luglio 2025.',{sz:18});
+    b+=_wBr();
+    b+=_wSigTable(e.tutor||'___',(v.nome||'')+ ' '+(v.cognome||'___'),p.luogo||e.indirizzo||'___',dataOggi);
+    b+=_wBr();
+    b+=_wP('Documento generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
+  
     const blob=await _assembleDocx(b,'Patto di Servizio');
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=`HubS_PattoDiServizio_${name}_${dataOggi}.docx`;
     a.click();
-  } catch(err) {
-    alert('Errore generazione DOCX: '+err.message);
-  }
+  } catch(err) { alert('Errore DOCX Patto: '+err.message); }
 }
 
 
@@ -3890,93 +3895,92 @@ function renderDocPreview() {
 }
 
 async function downloadDocx() {
-  collectA5();
-  const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
-  const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
-  const dataOggi=today();
-  const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
-  const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
-
-  const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
-  const s41rows=[];
-  let rowN=0;
-  validated.forEach(([ak,m])=>{
-    const ada=ADA_DB[ak]; if(!ada) return;
-    (ada.ra||[]).forEach((ra,ri)=>{
-      rowN++;
-      s41rows.push([String(rowN),m.attivita||p.attivita||'',ada.code,ada.desc,ra.code,ra.desc,m.livello||'—',(m.copertura&&m.copertura[ri])||'—']);
-    });
-  });
-
-  const s42rows=DIGCOMP.map(dc=>{const a2d=S.a2.dc[dc.id]||{};const m=S.a4.mappings[dc.ada]||{};return[dc.area,dc.nome,dc.ada,String(a2d.livello||m.livello||'—'),a2d.note||''];});
-  const s43rows=LIFECOMP.map(lc=>{const a2l=S.a2.lc[lc.id]||{};return[lc.area,lc.nome,a2l.note||'',String(a2l.livello||'—')];});
-  const s44rows=ENTRECOMP.map(ec=>{const a2e=S.a2.ec[ec.id]||{};return[ec.area,ec.nome,a2e.note||'',String(a2e.livello||'—')];});
-  const s5rows=S.a3.evidenze.filter(ev=>ev.inclusa!==false).map((ev,i)=>[String(i+1),ev.tipo||'—',ev.titolo||'—',fmtDate(ev.data)||'—',ev.fvaQuadrante||'—',ev.esito==='accettata'?'Sì':ev.esito==='riserva'?'(±)':'—']);
-
-  let b='';
-  b+=_wH('DOCUMENTO DI TRASPARENZA',1);
-  b+=_wH('HubS – Spazi di Innovazione Sociale',2);
-  b+=_wP('Messa in trasparenza delle competenze acquisite in contesti non formali e informali',{italic:true,sz:16,color:'666666',align:'center'});
-  b+=_wP('Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021',{italic:true,sz:16,color:'666666',align:'center'});
-  b+=_wBr();
-
-  b+=_wH('Sezione 1 — Ente di Accoglienza',3);
-  b+=_wKVTable([['Denominazione ente',e.denominazione||'___'],['Codice fiscale',e.cfEnte||'___'],['Tipologia ente',e.tipo||'___'],['Indirizzo sede legale',e.indirizzo||'___'],['Rappresentante legale',e.repLegale||'___'],['Tutor / Responsabile',e.tutor||'___'],['Codice progetto HubS',e.codice||'___']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione 2 — Dati del Volontario',3);
-  b+=_wKVTable([['Cognome',v.cognome||'___'],['Nome',v.nome||'___'],['Data di nascita',fmtDate(v.dob)],['Luogo di nascita',v.luogoNascita||'___'],['Codice fiscale',v.cf||'___'],['Cittadinanza',v.cittadinanza||'___'],['Titolo di studio',v.titoloStudio||'___'],['Situazione occupazionale',v.occupazione||'___']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione 3 — Dati del Percorso',3);
-  b+=_wKVTable([['Descrizione attività svolta',p.attivita||'___'],['Settore di attività',p.settore||'___'],['Data inizio',fmtDate(p.dataInizio)],['Data fine',fmtDate(p.dataFine)],['Ore totali previste',String(p.orePreviste||'___')],['Ore totali svolte',String(p.oreSvolte||'___')],['Percentuale di presenza',percNum+'%'],['Soglia minima 75% raggiunta',percNum>=75?'Sì':'No'],['Luogo di svolgimento',p.luogo||'___']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione 4.1 — Mappatura verso l\'Atlante del Lavoro INAPP',3);
-  b+=_wP('Conforme Allegato A — DI 5 gennaio 2021. Livelli: 1=Esecutivo · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise',{italic:true,sz:16,color:'666666'});
-  b+=_wDataTable(['N.','Attività svolta','ADA Codice','ADA Descrizione','RA Codice','RA Descrizione','Livello','Copertura RA'],
-    s41rows.length?s41rows:[['—','Completare la Fase 4','','','','','','']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione 4.2 — Competenza Digitale — DigComp 2.2',3);
-  b+=_wDataTable(['Area DigComp','Competenza','ADA rif.','Livello','Note'],s42rows);
-  b+=_wBr();
-
-  b+=_wH('Sezione 4.3 — Competenza Personale e Sociale — LifeComp',3);
-  b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
-  b+=_wDataTable(['Area LifeComp','Competenza','Descrizione manifestazione','Livello'],s43rows);
-  b+=_wBr();
-
-  b+=_wH('Sezione 4.4 — Competenza Imprenditoriale — EntreComp',3);
-  b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
-  b+=_wDataTable(['Area EntreComp','Competenza','Descrizione manifestazione','Livello'],s44rows);
-  b+=_wBr();
-
-  b+=_wH('Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)',3);
-  b+=_wDataTable(['N.','Tipo','Descrizione','Data','Quadrante FVA','Validazione'],
-    s5rows.length?s5rows:[['—','Nessuna evidenza registrata','','','','']]);
-  b+=_wBr();
-
-  b+=_wH('Sezione 6 — Note del Tutor',3);
-  b+=_wP(S.a5.notetutor||'___',{sz:18});
-  b+=_wBr();
-
-  b+=_wH('Sezione 7 — Dichiarazioni e Firme',3);
-  b+=_wP('Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.',{sz:18});
-  b+=_wBr();
-  b+=_wSigTable(e.tutor||'___',(v.nome||'')+' '+(v.cognome||'___'),p.luogo||'___',dataOggi);
-  b+=_wBr();
-  b+=_wP('Documento conforme Allegato A DI 5 gennaio 2021 — Art. 5 DI 31 luglio 2025 — GDPR 2016/679/UE — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
-
   try {
+  
+    collectA5();
+    const v=S.a1.vol, e=S.a1.ente, p=S.a1.percorso;
+    const name=((v.cognome||'')+'_'+(v.nome||'volontario')).replace(/\s/g,'_');
+    const dataOggi=today();
+    const orePrev=p.orePreviste||60, oreSv=p.oreSvolte||0;
+    const percNum=orePrev>0?Math.round(oreSv/orePrev*100):0;
+  
+    const validated=Object.entries(S.a4.mappings).filter(([,m])=>m.validated);
+    const s41rows=[];
+    let rowN=0;
+    validated.forEach(([ak,m])=>{
+      const ada=ADA_DB[ak]; if(!ada) return;
+      (ada.ra||[]).forEach((ra,ri)=>{
+        rowN++;
+        s41rows.push([String(rowN),m.attivita||p.attivita||'',ada.code,ada.desc,ra.code,ra.desc,m.livello||'—',(m.copertura&&m.copertura[ri])||'—']);
+      });
+    });
+  
+    const s42rows=DIGCOMP.map(dc=>{const a2d=S.a2.dc[dc.id]||{};const m=S.a4.mappings[dc.ada]||{};return[dc.area,dc.nome,dc.ada,String(a2d.livello||m.livello||'—'),a2d.note||''];});
+    const s43rows=LIFECOMP.map(lc=>{const a2l=S.a2.lc[lc.id]||{};return[lc.area,lc.nome,a2l.note||'',String(a2l.livello||'—')];});
+    const s44rows=ENTRECOMP.map(ec=>{const a2e=S.a2.ec[ec.id]||{};return[ec.area,ec.nome,a2e.note||'',String(a2e.livello||'—')];});
+    const s5rows=S.a3.evidenze.filter(ev=>ev.inclusa!==false).map((ev,i)=>[String(i+1),ev.tipo||'—',ev.titolo||'—',fmtDate(ev.data)||'—',ev.fvaQuadrante||'—',ev.esito==='accettata'?'Sì':ev.esito==='riserva'?'(±)':'—']);
+  
+    let b='';
+    b+=_wH('DOCUMENTO DI TRASPARENZA',1);
+    b+=_wH('HubS – Spazi di Innovazione Sociale',2);
+    b+=_wP('Messa in trasparenza delle competenze acquisite in contesti non formali e informali',{italic:true,sz:16,color:'666666',align:'center'});
+    b+=_wP('Rif. Art. 5 DI 31 luglio 2025 — conforme Allegato A DI 5 gennaio 2021',{italic:true,sz:16,color:'666666',align:'center'});
+    b+=_wBr();
+  
+    b+=_wH('Sezione 1 — Ente di Accoglienza',3);
+    b+=_wKVTable([['Denominazione ente',e.denominazione||'___'],['Codice fiscale',e.cfEnte||'___'],['Tipologia ente',e.tipo||'___'],['Indirizzo sede legale',e.indirizzo||'___'],['Rappresentante legale',e.repLegale||'___'],['Tutor / Responsabile',e.tutor||'___'],['Codice progetto HubS',e.codice||'___']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 2 — Dati del Volontario',3);
+    b+=_wKVTable([['Cognome',v.cognome||'___'],['Nome',v.nome||'___'],['Data di nascita',fmtDate(v.dob)],['Luogo di nascita',v.luogoNascita||'___'],['Codice fiscale',v.cf||'___'],['Cittadinanza',v.cittadinanza||'___'],['Titolo di studio',v.titoloStudio||'___'],['Situazione occupazionale',v.occupazione||'___']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 3 — Dati del Percorso',3);
+    b+=_wKVTable([['Descrizione attività svolta',p.attivita||'___'],['Settore di attività',p.settore||'___'],['Data inizio',fmtDate(p.dataInizio)],['Data fine',fmtDate(p.dataFine)],['Ore totali previste',String(p.orePreviste||'___')],['Ore totali svolte',String(p.oreSvolte||'___')],['Percentuale di presenza',percNum+'%'],['Soglia minima 75% raggiunta',percNum>=75?'Sì':'No'],['Luogo di svolgimento',p.luogo||'___']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 4.1 — Mappatura verso l\'Atlante del Lavoro INAPP',3);
+    b+=_wP('Conforme Allegato A — DI 5 gennaio 2021. Livelli: 1=Esecutivo · 2=Autonomia con supervisione · 3=Autonomia realizzativa · 4=Expertise',{italic:true,sz:16,color:'666666'});
+    b+=_wDataTable(['N.','Attività svolta','ADA Codice','ADA Descrizione','RA Codice','RA Descrizione','Livello','Copertura RA'],
+      s41rows.length?s41rows:[['—','Completare la Fase 4','','','','','','']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 4.2 — Competenza Digitale — DigComp 2.2',3);
+    b+=_wDataTable(['Area DigComp','Competenza','ADA rif.','Livello','Note'],s42rows);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 4.3 — Competenza Personale e Sociale — LifeComp',3);
+    b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
+    b+=_wDataTable(['Area LifeComp','Competenza','Descrizione manifestazione','Livello'],s43rows);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 4.4 — Competenza Imprenditoriale — EntreComp',3);
+    b+=_wP('Mappatura verso ADA in elaborazione INAPP (attesa fine 2026)',{italic:true,sz:16,color:'666666'});
+    b+=_wDataTable(['Area EntreComp','Competenza','Descrizione manifestazione','Livello'],s44rows);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 5 — Evidenze a Supporto (Dossier delle Evidenze)',3);
+    b+=_wDataTable(['N.','Tipo','Descrizione','Data','Quadrante FVA','Validazione'],
+      s5rows.length?s5rows:[['—','Nessuna evidenza registrata','','','','']]);
+    b+=_wBr();
+  
+    b+=_wH('Sezione 6 — Note del Tutor',3);
+    b+=_wP(S.a5.notetutor||'___',{sz:18});
+    b+=_wBr();
+  
+    b+=_wH('Sezione 7 — Dichiarazioni e Firme',3);
+    b+=_wP('Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025. Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate.',{sz:18});
+    b+=_wBr();
+    b+=_wSigTable(e.tutor||'___',(v.nome||'')+' '+(v.cognome||'___'),p.luogo||'___',dataOggi);
+    b+=_wBr();
+    b+=_wP('Documento conforme Allegato A DI 5 gennaio 2021 — Art. 5 DI 31 luglio 2025 — GDPR 2016/679/UE — Generato da HubS-TransparentIA · INRETE Cooperativa Sociale · '+dataOggi,{sz:14,color:'999999',align:'center',topBorder:true,spacing:'w:before="200"'});
+  
     const blob=await _assembleDocx(b,'Documento di Trasparenza');
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=`HubS_DocTrasparenza_${name}_${dataOggi}.docx`;
     a.click();
-  } catch(err) {
-    alert('Errore generazione DOCX: '+err.message);
-  }
+  } catch(err) { alert('Errore DOCX: '+err.message); }
 }
 
 
