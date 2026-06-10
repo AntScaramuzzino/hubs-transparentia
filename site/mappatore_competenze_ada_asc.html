@@ -204,6 +204,8 @@ details[open]{background:#fff}
 .info-box{background:var(--c-a1bg);border:1px solid var(--c-a1l);border-radius:9px;padding:11px 14px;font-size:.8rem;color:var(--c-a1)}
 .warn-box{background:var(--c-a3bg);border:1px solid var(--c-a3l);border-radius:9px;padding:11px 14px;font-size:.8rem;color:var(--c-a3)}
 .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.68rem;font-weight:800}
+.badge-l1{background:var(--c-a2bg);color:var(--c-a2);border:1px solid var(--c-a2l)}
+.badge-l2{background:var(--c-a3bg);color:var(--c-a3);border:1px solid var(--c-a3l)}
 
 /* ====== EXPORT (Passo 4) ====== */
 .export-panel{border:1px solid var(--border);border-radius:10px;background:#fff;overflow:hidden}
@@ -248,6 +250,10 @@ details[open]{background:#fff}
 .agente-send{background:var(--c-a4l);color:#fff;border:none;border-radius:8px;padding:0 18px;font-weight:800;cursor:pointer;font-family:inherit}
 .agente-send:hover{background:var(--c-a4)}
 
+/* CTA sticky in fondo al pannello sinistro */
+.panel-left .section.cta-sticky{position:sticky;bottom:0;background:#fff;box-shadow:0 -6px 14px rgba(0,0,0,.06);border-top:1px solid var(--border);z-index:5;margin-top:auto}
+.step .num{font-size:.78rem}
+
 /* ====== RESPONSIVE ====== */
 @media (max-width: 1000px){
   body{overflow:auto;height:auto}
@@ -279,30 +285,20 @@ details[open]{background:#fff}
 <nav id="sidebar" aria-label="Navigazione fasi">
   <div class="sb-head"><i class="fa-solid fa-network-wired" aria-hidden="true"></i> HubS · Mappatore</div>
   <div class="nav-section">Fasi del percorso</div>
-  <div class="nav-item" data-a="a1" id="nav-fase-0" onclick="navGo(0)">
-    <div class="nav-num">0</div>
-    <div class="nav-info"><span class="nav-title">Progetto SCU</span><span class="nav-sub">Allegato 3A → voci 5.1 / 5.3</span></div>
-    <span class="nav-status" id="nav-status-0"></span>
-  </div>
-  <div class="nav-item" data-a="a2" id="nav-fase-1" onclick="navGo(1)">
+  <div class="nav-item" data-a="a1" id="nav-route-0" onclick="navGo(0)">
     <div class="nav-num">1</div>
-    <div class="nav-info"><span class="nav-title">Descrizione</span><span class="nav-sub">Attività effettive dell'OV · ingresso manuale</span></div>
-    <span class="nav-status" id="nav-status-1"></span>
+    <div class="nav-info"><span class="nav-title">Origine</span><span class="nav-sub">Progetto 3A · descrizione libera</span></div>
+    <span class="nav-status" id="nav-rstatus-0"></span>
   </div>
-  <div class="nav-item" data-a="a3" id="nav-fase-2" onclick="navGo(2)">
+  <div class="nav-item" data-a="a4" id="nav-route-1" onclick="navGo(3)">
     <div class="nav-num">2</div>
-    <div class="nav-info"><span class="nav-title">Competenze emerse</span><span class="nav-sub">DigComp · LifeComp · EntreComp · EU8</span></div>
-    <span class="nav-status" id="nav-status-2"></span>
+    <div class="nav-info"><span class="nav-title">Mappatura ADA</span><span class="nav-sub">Atlante INAPP · quadri europei</span></div>
+    <span class="nav-status" id="nav-rstatus-1"></span>
   </div>
-  <div class="nav-item" data-a="a4" id="nav-fase-3" onclick="navGo(3)">
+  <div class="nav-item" data-a="a5" id="nav-route-2" onclick="navGo(4)">
     <div class="nav-num">3</div>
-    <div class="nav-info"><span class="nav-title">Mappatura ADA</span><span class="nav-sub">Atlante del Lavoro INAPP</span></div>
-    <span class="nav-status" id="nav-status-3"></span>
-  </div>
-  <div class="nav-item" data-a="a5" id="nav-fase-4" onclick="navGo(4)">
-    <div class="nav-num">4</div>
-    <div class="nav-info"><span class="nav-title">Export</span><span class="nav-sub">All. 6C / 6D · documenti</span></div>
-    <span class="nav-status" id="nav-status-4"></span>
+    <div class="nav-info"><span class="nav-title">Documenti</span><span class="nav-sub">All. 6C / 6D · altri formati</span></div>
+    <span class="nav-status" id="nav-rstatus-2"></span>
   </div>
   <hr class="nav-divider">
   <div class="nav-section">Strumenti</div>
@@ -324,13 +320,12 @@ details[open]{background:#fff}
 <!-- CONTENUTO -->
 <div id="content">
 
-<div class="fase-stepper" id="fase-stepper">
-  <button class="step active" data-f="0" id="step-tab-0" onclick="goStep(0)"><span class="num" id="step-num-0">0</span><span class="step-txt"><b>Progetto SCU</b><span class="step-sub">Allegato 3A → 5.1/5.3</span></span></button>
-  <button class="step" data-f="1" id="step-tab-1" onclick="goStep(1)"><span class="num" id="step-num-1">1</span><span class="step-txt"><b>Descrizione</b><span class="step-sub">Cosa ha fatto davvero l'OV</span></span></button>
-  <button class="step" data-f="2" id="step-tab-2" onclick="goStep(2)"><span class="num" id="step-num-2">2</span><span class="step-txt"><b>Competenze emerse</b><span class="step-sub">Quadri europei</span></span></button>
-  <button class="step" data-f="3" id="step-tab-3" onclick="goStep(3)"><span class="num" id="step-num-3">3</span><span class="step-txt"><b>Mappatura ADA</b><span class="step-sub">Atlante INAPP</span></span></button>
-  <button class="step" data-f="4" id="step-tab-4" onclick="goStep(4)"><span class="num" id="step-num-4">4</span><span class="step-txt"><b>Export</b><span class="step-sub">All. 6C/6D · documenti</span></span></button>
+<div class="fase-stepper" id="fase-stepper" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+  <button class="step active" data-f="0" id="route-tab-0" onclick="goStep(0)"><span class="num" id="route-num-0">1</span><span class="step-txt"><b>Origine</b><span class="step-sub">Progetto 3A o descrizione</span></span></button>
+  <button class="step" data-f="3" id="route-tab-1" onclick="goStep(3)"><span class="num" id="route-num-1">2</span><span class="step-txt"><b>Mappatura ADA</b><span class="step-sub">Atlante INAPP · quadri europei</span></span></button>
+  <button class="step" data-f="4" id="route-tab-2" onclick="goStep(4)"><span class="num" id="route-num-2">3</span><span class="step-txt"><b>Documenti</b><span class="step-sub">All. 6C / 6D</span></span></button>
 </div>
+<div id="route-subbar" style="display:none;flex-shrink:0;margin:-4px 0 10px;gap:6px;"></div>
 <div id="stepper-hint"></div>
 
 
@@ -358,15 +353,12 @@ details[open]{background:#fff}
       <textarea id="prog-paste" placeholder="5.1) Complesso delle attività previste...&#10;...&#10;5.3) Ruolo ed attività previste per gli operatori volontari..." style="min-height:110px;resize:vertical;width:100%;font-size:12px;"></textarea>
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="usaTestoIncollato()">Usa questo testo</button>
     </div>
-    <div class="section">
-      <button class="btn-ai" id="btn-analizza-prog" style="margin-top:0;" onclick="analizzaProgetto()">
-        <span id="analizza-prog-icon">🤖</span>
-        <span id="analizza-prog-label">Analizza progetto (voci 5.1 + 5.3) →</span>
+    <div class="section cta-sticky">
+      <button class="btn-ai" id="btn-analizza-prog" style="margin-top:0;" onclick="_autoAnalisiFatta=true;analizzaProgetto()">
+        <span id="analizza-prog-icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+        <span id="analizza-prog-label">Analizza progetto</span>
       </button>
-      <div style="font-size:10px;color:var(--grigio);margin-top:8px;line-height:1.5;">L'AI individua le sedi di attuazione, le attività dei volontari e suggerisce il settore SCU. Potrai scegliere sede e attività prima della mappatura.</div>
-    </div>
-    <div class="section">
-      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="goStep(1)">Salta — parti dalla descrizione libera →</button>
+      <div style="font-size:10px;color:var(--grigio);margin-top:8px;line-height:1.5;">L'analisi parte da sola al caricamento: un'unica attesa per sedi, attività, settore e proposte ADA. Questo pulsante serve solo a ripeterla.</div>
     </div>
   </div>
   <div class="panel-right">
@@ -377,8 +369,15 @@ details[open]{background:#fff}
       </div>
     </div>
     <div id="prog-result" style="padding:18px 22px;">
-      <div class="empty-mapping" id="prog-placeholder">Carica il PDF del progetto (o incolla il testo) e premi <strong>Analizza progetto</strong>.<br>
-      <span style="font-size:11px;color:var(--grigio);">Le attività selezionate diventeranno la descrizione del percorso (Passo 1) e guideranno la mappatura ADA sul catalogo del settore.</span></div>
+      <div id="prog-placeholder" style="max-width:560px;margin:24px auto;">
+        <h3 style="margin-bottom:12px;"><i class="fa-solid fa-route" aria-hidden="true" style="color:var(--c-a1l);"></i> Come funziona il percorso</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:.86rem;">
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:var(--c-a1);color:#fff;border-radius:999px;width:22px;height:22px;display:grid;place-items:center;font-weight:800;font-size:.72rem;flex-shrink:0;">1</span><div><b>Carica l'Allegato 3A</b> (o incolla le voci 5.1/5.3): l'analisi parte da sola — settore, sedi, attività dei volontari e proposte ADA in un'unica attesa.</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:var(--c-a4);color:#fff;border-radius:999px;width:22px;height:22px;display:grid;place-items:center;font-weight:800;font-size:.72rem;flex-shrink:0;">2</span><div><b>Conferma sede e attività</b> e apri la Mappatura: valida le proposte ADA (livello e copertura dei RA).</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:var(--c-a5);color:#fff;border-radius:999px;width:22px;height:22px;display:grid;place-items:center;font-weight:800;font-size:.72rem;flex-shrink:0;">3</span><div><b>Genera i Documenti</b>: Documento di trasparenza (All. 6D) e Attestato specifico (All. 6C) precompilati.</div></div>
+        </div>
+        <div style="margin-top:16px;padding:10px 14px;background:var(--c-a1bg);border-radius:9px;font-size:.78rem;color:var(--c-a1);"><i class="fa-solid fa-compass-drafting" aria-hidden="true"></i> <b>Per i progettisti</b>: dopo l'analisi, "Progettista: ADA per attività" associa il riferimento ADA a ogni attività della 5.3 (filtro settore) e genera il testo annotato da incollare nella scheda.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -492,7 +491,7 @@ details[open]{background:#fff}
   <div class="panel-left">
     <div class="section">
       <div class="section-title">📊 Stato mappatura</div>
-      <div id="map-stats" style="font-size:12px;color:var(--grigio);">Seleziona competenze nel Passo 2.</div>
+      <div id="map-stats" style="font-size:12px;color:var(--grigio);">Le proposte arrivano dall'analisi del progetto (Origine) o dai Quadri europei.</div>
     </div>
     <div class="section">
       <div class="section-title">🔎 Cerca nell'Atlante (catalogo SCU)</div>
@@ -500,8 +499,9 @@ details[open]{background:#fff}
       <input type="text" id="catalogo-search" placeholder="Codice o parola chiave (min 3 lettere)…" oninput="searchCatalogo()" onfocus="ensureCatalogo().catch(()=>{})">
       <div id="catalogo-results" style="margin-top:6px;max-height:220px;overflow-y:auto;"></div>
     </div>
-    <div class="section">
-      <div class="section-title">➕ Aggiungi ADA manualmente</div>
+    <details class="section" style="border:none;border-radius:0;background:#fafbfd;">
+      <summary style="font-size:.78rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;cursor:pointer;padding:4px 0;">➕ Aggiungi ADA manualmente (avanzato)</summary>
+      <div style="margin-top:8px;">
       <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;">Per ADA non in elenco — cerca su <a class="atlante-link" href="https://atlantelavoro.inapp.org" target="_blank">atlantelavoro.inapp.org ↗</a></div>
       <label>Codice ADA</label><input type="text" id="manual-ada-code" placeholder="Es. ADA.18.02.01">
       <label>Descrizione ADA</label><input type="text" id="manual-ada-desc" placeholder="Da Atlante del Lavoro INAPP">
@@ -509,12 +509,13 @@ details[open]{background:#fff}
       <label>Descrizione RA</label><input type="text" id="manual-ra-desc" placeholder="Titolo del Risultato Atteso">
       <label>Competenza di origine</label><input type="text" id="manual-comp-source" placeholder="Es. LifeComp — Empatia">
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:2px;" onclick="addManualADA()">+ Aggiungi ADA</button>
-    </div>
+      </div>
+    </details>
     <div class="section">
       <div class="section-title">⚡ Azioni rapide</div>
       <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:6px;" onclick="validateAll()">✅ Valida tutti gli ADA L1</button>
       <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:6px;" onclick="goStep(2)">← Modifica selezioni</button>
-      <button class="btn btn-primary btn-sm" style="width:100%;" onclick="goStep(4)">Export →</button>
+      <button class="btn btn-primary btn-sm" style="width:100%;" id="btn-vai-documenti" onclick="goStep(4)">Documenti →</button>
     </div>
   </div>
   <div class="panel-right">
@@ -522,8 +523,15 @@ details[open]{background:#fff}
       <div>
         <h2>Proposte di mappatura ADA</h2>
         <p>Valida ogni proposta, imposta livello di realizzazione e copertura RA</p>
+        <div id="map-filtri" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <button class="tab active" data-mf="tutti" onclick="setMapFilter('tutti')">Tutte</button>
+          <button class="tab" data-mf="da-validare" onclick="setMapFilter('da-validare')">Da validare</button>
+          <button class="tab" data-mf="validati" onclick="setMapFilter('validati')">Validate</button>
+          <button class="tab" data-mf="l1" onclick="setMapFilter('l1')">L1 certificabili</button>
+          <button class="tab" data-mf="l2" onclick="setMapFilter('l2')">L2 inferenziali</button>
+        </div>
       </div>
-      <button class="btn btn-primary" onclick="goStep(4)">Export →</button>
+      <button class="btn btn-primary" id="btn-vai-documenti-2" onclick="goStep(4)">Documenti →</button>
     </div>
     <div id="mapping-cards">
       <div class="empty-mapping">Torna al Passo 2 per selezionare le competenze.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(2)">← Seleziona competenze</button></div>
@@ -534,23 +542,6 @@ details[open]{background:#fff}
 <!-- SCREEN 4 -->
 <div class="screen" id="screen-4">
   <div class="panel-left">
-    <div class="section">
-      <div class="section-title">📊 Stato export</div>
-      <div id="export-stats" style="font-size:12px;color:var(--grigio);">Genera la mappatura prima.</div>
-    </div>
-    <div class="section">
-      <div class="section-title">📥 Formato</div>
-      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="tabella" checked> Tabella HTML (Sezione 4.1)</label>
-      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="csv"> CSV (per Excel)</label>
-      <label><input type="radio" name="export-fmt" value="testo"> Testo strutturato</label>
-    </div>
-    <div class="section">
-      <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="generateExport()">🔄 Aggiorna anteprima</button>
-      <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="copyExport()">📋 Copia negli appunti</button>
-      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadExport()">💾 Scarica .txt</button>
-      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadDocx()">📄 Solo Sez.4.1 .docx</button>
-      <button class="btn btn-outline" style="width:100%;" onclick="downloadPdf()">🖨️ Stampa / Salva PDF</button>
-    </div>
     <div class="section" style="background:#eef4fb;border-left:3px solid var(--blu);">
       <div class="section-title" style="color:var(--blu);">📑 MODELLI UFFICIALI (All. 6C / 6D)</div>
       <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;line-height:1.5;">Compila i dati e genera i due modelli precompilati con la mappatura ADA validata. I campi vuoti restano come linee da completare.</div>
@@ -607,6 +598,27 @@ details[open]{background:#fff}
       <button class="btn btn-success" style="width:100%;" onclick="downloadAttestato()">🎓 All. 6C — Attestato specifico .docx</button>
     </div>
 
+    
+    <details class="section" style="border:none;border-radius:0;background:#fafbfd;">
+      <summary style="font-size:.78rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;cursor:pointer;padding:4px 0;"><i class="fa-solid fa-box-archive" aria-hidden="true"></i> Altri formati ed export</summary>
+      <div style="margin-top:10px;">
+<div class="section">
+      <div class="section-title">📊 Stato export</div>
+      <div id="export-stats" style="font-size:12px;color:var(--grigio);">Genera la mappatura prima.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">📥 Formato</div>
+      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="tabella" checked> Tabella HTML (Sezione 4.1)</label>
+      <label style="margin-bottom:6px;"><input type="radio" name="export-fmt" value="csv"> CSV (per Excel)</label>
+      <label><input type="radio" name="export-fmt" value="testo"> Testo strutturato</label>
+    </div>
+    <div class="section">
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="generateExport()">🔄 Aggiorna anteprima</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="copyExport()">📋 Copia negli appunti</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadExport()">💾 Scarica .txt</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:6px;" onclick="downloadDocx()">📄 Solo Sez.4.1 .docx</button>
+      <button class="btn btn-outline" style="width:100%;" onclick="downloadPdf()">🖨️ Stampa / Salva PDF</button>
+    </div>
     <div class="section" style="background:var(--verde-sfondo);border-left:3px solid var(--verde);">
       <div class="section-title" style="color:var(--verde);">📋 DOCUMENTO DI TRASPARENZA</div>
       <div style="font-size:11px;color:#1b5e20;margin-bottom:10px;line-height:1.5;">Genera il <strong>Documento completo</strong> (Sez. 1–7) con la Sezione 4 interamente popolata: 4.1 ADA, 4.2 DigComp, 4.3 LifeComp, 4.4 EntreComp, EU8.</div>
@@ -624,13 +636,16 @@ details[open]{background:#fff}
     <div class="section">
       <div style="font-size:11px;color:var(--grigio);line-height:1.6;">Firma del tutor obbligatoria (Art. 5 DI 31/07/2025).<br><em>I campi ☐ vanno completati a mano sul documento finale.</em></div>
     </div>
+  
+      </div>
+    </details>
   </div>
   <div class="panel-right">
     <div class="section-header">
       <div><h2>Export — Sezione 4 Documento di Trasparenza</h2><p>Anteprima Sez. 4.1 · Usa i pulsanti a sinistra per il documento completo</p></div>
     </div>
     <div id="export-output">
-      <div class="empty-mapping">Torna al Passo 3 e valida le proposte ADA prima di esportare.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(3)">← Vai alla mappatura</button></div>
+      <div class="empty-mapping">Valida le proposte ADA nella Mappatura prima di generare i documenti.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(3)">← Mappatura ADA</button></div>
     </div>
   </div>
 </div>
@@ -994,8 +1009,10 @@ function generateMappings() {
       grouped[ak].maxLevel = Math.max(grouped[ak].maxLevel, sel.level);
     });
   });
+  const _mappaturaEsistente = Object.keys(mappings).length > 0;
   Object.entries(grouped).forEach(([ak, data]) => {
     if (!mappings[ak]) {
+      if (_mappaturaEsistente) return; // la mappatura viene dall'analisi: niente ADA derivate in automatico dai link delle competenze
       const ada = ADA_DB[ak];
       mappings[ak] = {
         adaKey: ak, validated: false,
@@ -1009,11 +1026,26 @@ function generateMappings() {
   updateMapStats();
 }
 
+let _mapFilter = 'tutti';
+function setMapFilter(f){
+  _mapFilter = f;
+  document.querySelectorAll('#map-filtri .tab').forEach(b => b.classList.toggle('active', b.dataset.mf === f));
+  renderMappingCards();
+}
 function renderMappingCards() {
   const c = document.getElementById('mapping-cards');
-  const adaKeys = Object.keys(mappings);
+  let adaKeys = Object.keys(mappings);
+  const _F = _mapFilter || 'tutti';
+  if (_F !== 'tutti') adaKeys = adaKeys.filter(ak => {
+    const m = mappings[ak], lv = ADA_DB[ak]?.level;
+    if (_F === 'validati') return m.validated;
+    if (_F === 'da-validare') return !m.validated;
+    if (_F === 'l1') return lv === 'L1';
+    if (_F === 'l2') return lv !== 'L1';
+    return true;
+  });
   if (!adaKeys.length && !manualADAs.length) {
-    c.innerHTML='<div class="empty-mapping">Nessuna competenza selezionata.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(2)">← Seleziona competenze</button></div>';
+    c.innerHTML='<div class="empty-mapping">Nessuna proposta ADA. Analizza il progetto in Origine, oppure seleziona le competenze nei Quadri europei.<br><button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(0)">← Origine</button> <button class="btn btn-outline" style="margin-top:12px;" onclick="goStep(2)">Quadri europei</button></div>';
     return;
   }
   c.innerHTML = '';
@@ -1070,7 +1102,7 @@ function renderMappingCards() {
       <div class="ada-card-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="ada-code">${ada?.code||ak}</span>
-          <span class="badge badge-${ada?.level?.toLowerCase()||'l2'}">${ada?.level==='L1'?'✅ L1 — Deterministico':'⚠️ L2 — Inferenziale'}</span>
+          <span class="badge badge-${ada?.level==='L1'?'l1':'l2'}">${ada?.level==='L1'?'L1 · Certificabile':'L2 · Inferenziale — da verificare'}</span>
           ${schedaBtn}
           ${map.validated?'<span class="validated-badge">✅ Validato dal tutor</span>':'<span style="font-size:11px;color:var(--grigio);">In attesa di validazione</span>'}
         </div>
@@ -1154,6 +1186,11 @@ function addManualADA(){
 function updateMapStats(){
   const tot = Object.keys(mappings).length + manualADAs.length;
   const val = Object.values(mappings).filter(m=>m.validated).length + manualADAs.filter(m=>m.validated).length;
+  ['btn-vai-documenti','btn-vai-documenti-2'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.disabled = val===0;
+    b.title = val===0 ? 'Valida almeno una proposta ADA per generare i documenti' : '';
+  });
   const l1 = Object.keys(mappings).filter(k=>ADA_DB[k]?.level==='L1').length;
   const l2 = Object.keys(mappings).filter(k=>ADA_DB[k]?.level==='L2').length;
   document.getElementById('map-stats').innerHTML=`
@@ -1663,67 +1700,77 @@ function downloadPdf(){
 
 // ==================== NAVIGATION ====================
 let currentStep = 0;
-// ==================== NAVIGAZIONE A FASI (logica HubS_Sistema: stati + lock progressivi) ====================
-function _faseStato(i){
-  const desc=(document.getElementById('perc-desc')?.value||'').trim();
-  switch(i){
-    case 0: return PROJECT?'done':'';
-    case 1: return desc.length>=30?'done':'';
-    case 2: return Object.keys(selections).length?'done':'';
-    case 3: {
-      const tot=Object.keys(mappings).length+manualADAs.length;
-      if(!tot) return '';
-      const val=Object.values(mappings).filter(m=>m.validated).length+manualADAs.filter(m=>m.validated).length;
-      return val?'done':'warn';
-    }
-  }
+// ==================== NAVIGAZIONE A 3 FASE (route) — gli indici interni 0..4 restano per compatibilità ====================
+const ROUTE_OF = { 0: 0, 1: 0, 2: 1, 3: 1, 4: 2 };          // screen interno -> fase
+const ROUTE_DEFAULT_SCREEN = { 0: 0, 1: 3, 2: 4 };           // fase -> screen di default
+const ROUTE_SUBS = {
+  0: [[0, 'fa-file-import', 'Da progetto (3A)'], [1, 'fa-pen', 'Descrizione libera']],
+  1: [[3, 'fa-diagram-project', 'Mappatura ADA'], [2, 'fa-table-cells', 'Quadri europei']],
+  2: []
+};
+function _routeStato(r){
+  const desc = (document.getElementById('perc-desc')?.value || '').trim();
+  const tot = Object.keys(mappings).length + manualADAs.length;
+  const val = Object.values(mappings).filter(m => m.validated).length + manualADAs.filter(m => m.validated).length;
+  if (r === 0) return (PROJECT || desc.length >= 30) ? 'done' : '';
+  if (r === 1) return val > 0 ? 'done' : (tot > 0 ? 'warn' : '');
   return '';
 }
-function _faseLocked(i){
-  const desc=(document.getElementById('perc-desc')?.value||'').trim();
-  const hasComp=Object.keys(selections).length>0;
-  const hasMap=Object.keys(mappings).length+manualADAs.length>0;
-  if(i===2||i===3) return !(desc.length>=30||hasComp||hasMap);
-  if(i===4) return !hasMap;
+function _routeLocked(r){
+  const desc = (document.getElementById('perc-desc')?.value || '').trim();
+  const tot = Object.keys(mappings).length + manualADAs.length;
+  const val = Object.values(mappings).filter(m => m.validated).length + manualADAs.filter(m => m.validated).length;
+  if (r === 1) return !(desc.length >= 30 || Object.keys(selections).length || tot);
+  if (r === 2) return val === 0; // Documenti solo con almeno una ADA validata
   return false;
 }
-const FASE_HINTS={
-  2:"Prima descrivi le attività del volontario (Fase 1) o carica il progetto (Fase 0): le competenze emergono da lì.",
-  3:"Per la mappatura ADA serve una descrizione (Fase 1) oppure delle competenze selezionate (Fase 2).",
-  4:"Per l'export serve almeno una ADA mappata (Fase 3)."
+const ROUTE_HINTS = {
+  1: "Prima carica il progetto o scrivi la descrizione delle attività (Fase 1).",
+  2: "Per i documenti serve almeno una ADA validata: apri la Mappatura e valida le proposte."
 };
 function _hint(msg){
-  const h=document.getElementById('stepper-hint'); if(!h) return;
-  h.textContent='🔒 '+msg; h.classList.add('visible');
-  clearTimeout(h._t); h._t=setTimeout(()=>h.classList.remove('visible'),5000);
+  const el = document.getElementById('stepper-hint'); if (!el) return;
+  el.textContent = '🔒 ' + msg; el.classList.add('visible');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('visible'), 5000);
+}
+function _renderSubbar(route, screen){
+  const bar = document.getElementById('route-subbar'); if (!bar) return;
+  const subs = ROUTE_SUBS[route] || [];
+  if (!subs.length) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = subs.map(([sc, ic, label]) =>
+    `<button class="tab ${sc === screen ? 'active' : ''}" style="border-radius:8px;" onclick="goStep(${sc})"><i class="fa-solid ${ic}" aria-hidden="true"></i>&nbsp; ${label}</button>`).join('');
 }
 function goStep(n){
-  if(_faseLocked(n)){ _hint(FASE_HINTS[n]||'Fase non ancora disponibile.'); updateNav(); return; }
-  currentStep=n;
-  for(let i=0;i<=4;i++){
-    const tab=document.getElementById(`step-tab-${i}`); if(!tab) continue;
-    const stato=_faseStato(i), locked=_faseLocked(i);
-    tab.className='step'+(i===n?' active':'')+(stato==='done'&&i!==n?' done':'')+(locked&&i!==n?' locked':'');
-    tab.setAttribute('data-f', i);
-    const num=document.getElementById(`step-num-${i}`);
-    if(num) num.textContent=(stato==='done'&&i!==n)?'✓':i;
-    const sc=document.getElementById(`screen-${i}`);
-    if(sc){ sc.classList.toggle('active', i===n); sc.style.display=i===n?'flex':'none'; }
+  const route = ROUTE_OF[n] ?? 0;
+  if (_routeLocked(route)) { _hint(ROUTE_HINTS[route] || 'Fase non ancora disponibile.'); updateNav(); return; }
+  currentStep = n;
+  for (let i = 0; i <= 4; i++) {
+    const sc = document.getElementById(`screen-${i}`);
+    if (sc) { sc.classList.toggle('active', i === n); sc.style.display = i === n ? 'flex' : 'none'; }
   }
-  updateNav(n);
+  for (let r = 0; r <= 2; r++) {
+    const tab = document.getElementById(`route-tab-${r}`); if (!tab) continue;
+    const stato = _routeStato(r), locked = _routeLocked(r);
+    tab.className = 'step' + (r === route ? ' active' : '') + (stato === 'done' && r !== route ? ' done' : '') + (locked && r !== route ? ' locked' : '');
+    const num = document.getElementById(`route-num-${r}`);
+    if (num) num.textContent = (stato === 'done' && r !== route) ? '✓' : (r + 1);
+  }
+  _renderSubbar(route, n);
+  updateNav(route);
   toggleSidebar(false);
-  if(n===3){ generateMappings(); }
-  if(n===4){ generateExport(); }
+  if (n === 3) { generateMappings(); }
+  if (n === 4) { generateExport(); }
 }
-function updateNav(n){
-  if(n===undefined) n=currentStep;
-  for(let i=0;i<=4;i++){
-    const item=document.getElementById(`nav-fase-${i}`); if(!item) continue;
-    const stato=_faseStato(i), locked=_faseLocked(i);
-    item.classList.toggle('active', i===n);
-    item.classList.toggle('locked', locked&&i!==n);
-    const st=document.getElementById(`nav-status-${i}`);
-    if(st) st.textContent = (locked&&i!==n)?'🔒':(stato==='done'?'✅':(stato==='warn'?'⚠️':(i===n?'●':'')));
+function updateNav(route){
+  if (route === undefined) route = ROUTE_OF[currentStep] ?? 0;
+  for (let r = 0; r <= 2; r++) {
+    const item = document.getElementById(`nav-route-${r}`); if (!item) continue;
+    const stato = _routeStato(r), locked = _routeLocked(r);
+    item.classList.toggle('active', r === route);
+    item.classList.toggle('locked', locked && r !== route);
+    const st = document.getElementById(`nav-rstatus-${r}`);
+    if (st) st.textContent = (locked && r !== route) ? '🔒' : (stato === 'done' ? '✅' : (stato === 'warn' ? '⚠️' : (r === route ? '●' : '')));
   }
 }
 function navGo(i){ goStep(i); }
@@ -1753,6 +1800,8 @@ let PROGETTO_PARSED = null;    // output AI strutturato
 let CATALOGO = null;           // ada_catalogo_scu.json (lazy)
 let _selSedeIdx = 0;
 let _attChecked = {};          // "sede-att" -> bool
+let PENDING_MAP = null;        // proposte ADA dalla chiamata unificata (con chiavi ks)
+let _autoAnalisiFatta = false; // analisi automatica una sola volta per file
 
 const SETTORI_SCU = {
   A:'Assistenza',
@@ -1820,6 +1869,7 @@ async function handleProjectFile(file){
     const v = estraiVoci(text);
     PROGETTO_RAW.v51 = v.v51; PROGETTO_RAW.v53 = v.v53;
     PROGETTO_RAW.titolo = v.titolo; PROGETTO_RAW.ente = v.ente;
+    _autoAnalisiFatta = false;
     renderEstrattoStatus();
     detectSettoreProgetto();
   } catch (e) {
@@ -1838,6 +1888,7 @@ function usaTestoIncollato(){
   if (v.titolo) PROGETTO_RAW.titolo = v.titolo;
   if (v.ente) PROGETTO_RAW.ente = v.ente;
   document.getElementById('prog-file-name').textContent = '(testo incollato)';
+  _autoAnalisiFatta = false;
   renderEstrattoStatus();
   detectSettoreProgetto();
 }
@@ -1983,6 +2034,8 @@ Rispondi SOLO con JSON: {"settore":"E","motivo":"max 100 caratteri"}`;
     try { await ensureCatalogo(); r.nAda = (CATALOGO.settori[r.settore]?.ada || []).length; } catch (e) {}
   }
   renderEstrattoStatus();
+  // UNA SOLA ATTESA: l'analisi completa (sedi + attività + proposte ADA) parte da sola
+  if (!_autoAnalisiFatta && (r.v53 || r.v51)) { _autoAnalisiFatta = true; analizzaProgetto(); }
 }
 
 const PROGETTO_SYS = `Sei un analista esperto di progetti di Servizio Civile Universale italiani (scheda progetto Allegato 3A).
@@ -2000,8 +2053,10 @@ REGOLE:
 - "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
 - Se titolo/ente sono indicati nel messaggio, riportali; altrimenti deducili dal testo.
 
+- Se il messaggio contiene un CATALOGO ADA, aggiungi anche "mappatura": le ADA pertinenti alle attività dei volontari (SOLO codici del catalogo). Ogni voce: {"ada_code","ra_codes":[codici RA],"livello":1|2,"comp_ids":[max 3],"attivita":"nome breve","ks":["0-1"]} dove ks = indici sede-attività coperti (es. "0-1" = sede 0, attività 1). COMP_IDS validi: dc1..dc5, lc1, lc3..lc7, ec1, ec3..ec7, eu1, eu5, eu6, eu7. Massimo 12 voci, raggruppa le attività nella stessa ADA.
+
 OUTPUT — SOLO JSON, nessun testo prima o dopo:
-{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"..."}]}]}`;
+{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"..."}]}],"mappatura":[{"ada_code":"ADA.18.01.06","ra_codes":["RA.18.01.06.1"],"livello":2,"comp_ids":["lc4"],"attivita":"...","ks":["0-0","0-1"]}]}`;
 
 function _balanceJson(s){
   // taglia all'ultima chiusura strutturale e bilancia le parentesi rimaste aperte (string-aware)
@@ -2055,7 +2110,11 @@ async function analizzaProgetto(){
   try {
     const v53 = r.v53.slice(0, 60000);
     const v51 = r.v51.slice(0, 90000);
-    const msg = `${r.titolo ? 'TITOLO (voce 2): ' + r.titolo + '\n' : ''}${r.ente ? 'ENTE (voce 1): ' + r.ente + '\n' : ''}${r.settore ? 'SETTORE PRE-RILEVATO: ' + r.settore + ' (confermalo o correggilo in base alle attività)\n' : ''}
+    let catalogoMsg = '';
+    if (r.settore) {
+      try { await ensureCatalogo(); applySettoreCatalog(r.settore); catalogoMsg = '\n=== CATALOGO ADA (settore ' + r.settore + ' + QE — usa SOLO questi codici) ===\n' + buildAdaPromptDb() + '\n'; } catch (e) {}
+    }
+    const msg = `${r.titolo ? 'TITOLO (voce 2): ' + r.titolo + '\n' : ''}${r.ente ? 'ENTE (voce 1): ' + r.ente + '\n' : ''}${r.settore ? 'SETTORE PRE-RILEVATO: ' + r.settore + ' (confermalo o correggilo in base alle attività)\n' : ''}${catalogoMsg}
 === VOCE 5.3 — RUOLO E ATTIVITÀ DEGLI OPERATORI VOLONTARI ===
 ${v53 || '(non disponibile)'}
 
@@ -2068,6 +2127,7 @@ Restituisci SOLO il JSON.`;
     const parsed = _tryParseJson(raw);
     if (!parsed.sedi || !parsed.sedi.length) throw new Error('Nessuna sede/attività individuata nella voce 5.3');
     PROGETTO_PARSED = parsed;
+    PENDING_MAP = Array.isArray(parsed.mappatura) ? parsed.mappatura : null;
     _selSedeIdx = 0; _attChecked = {}; PROG_ADA = {}; _progettistaView = false;
     renderProgettoUI();
   } catch (e) {
@@ -2101,6 +2161,7 @@ function renderProgettoUI(){
         ${a.rif ? `<span style="display:inline-block;background:var(--blu);color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700;margin-right:5px;vertical-align:1px;">${_escH(a.rif)}</span>` : ''}
         <strong>${_escH(a.titolo)}</strong>
         ${a.descrizione ? `<br><span style="color:var(--grigio);font-size:11px;">${_escH(a.descrizione)}</span>` : ''}
+        ${(PENDING_MAP || []).filter(m => (m.ks || []).includes(key)).map(m => `<span style="display:inline-block;margin:3px 4px 0 0;padding:1px 8px;border-radius:8px;font-size:9.5px;font-weight:700;background:var(--c-a4bg);color:var(--c-a4);font-family:Consolas,monospace;">${m.ada_code}</span>`).join('')}
       </span>
     </label>`;
   }).join('');
@@ -2123,15 +2184,15 @@ function renderProgettoUI(){
         ${sede.ruolo ? `<div style="font-size:11px;color:var(--grigio);margin-top:8px;line-height:1.5;"><strong>Ruolo:</strong> ${_escH(sede.ruolo)}</div>` : ''}
       </div>
       <div style="flex:2;min-width:300px;">
-        <div class="section-title" style="margin-bottom:8px;">✅ Attività del volontario (voce 5.3${PROGETTO_RAW.v51 ? ' ↔ 5.1' : ''})</div>
+        <div class="section-title" style="margin-bottom:8px;">✅ Attività del volontario (voce 5.3${PROGETTO_RAW.v51 ? ' ↔ 5.1' : ''})${PENDING_MAP && PENDING_MAP.length ? ` · <span style="color:var(--c-a4);">${PENDING_MAP.length} ADA proposte</span>` : ''}</div>
         <div style="display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;padding-right:4px;">${attList || '<em style="font-size:12px;color:var(--grigio);">Nessuna attività per questa sede</em>'}</div>
       </div>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="applicaProgetto(true)">✓ Usa e analizza → Mappatura ADA</button>
+      <button class="btn btn-primary btn-large" onclick="applicaProgetto(true)"><i class="fa-solid fa-check" aria-hidden="true"></i> Conferma e apri la Mappatura ADA</button>
       <button class="btn btn-outline" onclick="applicaProgetto(false)" title="Si ferma alla Fase 1 per adattare il testo alle attività effettivamente svolte dal volontario">✏️ Applica e rifinisci la descrizione</button>
       <button class="btn btn-outline" onclick="apriProgettista()" title="Per i progettisti: definisci l'ADA di riferimento per ogni attività della 5.3, filtrata sul settore">🏗️ Progettista: ADA per attività</button>
-      <span style="font-size:11px;color:var(--grigio);">"Usa e analizza" porta direttamente alle proposte ADA; "rifinisci" si ferma alla descrizione per adattarla a ciò che il volontario ha fatto davvero.</span>
+      <span style="font-size:11px;color:var(--grigio);">Le proposte ADA e le competenze sono già pronte (chiamata unica): la conferma apre la Mappatura senza nuove attese. "Rifinisci" permette di adattare il testo a ciò che il volontario ha fatto davvero.</span>
     </div>`;
 }
 
@@ -2258,11 +2319,23 @@ async function applicaProgetto(autoAnalisi){
     b.innerHTML = `📂 <strong>${_escH(PROJECT.titolo || 'Progetto')}</strong> · ${_escH(PROJECT.sede)} · Settore ${settore} · ${atts.length} attività` +
       (nAdded ? ` · <span style="color:var(--verde);font-weight:600;">+${nAdded} ADA di settore caricate</span>` : '');
   }
-  goStep(1);
   if (autoAnalisi) {
-    // descrizione pronta: analisi AI immediata → Fase 3 (Mappatura), senza sosta in Fase 1
+    // le proposte ADA sono già arrivate con la chiamata unificata: filtra per le attività selezionate
+    const ks = new Set();
+    (sede.attivita || []).forEach((a, j) => { if (_attChecked[_selSedeIdx + '-' + j] !== false) ks.add(_selSedeIdx + '-' + j); });
+    const pend = (PENDING_MAP || []).filter(m => !m.ks || !m.ks.length || m.ks.some(k => ks.has(k)));
+    if (pend.length) {
+      applyFullMappatura({ mappatura: pend });
+      goStep(3);
+      _hint(`Mappatura generata: ${pend.length} proposte ADA dalle attività selezionate. Valida le proposte per sbloccare i Documenti.`);
+      return;
+    }
+    // fallback (nessuna proposta nella risposta): vecchio percorso a due passi
+    goStep(1);
     setTimeout(() => { try { analizzaAttivita(); } catch (e) { console.warn(e); } }, 80);
+    return;
   }
+  goStep(1);
 }
 
 // ==================== MODALITÀ PROGETTISTA — ADA associata a ogni attività della 5.3 (filtro settore) ====================
