@@ -428,8 +428,7 @@ details[open]{background:#fff}
             <div style="font-size:13px;line-height:1.6;">Descrivi le attività nel riquadro a sinistra e premi <strong>Analizza attività</strong> per ottenere una proposta automatica di competenze e ADA.<br>Oppure usa il pulsante <strong>🤖 Agente Emersione</strong> in alto a destra per una sessione guidata.</div></div>
           </div>
           <div style="font-size:13px;color:var(--grigio);line-height:1.9;background:var(--grigio-chiaro);padding:12px 16px;border-radius:8px;">
-            <strong>Come funziona:</strong> 1️⃣ Descrivi le attività &nbsp;→&nbsp; 2️⃣ Rivedi le competenze emerse &nbsp;→&nbsp; 3️⃣ Valida ADA &nbsp;→&nbsp; 4️⃣ Export
-          </div>
+            <strong>Come funziona:</strong> 1️⃣ Descrivi le attività → 2️⃣ Analizza (competenze e proposte ADA insieme) → 3️⃣ Valida nella Mappatura → genera i Documenti</div>
         </div>
         <button class="btn btn-outline btn-large" style="margin-top:20px;font-size:13px;" onclick="goStep(2)">Salta analisi → Seleziona competenze manualmente</button>
       </div>
@@ -1743,7 +1742,7 @@ function _renderSubbar(route, screen){
 }
 function goStep(n){
   const route = ROUTE_OF[n] ?? 0;
-  if (_routeLocked(route)) { _hint(ROUTE_HINTS[route] || 'Fase non ancora disponibile.'); updateNav(); return; }
+  if (n !== 2 && _routeLocked(route)) { _hint(ROUTE_HINTS[route] || 'Fase non ancora disponibile.'); updateNav(); return; } // i Quadri europei (screen 2) restano sempre accessibili come ingresso manuale
   currentStep = n;
   for (let i = 0; i <= 4; i++) {
     const sc = document.getElementById(`screen-${i}`);
