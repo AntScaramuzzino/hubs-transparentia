@@ -193,7 +193,7 @@
 </div>
 
 <!-- SCREEN 0 — PROGETTO SCU -->
-<div class="screen" id="screen-0" style="display:flex;">
+<div class="screen active" id="screen-0" style="display:flex;">
   <div class="panel-left">
     <div class="section">
       <div class="section-title">📂 Progetto di Servizio Civile</div>
@@ -1162,96 +1162,277 @@ function buildDocumentData(){
   return {nome,ente,tutor,codice,inizio,fine,ore,settore,desc,rows,date:new Date().toLocaleDateString('it-IT')};
 }
 
-function downloadDocx(){
-  const d=buildDocumentData();
-  if(!d.rows.length){alert('Nessuna mappatura da esportare. Completa il Passo 3.');return;}
-  const nomeFile=(d.nome||'volontario').replace(/\s/g,'_');
+// ==================== EXPORT LEGACY IN OOXML — XML diretto dai dati (niente HTML mascherato) ====================
 
-  // Build Word-compatible HTML (same technique used dai file XLS INAPP)
-  let tableRows='';
-  d.rows.forEach(r=>{
-    const bg=r.validated===true?'#e6f4ee':r.validated===false?'#fff3e0':'#ffffff';
-    tableRows+=`<tr style="background:${bg};">
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;font-weight:bold;vertical-align:top;" rowspan="${r.raCount}">${r.n}</td>`:''}
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;" rowspan="${r.raCount}">${r.attivita}</td>`:''}
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;font-size:9pt;" rowspan="${r.raCount}">${r.comps}</td>`:''}
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;font-family:Courier New;font-size:9pt;vertical-align:top;" rowspan="${r.raCount}">${r.adaCode}</td>`:''}
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;vertical-align:top;" rowspan="${r.raCount}">${r.adaDesc}</td>`:''}
-      <td style="border:1px solid #1a3a6b;padding:5pt;font-family:Courier New;font-size:8pt;vertical-align:top;">${r.raCode}</td>
-      <td style="border:1px solid #1a3a6b;padding:5pt;font-size:9pt;vertical-align:top;">${r.raDesc}</td>
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;" rowspan="${r.raCount}">${r.livello}<br><span style="font-size:7pt;color:#555;">${r.livelloDesc}</span></td>`:''}
-      <td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;">${r.coverage}</td>
-      <td style="border:1px solid #1a3a6b;padding:5pt;font-size:9pt;vertical-align:top;">${r.raAttivita}</td>
-      ${r.n!==null?`<td style="border:1px solid #1a3a6b;padding:5pt;text-align:center;vertical-align:top;" rowspan="${r.raCount}">${r.validated?'✅':'⏳'}</td>`:''}
-    </tr>`;
-  });
+function _wPageBreak(){ return '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'; }
 
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<style>
-  body{font-family:Arial,sans-serif;font-size:10pt;margin:2cm;}
-  h1{font-size:14pt;color:#1a3a6b;margin-bottom:6pt;}
-  h2{font-size:12pt;color:#1a3a6b;margin-top:14pt;margin-bottom:4pt;}
-  .meta{font-size:9pt;color:#555;margin-bottom:12pt;border-left:3px solid #1a3a6b;padding-left:8pt;}
-  table{border-collapse:collapse;width:100%;font-size:9pt;}
-  th{background:#1a3a6b;color:white;padding:5pt 4pt;text-align:left;font-size:8pt;}
-  .footer{font-size:7pt;color:#888;margin-top:18pt;border-top:1px solid #ccc;padding-top:4pt;}
-  .warn{background:#fef3e2;border:1px solid #f6d088;padding:6pt;font-size:9pt;margin-bottom:8pt;}
-</style>
-</head>
-<body>
-<h1>SEZIONE 4.1 — MAPPATURA VERSO L'ATLANTE DEL LAVORO E DELLE QUALIFICAZIONI</h1>
-<p style="font-size:9pt;color:#1a3a6b;font-style:italic;">Documento di Trasparenza HubS — Rif. Art. 5, c. 1, lett. d) DI 31 luglio 2025</p>
-<div class="meta">
-  <strong>Volontario/a:</strong> ${d.nome||'—'}<br>
-  <strong>Ente di accoglienza:</strong> ${d.ente||'—'}<br>
-  <strong>Tutor / Resp. accompagnamento:</strong> ${d.tutor||'—'}<br>
-  <strong>Codice progetto HubS:</strong> ${d.codice||'—'}<br>
-  <strong>Periodo:</strong> ${d.inizio||'—'} → ${d.fine||'—'} &nbsp;|&nbsp; <strong>Ore svolte:</strong> ${d.ore||'—'} &nbsp;|&nbsp; <strong>Settore:</strong> ${d.settore||'—'}
-</div>
-${d.desc?`<p style="font-size:9pt;margin-bottom:10pt;"><strong>Descrizione attività:</strong> ${d.desc}</p>`:''}
-<div class="warn">⚠️ Gli ADA contrassegnati con ⏳ non sono ancora stati validati dal tutor. Verificare prima della firma. Gli ADA L2 (SEP 18) richiedono verifica della corrispondenza al framework EU su atlantelavoro.inapp.org</div>
-<table>
-  <thead><tr>
-    <th style="width:3%;">N.</th>
-    <th style="width:9%;">Attività svolta</th>
-    <th style="width:9%;">Competenza</th>
-    <th style="width:10%;">ADA Codice</th>
-    <th style="width:16%;">ADA Descrizione</th>
-    <th style="width:10%;">RA Codice</th>
-    <th style="width:20%;">RA Descrizione</th>
-    <th style="width:6%;">Livello</th>
-    <th style="width:6%;">Copertura</th>
-    <th style="width:9%;">Attività RA</th>
-    <th style="width:3%;">St.</th>
-  </tr></thead>
-  <tbody>${tableRows}</tbody>
-</table>
-<h2>SCALA LIVELLI DI REALIZZAZIONE</h2>
-<table style="width:auto;">
-  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">1</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Esecutivo con istruzioni</td></tr>
-  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">2</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Autonomia operativa con supervisione</td></tr>
-  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">3</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Autonomia realizzativa</td></tr>
-  <tr><td style="border:1px solid #ccc;padding:3pt 6pt;font-weight:bold;">4</td><td style="border:1px solid #ccc;padding:3pt 8pt;">Expertise tecnico</td></tr>
-</table>
-<table style="margin-top:24pt;width:60%;border-collapse:collapse;">
-  <tr>
-    <td style="border:1px solid #1a3a6b;padding:6pt 10pt;width:50%;font-size:9pt;"><strong>Tutor / Responsabile accompagnamento</strong><br><br><br>Firma: _____________________<br>Data: _____________________</td>
-    <td style="border:1px solid #1a3a6b;padding:6pt 10pt;width:50%;font-size:9pt;"><strong>Volontario/a</strong><br><br><br>Firma: _____________________<br>Data: _____________________</td>
-  </tr>
-</table>
-<div class="footer">
-  Generato da HubS-TransparentIA — Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · ${d.date}<br>
-  Conforme all'Allegato A del D.I. 5 gennaio 2021 come richiesto dall'Art. 5, c. 1, lett. d) del D.I. 31 luglio 2025 · GDPR 2016/679
-</div>
-</body></html>`;
-
-  const blob=new Blob(['﻿'+html],{type:'application/msword'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`HubS_Mappatura_ADA_${nomeFile}_${new Date().toISOString().slice(0,10)}.docx`;
-  a.click();
+function _wDataTableW(hdrs, rows, weights){
+  const w = weights && weights.length === hdrs.length ? weights : hdrs.map(() => 1);
+  const hTr = `<w:tr>${hdrs.map(h => _wTc(h, { header: true, sz: 16 })).join('')}</w:tr>`;
+  const bTrs = rows.map(row => `<w:tr>${row.map(c => _wTc(c === '' ? ' ' : (c || '—'), { sz: 16 })).join('')}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="5000" w:type="pct"/>${_wCellMar()}</w:tblPr>${_wGrid(w)}${hTr}${bTrs}</w:tbl>`;
 }
+
+function _fieldOr(ids, fb){
+  for (const id of ids) {
+    const v = document.getElementById(id)?.value?.trim();
+    if (v) return v;
+  }
+  return fb || '';
+}
+
+function _datiIntestazione(){
+  const nome = _fieldOr(['vol-nome']) || ((_fieldOr(['mod-vol-nome']) + ' ' + _fieldOr(['mod-vol-cognome'])).trim());
+  return {
+    nome: nome || '—',
+    ente: _fieldOr(['vol-ente', 'mod-ente-denominazione'], '—'),
+    tutor: _fieldOr(['vol-tutor']) || ((_fieldOr(['mod-resp-nome']) + ' ' + _fieldOr(['mod-resp-cognome'])).trim()) || '—',
+    codice: _fieldOr(['vol-codice', 'mod-vol-cf'], '—'),
+    inizio: _fieldOr(['perc-inizio', 'mod-prog-inizio'], ''),
+    fine: _fieldOr(['perc-fine', 'mod-prog-fine'], ''),
+    ore: _fieldOr(['perc-ore'], '—'),
+    settore: _fieldOr(['perc-settore']) || (PROJECT ? PROJECT.settore + ' — ' + PROJECT.settoreNome : '—'),
+    desc: _fieldOr(['perc-desc'], '—'),
+    oggi: new Date().toLocaleDateString('it-IT')
+  };
+}
+
+// righe della mappatura: una riga per RA, celle ADA solo sulla prima (dati di stato, non conversioni)
+function _righeMappatura(){
+  const lvlD = { 1: 'Esecutivo con istruzioni', 2: 'Autonomia operativa con supervisione', 3: 'Autonomia realizzativa', 4: 'Expertise tecnico' };
+  const rows = [];
+  let n = 0;
+  const ordered = Object.values(mappings).sort((a, b) => (b.validated ? 1 : 0) - (a.validated ? 1 : 0));
+  ordered.forEach(m => {
+    const ada = ADA_DB[m.adaKey] || {};
+    n++;
+    const raL = (m.ra && m.ra.length) ? m.ra : [{ code: '—', desc: '—', coverage: null, attivita: '' }];
+    raL.forEach((r, ri) => {
+      rows.push([
+        ri === 0 ? String(n) : '',
+        ri === 0 ? (m.attivita || '—') : '',
+        ri === 0 ? ((m.comps || []).map(c => c.name).join(', ') || '—') : '',
+        ri === 0 ? ((ada.code || m.adaKey) + (m.validated ? ' ✓' : '')) + '\n' + (ada.desc || '') : '',
+        (r.code || '—') + (r.desc ? '\n' + String(r.desc).replace(/^RA\d*:\s*/, '') : ''),
+        ri === 0 ? (m.livello ? m.livello + ' — ' + (lvlD[m.livello] || '') : '—') : '',
+        r.coverage === 'totale' ? 'Totale' : r.coverage === 'parziale' ? 'Parziale' : '—',
+        r.attivita || '—'
+      ]);
+    });
+  });
+  manualADAs.forEach(m => {
+    n++;
+    const raL = (m.ra && m.ra.length) ? m.ra : [{ code: '—', desc: '—' }];
+    raL.forEach((r, ri) => {
+      rows.push([
+        ri === 0 ? String(n) : '',
+        ri === 0 ? (m.desc || '—') : '',
+        ri === 0 ? (m.compSource || '—') : '',
+        ri === 0 ? ((m.code || '—') + (m.validated ? ' ✓' : '') + ' (man.)') : '',
+        (r.code || '—') + (r.desc ? '\n' + String(r.desc).replace(/^RA\d*:\s*/, '') : ''),
+        '', '—', '—'
+      ]);
+    });
+  });
+  return rows;
+}
+
+function _tabella41(){
+  const rows = _righeMappatura();
+  return _wDataTableW(
+    ['N°', 'Attività svolta', 'Competenze collegate', 'ADA', 'Risultato Atteso (RA)', 'Livello', 'Copertura', 'Attività del RA'],
+    rows,
+    [1, 4, 3, 4, 5, 2, 2, 4]
+  );
+}
+
+function _legendaLivelli(){
+  return _wP('Scala livelli di realizzazione: 1 = Esecutivo con istruzioni · 2 = Autonomia operativa con supervisione · 3 = Autonomia realizzativa · 4 = Expertise tecnico', { italic: true, sz: 14, color: '666666' });
+}
+
+// ---------- Sez. 4.1 (solo tabella) ----------
+async function downloadDocx(){
+  try {
+    if (!Object.keys(mappings).length && !manualADAs.length) { alert('Nessuna mappatura da esportare. Completa il Passo 3.'); return; }
+    const d = _datiIntestazione();
+    let xml = '';
+    xml += _wH("SEZIONE 4.1 — MAPPATURA VERSO L'ATLANTE DEL LAVORO E DELLE QUALIFICAZIONI", 2);
+    xml += _wP(`Volontario/a: ${d.nome} · Ente: ${d.ente} · ${d.oggi}`, { sz: 16, color: '444444' });
+    xml += _wBr();
+    xml += _tabella41();
+    xml += _wBr();
+    xml += _legendaLivelli();
+    const blob = await _assembleDocx(xml, 'Sezione 4.1 — Mappatura ADA');
+    _saveBlob(blob, `HubS_Sez41_Mappatura_${(d.nome === '—' ? 'OV' : d.nome).replace(/\s+/g, '_')}_${_ymd()}.docx`);
+  } catch (e) { alert('Errore generazione docx: ' + e.message); }
+}
+
+// ---------- Documento di Trasparenza completo (Sez. 1–7, layout HubS) ----------
+async function downloadDocumentoTrasparenza(withAI){
+  try {
+    if (!Object.keys(mappings).length && !manualADAs.length) { alert('Nessuna mappatura da esportare. Completa il Passo 3.'); return; }
+    const d = _datiIntestazione();
+
+    let aiDescs = {};
+    if (withAI) {
+      const icon = document.getElementById('doc-ai-icon');
+      const label = document.getElementById('doc-ai-label');
+      if (icon) icon.outerHTML = '<span id="doc-ai-icon" class="ai-spinner"></span>';
+      if (label) label.textContent = 'Generazione descrizioni AI…';
+      try { aiDescs = await generaDescrizioniCompetenze(d.desc, d.settore) || {}; }
+      catch (e) { console.warn('Descrizioni AI non disponibili:', e); }
+      finally {
+        const ic = document.getElementById('doc-ai-icon');
+        if (ic) ic.outerHTML = '<span id="doc-ai-icon">✨</span>';
+        const lb = document.getElementById('doc-ai-label');
+        if (lb) lb.textContent = '+ Descrizioni AI per ogni competenza';
+      }
+    }
+
+    let xml = '';
+    xml += _wH('DOCUMENTO DI TRASPARENZA', 1);
+    xml += _wP('Emersione e messa in trasparenza delle competenze — Servizio Civile Universale (D.lgs. 13/2013; D.lgs. 40/2017; D.M. 115/2024)', { align: 'center', italic: true, sz: 16 });
+    xml += _wP('HubS — Spazi di Innovazione Sociale', { align: 'center', sz: 16, color: '444444' });
+    xml += _wBr();
+
+    xml += _wH('SEZIONE 1 — ENTE DI ACCOGLIENZA', 3);
+    xml += _wKVTable([
+      ['Denominazione', d.ente],
+      ['Sede legale', _fieldOr(['mod-ente-sede'], '____________________')],
+      ['Codice SU', _fieldOr(['mod-ente-codice-su'], '____________________')]
+    ]);
+    xml += _wBr();
+
+    xml += _wH('SEZIONE 2 — DATI DEL VOLONTARIO/A', 3);
+    xml += _wKVTable([
+      ['Nominativo', d.nome],
+      ['Codice fiscale / codice volontario', d.codice],
+      ['Data di nascita', _dIT(_fieldOr(['mod-vol-data-nascita'])) || '____________________'],
+      ['Luogo di nascita', _fieldOr(['mod-vol-luogo-nascita'], '____________________')]
+    ]);
+    xml += _wBr();
+
+    xml += _wH('SEZIONE 3 — DATI DEL PERCORSO', 3);
+    xml += _wKVTable([
+      ['Progetto', _fieldOr(['mod-prog-titolo']) || (PROJECT?.titolo || '____________________')],
+      ['Sede di attuazione', _fieldOr(['mod-sede-attuazione']) || (PROJECT?.sede || '____________________')],
+      ['Data inizio servizio', _dIT(d.inizio) || '____________________'],
+      ['Data fine servizio', _dIT(d.fine) || '____________________'],
+      ['Ore settimanali', d.ore],
+      ['Settore SCU', d.settore],
+      ['Descrizione delle attività svolte', d.desc.slice(0, 1800)]
+    ]);
+    xml += _wBr();
+
+    xml += _wH('SEZIONE 4 — RICOGNIZIONE NORMATIVA E ANCORAGGIO AL REPERTORIO ADA', 2);
+    xml += _wH("4.1 Mappatura verso l'Atlante del Lavoro e delle Qualificazioni (INAPP)", 3);
+    xml += _tabella41();
+    xml += _legendaLivelli();
+    xml += _wBr();
+
+    // 4.2–4.5: quadri europei dalle selezioni
+    const fw = [
+      ['4.2 DigComp 2.2 — Competenze digitali', (typeof DC_ROWS !== 'undefined' ? DC_ROWS : [])],
+      ['4.3 LifeComp — Competenze personali e sociali', (typeof LC_ROWS !== 'undefined' ? LC_ROWS : [])],
+      ['4.4 EntreComp — Competenze imprenditoriali', (typeof EC_ROWS !== 'undefined' ? EC_ROWS : [])],
+      ['4.5 Competenze chiave europee (Racc. UE 2018)', (typeof EU8_ROWS !== 'undefined' ? EU8_ROWS : [])]
+    ];
+    const lvlD = { 1: 'Esecutivo con istruzioni', 2: 'Autonomia operativa con supervisione', 3: 'Autonomia realizzativa', 4: 'Expertise tecnico' };
+    fw.forEach(([titolo, rowsDef]) => {
+      const sel = (rowsDef || []).filter(r => selections[r.id]);
+      if (!sel.length) return;
+      xml += _wH(titolo, 3);
+      xml += _wDataTableW(
+        ['Competenza', 'Area', 'Rif. ADA', 'Livello', 'Evidenza nell\'esperienza'],
+        sel.map(r => [
+          r.name || ALL_COMPS[r.id] || r.id,
+          r.area || '—',
+          r.ada || '—',
+          String(selections[r.id]?.level || '—') + (lvlD[selections[r.id]?.level] ? ' — ' + lvlD[selections[r.id].level] : ''),
+          aiDescs[r.id] || '—'
+        ]),
+        [4, 3, 2, 3, 5]
+      );
+      xml += _wBr();
+    });
+
+    xml += _wH('SEZIONE 5 — EVIDENZE A SUPPORTO (DOSSIER)', 3);
+    ['Attestato specifico (Allegato 6C)', 'Prodotti e materiali realizzati dal volontario', 'Diario di bordo / report delle attività', 'Altro: ____________________'].forEach(v => {
+      xml += _wP('☐  ' + v, { sz: 18 });
+    });
+    xml += _wBr();
+
+    xml += _wH("SEZIONE 6 — COLLEGAMENTO ALL'ATLANTE DEL LAVORO (RIEPILOGO)", 3);
+    Object.values(mappings).forEach(m => {
+      const ada = ADA_DB[m.adaKey] || {};
+      xml += _wP(`• ${ada.code || m.adaKey} — ${ada.desc || ''} ${m.validated ? '(validata)' : '(da validare)'} — ${(m.ra || []).filter(r => r.coverage).length}/${(m.ra || []).length} RA coperti`, { sz: 18 });
+    });
+    manualADAs.forEach(m => { xml += _wP(`• ${m.code || '—'} — ${m.desc || ''} (inserimento manuale)`, { sz: 18 }); });
+    xml += _wBr();
+
+    xml += _wH('SEZIONE 7 — DICHIARAZIONI E FIRME', 3);
+    xml += _wP("Il responsabile della funzione di accompagnamento dichiara che le attività e le competenze sopra riportate corrispondono a quanto osservato e documentato durante il percorso di Servizio Civile Universale. Il documento è reso ai fini della messa in trasparenza delle competenze ai sensi del D.lgs. 13/2013.", { sz: 18 });
+    xml += _wBr();
+    xml += _wSigTable(d.tutor, d.nome, _fieldOr(['mod-ril-luogo'], '__________'), _dIT(_fieldOr(['mod-ril-data'])) || d.oggi);
+
+    const blob = await _assembleDocx(xml, 'Documento di Trasparenza');
+    _saveBlob(blob, `HubS_DocumentoTrasparenza_${(d.nome === '—' ? 'OV' : d.nome).replace(/\s+/g, '_')}_${_ymd()}.docx`);
+  } catch (e) { alert('Errore generazione Documento di Trasparenza: ' + e.message); }
+}
+
+// ---------- Schede di Accompagnamento ADA (una per ADA, in un unico docx) ----------
+async function downloadSchedeADA(){
+  try {
+    const d = _datiIntestazione();
+    const lvlD = { 1: 'Esecutivo con istruzioni', 2: 'Autonomia operativa con supervisione', 3: 'Autonomia realizzativa', 4: 'Expertise tecnico' };
+    const allMaps = [...Object.values(mappings), ...manualADAs.map((m, i) => ({
+      adaKey: `MAN_${i}`, validated: m.validated, livello: m.livello || 2, attivita: '',
+      comps: [{ name: m.compSource || '—' }], ra: m.ra || [], _m: m
+    }))];
+    if (!allMaps.length) { alert('Nessuna ADA mappata. Completare il Passo 3 prima di esportare.'); return; }
+
+    let xml = '';
+    allMaps.forEach((map, idx) => {
+      const ada = ADA_DB[map.adaKey];
+      const code = ada?.code || map._m?.code || map.adaKey;
+      const descAda = ada?.desc || map._m?.desc || '—';
+      if (idx > 0) xml += _wPageBreak();
+      xml += _wH('SCHEDA DI ACCOMPAGNAMENTO ADA', 2);
+      xml += _wP(`${code} — ${descAda}`, { bold: true, sz: 22 });
+      xml += _wBr();
+      xml += _wKVTable([
+        ['Volontario/a', d.nome],
+        ['Ente di accoglienza', d.ente],
+        ['Tutor / OLP', d.tutor],
+        ['Periodo di servizio', (_dIT(d.inizio) || '—') + ' → ' + (_dIT(d.fine) || '—')],
+        ['SEP Atlante', ada?.sep || '—'],
+        ['Livello di realizzazione', map.livello ? map.livello + ' — ' + (lvlD[map.livello] || '') : '—'],
+        ['Stato', map.validated ? 'Validata dal tutor' : 'Da validare'],
+        ['Fonte', ada?.source || 'Atlante del Lavoro INAPP']
+      ]);
+      xml += _wBr();
+      xml += _wH('Risultati Attesi (RA)', 3);
+      (map.ra || []).forEach(r => {
+        xml += _wP((r.code || '—') + ' — ' + String(r.desc || '').replace(/^RA\d*:\s*/, ''), { bold: true, sz: 18 });
+        if (r.coverage) xml += _wP(`Copertura: ${r.coverage === 'totale' ? 'Totale' : 'Parziale'}${r.attivita ? ' · Attività: ' + r.attivita : ''}`, { sz: 16, color: '444444' });
+      });
+      xml += _wBr();
+      xml += _wH('Competenze collegate', 3);
+      xml += _wP((map.comps || []).map(c => c.name).join(' · ') || '—', { sz: 18 });
+      xml += _wBr();
+      xml += _wH('Evidenze osservate (a cura del tutor)', 3);
+      xml += _wP('______________________________________________________________________', { sz: 18 });
+      xml += _wP('______________________________________________________________________', { sz: 18 });
+      xml += _wP('______________________________________________________________________', { sz: 18 });
+      xml += _wBr();
+      xml += _wSigTable(d.tutor, d.nome, '__________', d.oggi);
+    });
+
+    const blob = await _assembleDocx(xml, 'Schede di Accompagnamento ADA');
+    _saveBlob(blob, `HubS_SchedeADA_${(d.nome === '—' ? 'OV' : d.nome).replace(/\s+/g, '_')}_${_ymd()}.docx`);
+  } catch (e) { alert('Errore generazione Schede ADA: ' + e.message); }
+}
+
 
 function downloadPdf(){
   const d=buildDocumentData();
@@ -1345,7 +1526,9 @@ function goStep(n){
     if(!tab) continue;
     tab.className='step'+(i===n?' active':'')+(i<n?' done':'');
     document.getElementById(`step-num-${i}`).textContent=i<n?'✓':i;
-    document.getElementById(`screen-${i}`).style.display=i===n?'flex':'none';
+    const sc=document.getElementById(`screen-${i}`);
+    sc.classList.toggle('active', i===n);
+    sc.style.display=i===n?'flex':'none';
   }
   if(n===3){ generateMappings(); }
   if(n===4){ generateExport(); }
@@ -2308,359 +2491,8 @@ const EU8_ROWS = [
   {id:'eu8', code:'EU8', name:'Consapevolezza ed espressione culturale'},
 ];
 
-async function downloadDocumentoTrasparenza(withAI) {
-  // Gather all data
-  const nome = document.getElementById('vol-nome').value || '—';
-  const ente = document.getElementById('vol-ente').value || '—';
-  const tutor = document.getElementById('vol-tutor').value || '—';
-  const codice = document.getElementById('vol-codice').value || '—';
-  const inizio = document.getElementById('perc-inizio').value || '—';
-  const fine = document.getElementById('perc-fine').value || '—';
-  const ore = document.getElementById('perc-ore').value || '—';
-  const settore = document.getElementById('perc-settore').value || '—';
-  const desc = document.getElementById('perc-desc').value || '—';
-  const today = new Date().toLocaleDateString('it-IT');
-  const nomeFile = nome.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30);
+// downloadDocumentoTrasparenza: riscritta in OOXML (vedi modulo EXPORT LEGACY IN OOXML)
 
-  // Get per-competency AI descriptions if requested
-  let compDescs = {}; // compId → description string
-  if (withAI) {
-    const btn = document.getElementById('btn-doc-ai');
-    const icon = document.getElementById('doc-ai-icon');
-    const label = document.getElementById('doc-ai-label');
-    btn.disabled = true;
-    icon.outerHTML = '<span id="doc-ai-icon" class="ai-spinner"></span>';
-    label.textContent = 'Generazione descrizioni in corso…';
-    try {
-      compDescs = await generaDescrizioniCompetenze(desc, settore);
-    } catch(e) {
-      alert('Errore generazione AI: ' + e.message + '\nIl documento verrà generato senza descrizioni.');
-    } finally {
-      btn.disabled = false;
-      document.getElementById('doc-ai-icon').outerHTML = '<span id="doc-ai-icon">✨</span>';
-      document.getElementById('doc-ai-label').textContent = '+ Descrizioni AI per ogni competenza';
-    }
-  }
-
-  // Helper: level cell
-  const lvlCell = (id) => {
-    const l = selections[id]?.level;
-    const s = {1:'Esecutivo',2:'Con supervisione',3:'Autonomo',4:'Expert'};
-    return l ? `<strong>${l}</strong> — ${s[l]}` : '—';
-  };
-  const descCell = (id) => compDescs[id] || '';
-  const isSelected = (id) => !!selections[id];
-
-  // Build ADA mapping table rows
-  const allMaps = [...Object.values(mappings), ...manualADAs.map((m,i)=>({
-    adaKey:`MAN_${i}`, validated:m.validated, livello:m.livello||2, attivita:'',
-    comps:[{name:m.compSource}], ra:m.ra?.map(r=>({...r,coverage:'parziale'}))||[], _m:m
-  }))];
-  let adaRows = '';
-  let n = 0;
-  const lvlD = {1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
-  allMaps.forEach(map => {
-    const ada = ADA_DB[map.adaKey];
-    const code = ada?.code || map._m?.code || map.adaKey;
-    const descAda = ada?.desc || map._m?.desc || '—';
-    const comps = map.comps?.map(c=>c.name).join(', ') || '—';
-    const raList = map.ra?.length ? map.ra : [{code:'—',desc:'—',coverage:null,attivita:''}];
-    raList.forEach((ra, ri) => {
-      n++;
-      const cov = ra.coverage==='totale' ? '✅ Totale' : ra.coverage==='parziale' ? '⚠️ Parziale' : '☐';
-      const st = map.validated ? '✅' : '⏳';
-      if (ri===0) {
-        adaRows += `<tr>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;text-align:center;vertical-align:top;" rowspan="${raList.length}">${n}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;vertical-align:top;" rowspan="${raList.length}">${map.attivita||'—'}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9pt;vertical-align:top;" rowspan="${raList.length}">${comps}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-family:Courier New;font-size:9pt;vertical-align:top;" rowspan="${raList.length}">${code}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9.5pt;vertical-align:top;" rowspan="${raList.length}">${descAda}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-family:Courier New;font-size:9pt;">${ra.code||'—'}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9pt;">${ra.desc||'—'}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;text-align:center;vertical-align:top;" rowspan="${raList.length}">${map.livello}<br><span style="font-size:7.5pt;">${lvlD[map.livello]||''}</span></td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;text-align:center;">${cov}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9pt;">${ra.attivita||''}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;text-align:center;vertical-align:top;" rowspan="${raList.length}">${st}</td>
-        </tr>`;
-      } else {
-        adaRows += `<tr>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-family:Courier New;font-size:9pt;">${ra.code||'—'}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9pt;">${ra.desc||'—'}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;text-align:center;">${cov}</td>
-          <td style="border:1px solid #1a3a6b;padding:5pt 4pt;font-size:9pt;">${ra.attivita||''}</td>
-        </tr>`;
-      }
-    });
-  });
-  if (!adaRows) adaRows = '<tr><td colspan="11" style="border:1px solid #1a3a6b;padding:8pt;text-align:center;color:#888;font-style:italic;">Nessuna ADA validata — tornare al Passo 3</td></tr>';
-
-  // Build DigComp table rows
-  let dcRows = DC_ROWS.map(row => {
-    const sel = isSelected(row.id);
-    const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || '<em style="color:#888;">(da completare)</em>') : '<span style="color:#aaa;">—</span>';
-    return `<tr style="${bg}">
-      <td style="border:1px solid #ccc;padding:5pt;">${row.area}</td>
-      <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
-      <td style="border:1px solid #ccc;padding:5pt;font-family:Courier New;font-size:9pt;">${row.ada}</td>
-      <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
-      <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;">${nota}</td>
-    </tr>`;
-  }).join('');
-
-  // Build EU8 rows
-  let eu8Rows = EU8_ROWS.map(row => {
-    const sel = isSelected(row.id);
-    const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || '<em style="color:#888;">(da completare)</em>') : '<span style="color:#aaa;">—</span>';
-    return `<tr style="${bg}">
-      <td style="border:1px solid #ccc;padding:5pt;font-weight:bold;">${row.code}</td>
-      <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
-      <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
-      <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;">${nota}</td>
-    </tr>`;
-  }).join('');
-
-  // Build LifeComp rows (group by area)
-  let lcRows = ''; let lastLCArea = '';
-  LC_ROWS.forEach(row => {
-    if (row.area !== lastLCArea) {
-      lastLCArea = row.area;
-      lcRows += `<tr style="background:#f0f4ff;"><td colspan="4" style="border:1px solid #ccc;padding:4pt 8pt;font-size:9pt;font-weight:bold;color:#1a3a6b;">${row.area}</td></tr>`;
-    }
-    const sel = isSelected(row.id);
-    const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || `<em style="color:#888;">(come si è manifestata nell'esperienza)</em>`) : `<span style="color:#aaa;">—</span>`;
-    lcRows += `<tr style="${bg}">
-      <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
-      <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
-      <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;" colspan="2">${nota}</td>
-    </tr>`;
-  });
-
-  // Build EntreComp rows
-  let ecRows = ''; let lastECArea = '';
-  EC_ROWS.forEach(row => {
-    if (row.area !== lastECArea) {
-      lastECArea = row.area;
-      ecRows += `<tr style="background:#fff8f0;"><td colspan="4" style="border:1px solid #ccc;padding:4pt 8pt;font-size:9pt;font-weight:bold;color:#c47a1a;">${row.area}</td></tr>`;
-    }
-    const sel = isSelected(row.id);
-    const bg = sel ? '' : 'background:#f9f9f9;';
-    const nota = sel ? (descCell(row.id) || `<em style="color:#888;">(come si è manifestata nell'esperienza)</em>`) : `<span style="color:#aaa;">—</span>`;
-    ecRows += `<tr style="${bg}">
-      <td style="border:1px solid #ccc;padding:5pt;">${row.name}</td>
-      <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? lvlCell(row.id) : '☐'}</td>
-      <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;" colspan="2">${nota}</td>
-    </tr>`;
-  });
-
-  // Assemble full document
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:w="urn:schemas-microsoft-com:office:word"
-    xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<style>
-  body{font-family:Arial,sans-serif;font-size:10pt;color:#111;margin:2cm;}
-  h1{font-size:14pt;color:#1a3a6b;border-bottom:2pt solid #1a3a6b;padding-bottom:6pt;margin-bottom:8pt;}
-  h2{font-size:12pt;color:#1a3a6b;margin:18pt 0 8pt;border-left:4pt solid #1a3a6b;padding-left:8pt;}
-  h3{font-size:10.5pt;color:#2d6db5;margin:14pt 0 6pt;}
-  .meta{border:1pt solid #1a3a6b;padding:6pt;margin-bottom:12pt;border-radius:4pt;}
-  .meta td{padding:3pt 8pt;font-size:9.5pt;border-bottom:0.5pt solid #e0e0e0;}
-  .meta td:first-child{font-weight:bold;color:#1a3a6b;width:160pt;white-space:nowrap;}
-  .note{font-size:7.5pt;color:#666;font-style:italic;margin-top:4pt;}
-  .warn{background:#fff8e1;border:1pt solid #f6d088;padding:5pt 8pt;font-size:8.5pt;color:#7a4a00;margin:8pt 0;}
-  .sign-table td{border:1pt solid #1a3a6b;padding:10pt;width:50%;}
-  .footer{font-size:7pt;color:#888;border-top:1pt solid #ccc;padding-top:6pt;margin-top:20pt;}
-  th{background:#1a3a6b;color:#fff;padding:5pt 4pt;text-align:left;font-size:8.5pt;}
-  table{border-collapse:collapse;width:100%;}
-  .section-divider{border:none;border-top:1pt solid #e0e0e0;margin:16pt 0;}
-</style>
-</head><body>
-
-<h1>DOCUMENTO DI TRASPARENZA</h1>
-<p style="font-size:9pt;color:#1a3a6b;font-style:italic;margin-bottom:12pt;">
-  Messa in trasparenza delle competenze acquisite in contesti non formali e informali<br>
-  Conforme all'Allegato A — DI 5 gennaio 2021 · Rif. Art. 5, comma 1, lett. d) DI 31 luglio 2025
-</p>
-
-<h2>SEZIONE 1 — ENTE DI ACCOGLIENZA</h2>
-<table class="meta"><tbody>
-  <tr><td>Denominazione ente</td><td>${ente}</td></tr>
-  <tr><td>Codice Fiscale</td><td>___________________________</td></tr>
-  <tr><td>Tipologia ente</td><td>☐ APS &nbsp; ☐ ODV &nbsp; ☐ ETS altro &nbsp; ☐ Cooperativa sociale</td></tr>
-  <tr><td>Sede legale</td><td>___________________________</td></tr>
-  <tr><td>Rappresentante legale</td><td>___________________________</td></tr>
-  <tr><td>Tutor / Responsabile accompagnamento</td><td>${tutor}</td></tr>
-  <tr><td>Codice progetto HubS</td><td>${codice}</td></tr>
-</tbody></table>
-
-<h2>SEZIONE 2 — DATI DEL VOLONTARIO/A</h2>
-<table class="meta"><tbody>
-  <tr><td>Cognome e Nome</td><td>${nome}</td></tr>
-  <tr><td>Data di nascita</td><td>___________________________</td></tr>
-  <tr><td>Luogo di nascita</td><td>___________________________</td></tr>
-  <tr><td>Codice Fiscale</td><td>___________________________</td></tr>
-  <tr><td>Cittadinanza</td><td>___________________________</td></tr>
-  <tr><td>Titolo di studio</td><td>___________________________</td></tr>
-  <tr><td>Situazione occupazionale</td><td>___________________________</td></tr>
-</tbody></table>
-
-<h2>SEZIONE 3 — DATI DEL PERCORSO</h2>
-<table class="meta"><tbody>
-  <tr><td>Descrizione percorso / attività svolte</td><td>${desc}</td></tr>
-  <tr><td>Settore di attività</td><td>${settore}</td></tr>
-  <tr><td>Luogo di svolgimento</td><td>___________________________</td></tr>
-  <tr><td>Data inizio</td><td>${inizio}</td></tr>
-  <tr><td>Data fine</td><td>${fine}</td></tr>
-  <tr><td>Ore previste</td><td>___________________________</td></tr>
-  <tr><td>Ore effettivamente svolte</td><td>${ore}</td></tr>
-  <tr><td>Percentuale di presenza</td><td>_______ % &nbsp;&nbsp; Soglia min. 75%: ☐ Raggiunta &nbsp; ☐ Non raggiunta</td></tr>
-</tbody></table>
-
-<hr class="section-divider">
-
-<h2>SEZIONE 4 — RICOGNIZIONE NORMATIVA E ANCORAGGIO AL REPERTORIO ADA</h2>
-<p style="font-size:9pt;color:#1a3a6b;font-style:italic;margin-bottom:8pt;">
-  Competenze → ADA · Atlante del Lavoro e delle Qualificazioni INAPP · Generato da HubS-TransparentIA Mappatore Normativo
-</p>
-
-<h3>4.1 — Mappatura verso l'Atlante del Lavoro e delle Qualificazioni</h3>
-<p style="font-size:8.5pt;color:#666;font-style:italic;margin-bottom:6pt;">Tabella conforme Allegato A — DI 5 gennaio 2021. ADA ⏳ = in attesa di validazione tutor.</p>
-${allMaps.length===0 ? '<div class="warn">⚠️ Nessuna ADA validata. Completare il Passo 3 nel Mappatore prima di esportare.</div>' : ''}
-<table>
-  <thead><tr>
-    <th style="width:20pt;">N.</th>
-    <th style="width:70pt;">Attività svolta</th>
-    <th style="width:60pt;">Competenza origine</th>
-    <th style="width:75pt;">ADA Codice</th>
-    <th>ADA Descrizione</th>
-    <th style="width:65pt;">RA Codice</th>
-    <th>RA Descrizione</th>
-    <th style="width:55pt;">Livello</th>
-    <th style="width:50pt;">Copertura RA</th>
-    <th style="width:70pt;">Attività RA svolta</th>
-    <th style="width:20pt;">St.</th>
-  </tr></thead>
-  <tbody>${adaRows}</tbody>
-</table>
-<p class="note" style="margin-top:6pt;"><strong>Scala livelli:</strong> 1=Esecutivo con istruzioni · 2=Autonomia operativa con supervisione · 3=Autonomia realizzativa · 4=Expertise tecnico</p>
-
-<h3>4.2 — Competenza Digitale — DigComp 2.2</h3>
-<p class="note" style="margin-bottom:5pt;">Righe grigie = competenza non selezionata/non pertinente. ADA L1 — deterministica (GOL/EDO Regione Calabria n.15242/2025).</p>
-<table>
-  <thead><tr>
-    <th>Area DigComp</th><th>Competenza specifica</th><th>ADA di riferimento</th><th style="width:80pt;">Livello (1–4)</th><th>Descrizione manifestazione</th>
-  </tr></thead>
-  <tbody>${dcRows}</tbody>
-</table>
-
-<h3>4.3 — Competenze Chiave Europee — EU8 (Raccomandazione CE 2006/2018)</h3>
-<p class="note" style="margin-bottom:5pt;">Righe grigie = non pertinente al percorso. EU4 (Competenza digitale) mappata nella sezione 4.2.</p>
-<table>
-  <thead><tr>
-    <th style="width:40pt;">Cod.</th><th>Competenza chiave</th><th style="width:80pt;">Livello (1–4)</th><th>Descrizione manifestazione</th>
-  </tr></thead>
-  <tbody>${eu8Rows}</tbody>
-</table>
-
-<h3>4.4 — Competenza Personale, Sociale e di Imparare ad Imparare — LifeComp</h3>
-<p class="note" style="margin-bottom:5pt;">ADA L2 — inferenziale (SEP 18 Atlante del Lavoro). Metamodello INAPP in elaborazione (scad. ott. 2026). Validare su atlantelavoro.inapp.org.</p>
-<table>
-  <thead><tr>
-    <th>Competenza specifica</th><th style="width:80pt;">Livello (1–4)</th><th colspan="2">Descrizione manifestazione nell'esperienza</th>
-  </tr></thead>
-  <tbody>${lcRows}</tbody>
-</table>
-
-<h3>4.5 — Competenza Imprenditoriale — EntreComp</h3>
-<p class="note" style="margin-bottom:5pt;">ADA L2 — inferenziale (SEP 18 Atlante del Lavoro). Metamodello INAPP in elaborazione (scad. ott. 2026). Validare su atlantelavoro.inapp.org.</p>
-<table>
-  <thead><tr>
-    <th>Competenza specifica</th><th style="width:80pt;">Livello (1–4)</th><th colspan="2">Descrizione manifestazione nell'esperienza</th>
-  </tr></thead>
-  <tbody>${ecRows}</tbody>
-</table>
-
-${withAI ? '' : '<div class="warn" style="margin-top:10pt;">ℹ️ Le colonne "Descrizione manifestazione" possono essere arricchite automaticamente usando il pulsante <strong>"+ Descrizioni AI"</strong> nel Mappatore.</div>'}
-
-<hr class="section-divider">
-
-<h2>SEZIONE 5 — EVIDENZE A SUPPORTO (DOSSIER)</h2>
-<table>
-  <thead><tr><th style="width:30pt;">N.</th><th>Tipo di evidenza</th><th style="width:80pt;">Esito eQval</th><th>Note / Motivazione</th></tr></thead>
-  <tbody>
-    ${[1,2,3,4,5].map(i=>`<tr><td style="border:1px solid #ccc;padding:5pt;text-align:center;">${i}</td><td style="border:1px solid #ccc;padding:5pt;height:20pt;"></td><td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐ Acc. &nbsp; ☐ Ris. &nbsp; ☐ Non acc.</td><td style="border:1px solid #ccc;padding:5pt;"></td></tr>`).join('')}
-  </tbody>
-</table>
-<p style="font-size:8.5pt;margin-top:6pt;"><strong>Attestato specifico HubS allegato:</strong> ☐ Sì &nbsp; ☐ No &nbsp;&nbsp; <strong>N. attestato:</strong> _______________</p>
-
-<hr class="section-divider">
-
-<h2>SEZIONE 6 — COLLEGAMENTO ALL'ATLANTE DEL LAVORO (RIEPILOGO)</h2>
-<table>
-  <thead><tr><th>Codice ADA</th><th>Descrizione ADA</th><th>Framework</th><th>RA Coperti</th><th>Livello</th><th>Stato</th></tr></thead>
-  <tbody>
-    ${allMaps.map(map => {
-      const ada = ADA_DB[map.adaKey];
-      const code = ada?.code || map._m?.code || map.adaKey;
-      const desc2 = ada?.desc || map._m?.desc || '—';
-      const fw = ada?.framework || '—';
-      const raCov = map.ra?.filter(r=>r.coverage).map(r=>`${r.code} (${r.coverage})`).join(', ') || '—';
-      return `<tr>
-        <td style="border:1px solid #ccc;padding:5pt;font-family:Courier New;font-size:9pt;">${code}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:9.5pt;">${desc2}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:8.5pt;">${fw}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:8.5pt;">${raCov}</td>
-        <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${map.livello||'—'}</td>
-        <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${map.validated?'✅ Validato':'⏳ Da validare'}</td>
-      </tr>`;
-    }).join('') || '<tr><td colspan="6" style="border:1px solid #ccc;padding:8pt;text-align:center;color:#888;font-style:italic;">Nessuna ADA</td></tr>'}
-  </tbody>
-</table>
-
-<hr class="section-divider">
-
-<h2>SEZIONE 7 — DICHIARAZIONI E FIRME</h2>
-<p style="font-size:9pt;line-height:1.7;margin-bottom:12pt;">
-  Il responsabile della funzione di accompagnamento dichiara che le informazioni contenute nel presente documento corrispondono a quanto emerso nel percorso di messa in trasparenza delle competenze condotto ai sensi del DI 31 luglio 2025.<br>
-  Il/la volontario/a dichiara di aver partecipato attivamente al percorso e di riconoscere le competenze attestate come acquisite durante l'esperienza di volontariato.
-</p>
-<table class="sign-table">
-  <tr>
-    <td style="border:1px solid #1a3a6b;padding:10pt;width:50%;">
-      <strong>Responsabile funzione accompagnamento (Tutor)</strong><br>
-      Nome e cognome: ${tutor}<br>Ente: ${ente}<br><br>
-      Firma: _____________________________<br>Data: _____________________________
-    </td>
-    <td style="border:1px solid #1a3a6b;padding:10pt;width:50%;">
-      <strong>Volontario/a</strong><br>
-      Nome e cognome: ${nome}<br><br><br>
-      Firma: _____________________________<br>Data: _____________________________
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" style="border:1px solid #1a3a6b;padding:10pt;">
-      <strong>Rappresentante legale dell'Ente (timbro e firma)</strong><br><br><br>
-      Firma: _____________________________&nbsp;&nbsp;&nbsp; Timbro dell'Ente: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Data: ___________________
-    </td>
-  </tr>
-</table>
-
-<div class="footer">
-  Documento generato da HubS-TransparentIA — Mappatore Normativo · ${today}<br>
-  Conforme all'Allegato A del Decreto Interministeriale 5 gennaio 2021 — Art. 5, comma 1, lett. d) del DI 31 luglio 2025<br>
-  Trattamento dati: Regolamento UE 2016/679 (GDPR) · INRETE Cooperativa Sociale — INAPP Atlante del Lavoro (feb. 2026)
-</div>
-</body></html>`;
-
-  const blob = new Blob(['﻿'+html], {type:'application/msword'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `HubS_DocumentoTrasparenza_${nomeFile}_${new Date().toISOString().slice(0,10)}.docx`;
-  a.click();
-}
 
 // AI: generate competency descriptions from activity text
 async function generaDescrizioniCompetenze(activityDesc, settore) {
@@ -2696,177 +2528,8 @@ Includi solo gli ID presenti nella lista sopra.`;
 
 // ==================== SCHEDE DI ACCOMPAGNAMENTO ADA ====================
 
-function downloadSchedeADA() {
-  const nome = document.getElementById('vol-nome').value || '—';
-  const ente = document.getElementById('vol-ente').value || '—';
-  const tutor = document.getElementById('vol-tutor').value || '—';
-  const inizio = document.getElementById('perc-inizio').value || '—';
-  const fine = document.getElementById('perc-fine').value || '—';
-  const desc = document.getElementById('perc-desc').value || '—';
-  const today = new Date().toLocaleDateString('it-IT');
+// downloadSchedeADA: riscritta in OOXML (vedi modulo EXPORT LEGACY IN OOXML)
 
-  const allMaps = [...Object.values(mappings), ...manualADAs.map((m,i)=>({
-    adaKey:`MAN_${i}`, validated:m.validated, livello:m.livello||2, attivita:'',
-    comps:[{name:m.compSource||'—'}], ra:m.ra||[], _m:m
-  }))];
-
-  if (!allMaps.length) { alert('Nessuna ADA mappata. Completare il Passo 3 prima di esportare.'); return; }
-
-  const lvlD = {1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
-
-  let schedeHTML = '';
-  allMaps.forEach((map, mapIdx) => {
-    const ada = ADA_DB[map.adaKey];
-    const code = ada?.code || map._m?.code || map.adaKey;
-    const descAda = ada?.desc || map._m?.desc || '—';
-    const sep = ada?.sep || '—';
-    const fw = ada?.framework || '—';
-    const comps = map.comps?.map(c=>c.name).join(', ') || '—';
-    const raList = map.ra?.length ? map.ra : [{code:'—',desc:'—',coverage:null,attivita:''}];
-
-    // Build related framework rows for Section 4 of the scheda
-    const fwLinks = ada?.compLinks || [];
-    const fwRows = fwLinks.map(id => {
-      const sel = selections[id];
-      const name = ALL_COMPS[id] || id;
-      const fw_type = id.startsWith('dc') ? 'DigComp 2.2' : id.startsWith('lc') ? 'LifeComp' : id.startsWith('ec') ? 'EntreComp' : 'EU8 — Competenze Chiave';
-      const lvl = sel?.level || '☐ 1 ☐ 2 ☐ 3 ☐ 4';
-      return `<tr>
-        <td style="border:1px solid #ccc;padding:5pt;">${fw_type}</td>
-        <td style="border:1px solid #ccc;padding:5pt;">${name}</td>
-        <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${sel ? `<strong>${sel.level}</strong> — ${lvlD[sel.level]||''}` : '☐ 1 ☐ 2 ☐ 3 ☐ 4'}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;"></td>
-      </tr>`;
-    }).join('') || `<tr><td colspan="4" style="border:1px solid #ccc;padding:5pt;color:#888;font-style:italic;">Competenze di origine: ${comps}</td></tr>`;
-
-    // Build RA rows
-    const raRows = raList.map(ra => {
-      const cov = ra.coverage==='totale' ? '<strong style="color:green;">✅ Piena</strong>' : ra.coverage==='parziale' ? '<strong style="color:orange;">⚠️ Parziale</strong>' : '☐ Piena &nbsp; ☐ Parziale &nbsp; ☐ Nulla';
-      return `<tr>
-        <td style="border:1px solid #ccc;padding:5pt;font-family:Courier New;font-size:9pt;white-space:nowrap;">${ra.code||'—'}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:9.5pt;">${ra.desc||'—'}</td>
-        <td style="border:1px solid #ccc;padding:5pt;text-align:center;">${cov}</td>
-        <td style="border:1px solid #ccc;padding:5pt;font-size:9pt;">${ra.attivita||''}</td>
-      </tr>`;
-    }).join('');
-
-    const pageBreak = mapIdx < allMaps.length-1 ? '<div style="page-break-after:always;"></div>' : '';
-
-    schedeHTML += `
-    <div style="margin-bottom:24pt;">
-      <h1 style="font-size:13pt;color:#1a3a6b;border-bottom:2pt solid #1a3a6b;padding-bottom:5pt;margin-bottom:10pt;">
-        SCHEDA DI ACCOMPAGNAMENTO ADA
-        <span style="font-size:9pt;font-weight:normal;margin-left:12pt;">${map.validated ? '✅ Validata' : '⏳ Da validare'}</span>
-      </h1>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">1. IDENTIFICAZIONE ADA</h3>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:10pt;">
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;width:150pt;color:#1a3a6b;">Codice ADA</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-family:Courier New;">${code}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">Descrizione ADA</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;">${descAda}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">SEP di riferimento</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;">${sep}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">Framework europei</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-size:9pt;">${fw}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">Livello di realizzazione</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;"><strong>${map.livello}</strong> — ${lvlD[map.livello]||'—'}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">Data compilazione</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;">${today}</td></tr>
-        <tr><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;font-weight:bold;color:#1a3a6b;">Tutor</td><td style="border:1pt solid #1a3a6b;padding:4pt 8pt;">${tutor}</td></tr>
-      </table>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">2. DATI DEL VOLONTARIO/A</h3>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:10pt;">
-        <tr><td style="border:1pt solid #ccc;padding:4pt 8pt;font-weight:bold;width:150pt;">Cognome e Nome</td><td style="border:1pt solid #ccc;padding:4pt 8pt;">${nome}</td></tr>
-        <tr><td style="border:1pt solid #ccc;padding:4pt 8pt;font-weight:bold;">Percorso di volontariato</td><td style="border:1pt solid #ccc;padding:4pt 8pt;">${inizio} → ${fine}</td></tr>
-        <tr><td style="border:1pt solid #ccc;padding:4pt 8pt;font-weight:bold;">Ente di Accoglienza</td><td style="border:1pt solid #ccc;padding:4pt 8pt;">${ente}</td></tr>
-      </table>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">3. ATTIVITÀ CONCRETE SVOLTE</h3>
-      <div style="border:1pt solid #ccc;padding:8pt;margin-bottom:10pt;font-size:9.5pt;min-height:40pt;">
-        ${map.attivita || desc || '<em style="color:#888;">(da completare: descrivere le attività specifiche riconducibili a questa ADA)</em>'}
-      </div>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">4. COMPETENZE EMERGENTI (Collegamento ai Quadri Europei)</h3>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:10pt;">
-        <thead><tr>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Quadro / Framework</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Competenza specifica</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:100pt;">Livello</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Note</th>
-        </tr></thead>
-        <tbody>${fwRows}</tbody>
-      </table>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">5. RISULTATI DI APPRENDIMENTO (RA) COPERTI</h3>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:10pt;">
-        <thead><tr>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:80pt;">Codice RA</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Risultato di Apprendimento</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:90pt;">Copertura</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Attività concreta svolta</th>
-        </tr></thead>
-        <tbody>${raRows}</tbody>
-      </table>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">6. VALIDAZIONE EVIDENZE (eQval Standard 17)</h3>
-      <table style="border-collapse:collapse;width:100%;margin-bottom:10pt;">
-        <thead><tr>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;">Evidenza</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:30pt;text-align:center;">Val.</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:30pt;text-align:center;">Att.</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:30pt;text-align:center;">Per.</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:30pt;text-align:center;">Suf.</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:30pt;text-align:center;">Aut.</th>
-          <th style="background:#1a3a6b;color:white;padding:5pt;font-size:9pt;width:60pt;text-align:center;">Esito</th>
-        </tr></thead>
-        <tbody>
-          ${[1,2,3].map(()=>`<tr>
-            <td style="border:1px solid #ccc;padding:5pt;height:18pt;"></td>
-            <td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐</td>
-            <td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐</td>
-            <td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐</td>
-            <td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐</td>
-            <td style="border:1px solid #ccc;padding:5pt;text-align:center;">☐</td>
-            <td style="border:1px solid #ccc;padding:5pt;"></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-      <p style="font-size:7.5pt;color:#666;font-style:italic;">Val.=Validità · Att.=Attualità · Per.=Pertinenza · Suf.=Sufficienza · Aut.=Autenticità</p>
-
-      <h3 style="font-size:10.5pt;color:#1a3a6b;margin:10pt 0 5pt;">7. FIRMA E VALIDAZIONE</h3>
-      <table style="border-collapse:collapse;width:70%;margin-bottom:10pt;">
-        <tr>
-          <td style="border:1pt solid #1a3a6b;padding:10pt;width:50%;">
-            <strong>Il Tutor</strong><br>${tutor}<br><br>
-            Firma: _____________________<br>Data: _____________________
-          </td>
-          <td style="border:1pt solid #1a3a6b;padding:10pt;width:50%;">
-            <strong>Il/La Volontario/a</strong><br>${nome}<br><br>
-            Firma: _____________________<br>Data: _____________________
-          </td>
-        </tr>
-      </table>
-      <p style="font-size:7pt;color:#888;border-top:0.5pt solid #ccc;padding-top:5pt;margin-top:10pt;">
-        HubS-TransparentIA — Mappatore Normativo · Atlante del Lavoro INAPP (feb. 2026) · Generato il ${today}<br>
-        Conforme Allegato A DI 5 gennaio 2021 · Art. 5 c.1 lett. d) DI 31 luglio 2025 · GDPR 2016/679
-      </p>
-    </div>
-    ${pageBreak}`;
-  });
-
-  const fullHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:w="urn:schemas-microsoft-com:office:word"
-    xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<style>
-  body{font-family:Arial,sans-serif;font-size:10pt;color:#111;margin:2cm;}
-  h1,h2,h3{margin-top:0;}
-</style>
-</head><body>${schedeHTML}</body></html>`;
-
-  const nomeFile = nome.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30);
-  const blob = new Blob(['﻿'+fullHTML], {type:'application/msword'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `HubS_SchedeADA_${nomeFile}_${new Date().toISOString().slice(0,10)}.docx`;
-  a.click();
-}
 
 function applyAgenteAll() {
   if (!agenteLastSuggestions) return;
