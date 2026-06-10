@@ -16,7 +16,7 @@ const ALLOWED_MODELS = [
   'claude-sonnet-4-6'
 ];
 
-const MAX_TOKENS_CAP = 8000;   // tetto assoluto lato server
+const MAX_TOKENS_CAP = 16000;  // tetto assoluto lato server (analisi progetto: JSON lunghi)
 const MAX_MESSAGES = 60;       // limite messaggi per richiesta
 const MAX_BODY_CHARS = 200000; // limite dimensione payload messaggi
 

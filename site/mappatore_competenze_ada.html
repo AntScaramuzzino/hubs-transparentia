@@ -1941,27 +1941,50 @@ REGOLE:
 - Identifica ogni SEDE DI ATTUAZIONE presente nella voce 5.3 (le sedi dove operano i volontari). Se la 5.3 non distingue sedi, crea un'unica sede "Tutte le sedi".
 - Per ogni sede elenca le ATTIVITÀ PREVISTE PER GLI OPERATORI VOLONTARI (dalla 5.3). Quando possibile collega ciascuna all'Azione/Attività della voce 5.1 nel campo "rif" (es. "Azione 2 / Att. 2.1").
 - Per ogni attività: "titolo" conciso (max 80 caratteri) e "descrizione" operativa (cosa fa concretamente il volontario, 1-3 frasi, verbi d'azione).
-- "ruolo": sintesi del ruolo dei volontari in quella sede (max 300 caratteri).
+- "ruolo": sintesi del ruolo dei volontari in quella sede (max 250 caratteri).
+- SII COMPATTO: massimo 10 attività per sede (le più rilevanti e operative), descrizioni max 25 parole, JSON senza spazi o ritorni a capo superflui. La risposta DEVE chiudersi con il JSON completo.
 - "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
 - Se titolo/ente sono indicati nel messaggio, riportali; altrimenti deducili dal testo.
 
 OUTPUT — SOLO JSON, nessun testo prima o dopo:
 {"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"..."}]}]}`;
 
+function _balanceJson(s){
+  // taglia all'ultima chiusura strutturale e bilancia le parentesi rimaste aperte (string-aware)
+  let lastGood = -1, inStr = false, esc = false;
+  for (let i = 0; i < s.length; i++){
+    const c = s[i];
+    if (inStr){ if (esc){ esc = false; continue; } if (c === '\\'){ esc = true; continue; } if (c === '"') inStr = false; continue; }
+    if (c === '"'){ inStr = true; continue; }
+    if (c === '}' || c === ']') lastGood = i;
+  }
+  if (lastGood === -1) throw new Error('nessuna struttura JSON');
+  const cut = s.slice(0, lastGood + 1);
+  const st = []; inStr = false; esc = false;
+  for (let i = 0; i < cut.length; i++){
+    const c = cut[i];
+    if (inStr){ if (esc){ esc = false; continue; } if (c === '\\'){ esc = true; continue; } if (c === '"') inStr = false; continue; }
+    if (c === '"'){ inStr = true; continue; }
+    if (c === '{' || c === '[') st.push(c);
+    else if (c === '}' || c === ']') st.pop();
+  }
+  let out = cut;
+  while (st.length){ out += (st.pop() === '{' ? '}' : ']'); }
+  return out;
+}
+
 function _tryParseJson(raw){
   let s = null;
-  const cb = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const cb = raw.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/);
   if (cb) s = cb[1].trim();
-  else { const a = raw.indexOf('{'), b = raw.lastIndexOf('}'); if (a !== -1 && b > a) s = raw.slice(a, b + 1); }
+  if (!s || s.indexOf('{') === -1) { const a = raw.indexOf('{'); if (a !== -1) s = raw.slice(a); }
   if (!s) throw new Error('Risposta AI non valida');
-  try { return JSON.parse(s); } catch (e) {
-    // tentativo di riparazione: taglia all'ultima struttura chiusa
-    for (const tail of ['}]}]}', '}]}', '}}', '}']) {
-      const i = s.lastIndexOf(tail);
-      if (i > 0) { try { return JSON.parse(s.slice(0, i + tail.length)); } catch (e2) {} }
-    }
-    throw new Error('JSON non interpretabile');
-  }
+  try { return JSON.parse(s); } catch (e) {}
+  try { return JSON.parse(_balanceJson(s)); } catch (e) {}
+  // ultima spiaggia: code-fence parziale o testo prima del JSON
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a !== -1 && b > a) { try { return JSON.parse(_balanceJson(s.slice(a, b + 1))); } catch (e) {} }
+  throw new Error('risposta AI troncata o non valida (vedi console)');
 }
 
 async function analizzaProgetto(){
@@ -1986,14 +2009,16 @@ ${v53 || '(non disponibile)'}
 ${v51 || '(non disponibile)'}
 
 Restituisci SOLO il JSON.`;
-    const raw = await callAI([{ role: 'user', content: msg }], PROGETTO_SYS, 8000, 'claude-sonnet-4-6');
+    const raw = await callAI([{ role: 'user', content: msg }], PROGETTO_SYS, 12000, 'claude-sonnet-4-6');
+    window.__lastProgettoRaw = raw; // per diagnosi in console
     const parsed = _tryParseJson(raw);
     if (!parsed.sedi || !parsed.sedi.length) throw new Error('Nessuna sede/attività individuata nella voce 5.3');
     PROGETTO_PARSED = parsed;
     _selSedeIdx = 0; _attChecked = {};
     renderProgettoUI();
   } catch (e) {
-    box.innerHTML = '<div class="warn-box" style="margin:20px;">⚠️ Errore analisi progetto: ' + _escH(e.message) + '.<br>Riprova, oppure incolla solo la voce 5.3 nel riquadro a sinistra.</div>';
+    console.warn('Analisi progetto — risposta AI grezza:', window.__lastProgettoRaw);
+    box.innerHTML = '<div class="warn-box" style="margin:20px;">⚠️ Errore analisi progetto: ' + _escH(e.message) + '.<br>Riprova (la risposta era probabilmente troncata), oppure incolla solo la voce 5.3 nel riquadro a sinistra.</div>';
   } finally {
     btn.disabled = false;
     document.getElementById('analizza-prog-icon').outerHTML = '<span id="analizza-prog-icon">🤖</span>';
