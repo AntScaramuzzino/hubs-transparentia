@@ -1893,38 +1893,87 @@ function renderEstrattoStatus(){
 
 // ---------- Rilevamento settore SCU all'inserimento del progetto ----------
 const _SETT_KEYWORDS = {
-  A: /assistenz|anzian|disabilit|fragil|caregiv|povert|inclusione sociale|welfare|case famiglia/gi,
-  B: /protezione civile|emergenz|antincend|rischio sismic|calamit|primo soccorso/gi,
-  C: /riqualificazione urbana|patrimonio ambientale|rifiut|raccolta differenziata|verde pubblic|decoro urban/gi,
-  D: /patrimonio storico|patrimonio artistico|museo|musei|bibliotec|archivi|beni culturali|sito archeologic/gi,
-  E: /educazion|scuol|giovan|animazione territoriale|promozione culturale|sport|turismo|laborator|doposcuola|minori/gi,
-  F: /agricol|rural|montan|biodiversit|orti|filiera corta/gi,
-  G: /\bpace\b|nonviolenz|diritti umani|cooperazione allo svilupp|intercultura|migrant|commercio equo/gi
+  A: [[/anzian|disabilit|non autosufficien|domiciliar|caregiv|sociosanitar|assistenzial|fragil/gi, 3], [/inclusione sociale|welfare|povert|emarginazion|case famiglia|vittime di violenza/gi, 2]],
+  B: [[/protezione civile|emergenz|antincend|calamit|rischio sismic|primo soccorso/gi, 3]],
+  C: [[/riqualificazione urbana|raccolta differenziata|rifiut|verde pubblic|decoro urban|patrimonio ambiental/gi, 3]],
+  D: [[/\bmuse[oi]\b|bibliotec|archivi|beni cultural|patrimonio storic|patrimonio artistic|sit[oi] archeologic/gi, 3]],
+  E: [[/doposcuola|dispersione scolastic|animazione (?:territoriale|culturale|giovanile)|promozione cultural|educazione ambiental|turismo sostenib|attivit. sportiv|orientamento scolastic/gi, 3], [/educazion|scolastic|laborator/gi, 1]],
+  F: [[/agricol|biodiversit|rural|\borti\b|montan|filiera cort/gi, 3]],
+  G: [[/diritti umani|nonviolenz|cooperazione allo svilupp|commercio equo|intercultural|\bpace\b/gi, 2]]
 };
 function detectSettoreKeyword(text){
-  let best = null, bestN = 0;
-  Object.entries(_SETT_KEYWORDS).forEach(([k, re]) => {
-    const n = (text.match(re) || []).length;
-    if (n > bestN) { bestN = n; best = k; }
+  let best = null, bn = 0;
+  Object.entries(_SETT_KEYWORDS).forEach(([k, rules]) => {
+    let s = 0;
+    rules.forEach(([re, w]) => {
+      let n = (text.match(re) || []).length;
+      if (w <= 1) n = Math.min(n, 15); // i termini deboli non possono dominare da soli
+      s += n * w;
+    });
+    if (s > bn) { bn = s; best = k; }
   });
-  return bestN >= 3 ? best : best && bestN > 0 ? best : null;
+  return bn > 0 ? best : null;
 }
+
+// Il settore è quasi sempre DICHIARATO nella scheda (modulo formazione specifica sicurezza:
+// "rischi connessi all'impiego degli operatori volontari in SC nel settore X") → si legge, non si inferisce.
+function detectSettoreDichiarato(testo){
+  const t = String(testo || '').replace(/\s+/g, ' ');
+  const NOMI = [
+    [/settore\s+(?:dell[’']\s*)?assistenza\b/ig, 'A'],
+    [/settore\s+(?:della\s+)?protezione\s+civile/ig, 'B'],
+    [/settore\s+(?:del\s+)?patrimonio\s+ambientale/ig, 'C'],
+    [/settore\s+(?:del\s+)?patrimonio\s+storico/ig, 'D'],
+    [/settore\s+(?:dell[’']\s*)?educazione\s+e\s+promozione/ig, 'E'],
+    [/settore\s+(?:dell[’']\s*)?agricoltura/ig, 'F'],
+    [/settore\s+(?:della\s+)?promozione\s+della\s+pace/ig, 'G']
+  ];
+  const score = {};
+  NOMI.forEach(([re, k]) => { const n = (t.match(re) || []).length; if (n) score[k] = (score[k] || 0) + n; });
+  // peso forte alla frase standard del modulo sicurezza
+  const m = t.match(/impiego degli operatori\s*volontari in SC nel settore\s+([A-Za-zà-ù][a-zà-ù]*(?:\s+[a-zà-ù,]+){0,9})/i);
+  if (m) {
+    const frag = m[1].toLowerCase();
+    const k = frag.indexOf('assistenza') === 0 ? 'A'
+      : frag.indexOf('protezione') === 0 ? 'B'
+      : (frag.indexOf('patrimonio') === 0 && frag.indexOf('ambiental') > 0) ? 'C'
+      : frag.indexOf('patrimonio') === 0 ? 'D'
+      : frag.indexOf('educazione') === 0 ? 'E'
+      : frag.indexOf('agricoltura') === 0 ? 'F'
+      : frag.indexOf('promozione della pace') === 0 ? 'G' : null;
+    if (k) score[k] = (score[k] || 0) + 5;
+  }
+  let best = null, bn = 0;
+  Object.entries(score).forEach(([k, n]) => { if (n > bn) { bn = n; best = k; } });
+  return best;
+}
+
 async function detectSettoreProgetto(){
   const r = PROGETTO_RAW;
   const base = (r.v53 || r.v51 || '').trim();
   if (!base) return;
   r.settore = null; r.nAda = 0; r.settoreDetecting = true;
   renderEstrattoStatus();
-  try {
-    const sys = `Classifichi progetti di Servizio Civile Universale italiani nel settore d'impiego.
+  // 1) settore DICHIARATO nella scheda (deterministico, su tutto il testo)
+  const dich = detectSettoreDichiarato(r.full || base);
+  if (dich) {
+    r.settore = dich;
+    r.settore_motivo = 'Settore dichiarato nella scheda progetto (modulo formazione specifica)';
+  } else {
+    // 2) classificazione AI
+    try {
+      const sys = `Classifichi progetti di Servizio Civile Universale italiani nel settore d'impiego.
 Settori: A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace, diritti umani, cooperazione allo sviluppo.
+ATTENZIONE: assistenza ad anziani/disabili/fragili con laboratori o attività educative resta settore A; l'educazione è E solo quando è la finalità principale.
 Rispondi SOLO con JSON: {"settore":"E","motivo":"max 100 caratteri"}`;
-    const raw = await callAI([{ role: 'user', content: 'ATTIVITÀ DEL PROGETTO:\n' + base.slice(0, 7000) + '\n\nSOLO JSON.' }], sys, 150);
-    const p = _tryParseJson(raw);
-    const s = String(p.settore || '').toUpperCase();
-    if (SETTORI_SCU[s]) { r.settore = s; r.settore_motivo = p.motivo || ''; }
-  } catch (e) { /* fallback sotto */ }
-  if (!r.settore) r.settore = detectSettoreKeyword(base.toLowerCase());
+      const raw = await callAI([{ role: 'user', content: 'ATTIVITÀ DEL PROGETTO:\n' + base.slice(0, 7000) + '\n\nSOLO JSON.' }], sys, 150);
+      const p = _tryParseJson(raw);
+      const s = String(p.settore || '').toUpperCase();
+      if (SETTORI_SCU[s]) { r.settore = s; r.settore_motivo = p.motivo || ''; }
+    } catch (e) { /* fallback sotto */ }
+    // 3) keyword pesate
+    if (!r.settore) { r.settore = detectSettoreKeyword(base.toLowerCase()); r.settore_motivo = 'Stima da parole chiave'; }
+  }
   r.settoreDetecting = false;
   if (r.settore) {
     try { await ensureCatalogo(); r.nAda = (CATALOGO.settori[r.settore]?.ada || []).length; } catch (e) {}
