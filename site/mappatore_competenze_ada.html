@@ -1438,6 +1438,7 @@ async function handleProjectFile(file){
     PROGETTO_RAW.v51 = v.v51; PROGETTO_RAW.v53 = v.v53;
     PROGETTO_RAW.titolo = v.titolo; PROGETTO_RAW.ente = v.ente;
     renderEstrattoStatus();
+    detectSettoreProgetto();
   } catch (e) {
     statusEl.innerHTML = '<span style="color:#c62828;">⚠️ Errore lettura file: ' + _escH(e.message) + '</span><br>Usa il riquadro "incolla il testo" qui sotto.';
   }
@@ -1455,6 +1456,7 @@ function usaTestoIncollato(){
   if (v.ente) PROGETTO_RAW.ente = v.ente;
   document.getElementById('prog-file-name').textContent = '(testo incollato)';
   renderEstrattoStatus();
+  detectSettoreProgetto();
 }
 
 function estraiVoci(text){
@@ -1505,7 +1507,50 @@ function renderEstrattoStatus(){
     chip(!!r.v53, r.v53 ? `Voce 5.3 ✓ (${Math.round(r.v53.length / 1000)}k)` : 'Voce 5.3 non trovata') +
     (r.titolo ? chip(true, '📌 ' + _escH(r.titolo.slice(0, 40))) : '') +
     (r.ente ? chip(true, '🏛️ ' + _escH(r.ente.slice(0, 40))) : '') +
+    (r.settoreDetecting ? chip(false, '⚖️ Rilevamento settore…') : '') +
+    (r.settore ? chip(true, '⚖️ Settore ' + r.settore + ' — ' + _escH((SETTORI_SCU[r.settore] || '').slice(0, 34)) + (r.nAda ? ' · ' + r.nAda + ' ADA' : '')) : '') +
     (!r.v51 && !r.v53 ? '<div style="color:#c62828;margin-top:4px;">Marcatori "5.1)" / "5.3)" non trovati: il PDF potrebbe essere una scansione. Incolla il testo manualmente.</div>' : '');
+}
+
+// ---------- Rilevamento settore SCU all'inserimento del progetto ----------
+const _SETT_KEYWORDS = {
+  A: /assistenz|anzian|disabilit|fragil|caregiv|povert|inclusione sociale|welfare|case famiglia/gi,
+  B: /protezione civile|emergenz|antincend|rischio sismic|calamit|primo soccorso/gi,
+  C: /riqualificazione urbana|patrimonio ambientale|rifiut|raccolta differenziata|verde pubblic|decoro urban/gi,
+  D: /patrimonio storico|patrimonio artistico|museo|musei|bibliotec|archivi|beni culturali|sito archeologic/gi,
+  E: /educazion|scuol|giovan|animazione territoriale|promozione culturale|sport|turismo|laborator|doposcuola|minori/gi,
+  F: /agricol|rural|montan|biodiversit|orti|filiera corta/gi,
+  G: /\bpace\b|nonviolenz|diritti umani|cooperazione allo svilupp|intercultura|migrant|commercio equo/gi
+};
+function detectSettoreKeyword(text){
+  let best = null, bestN = 0;
+  Object.entries(_SETT_KEYWORDS).forEach(([k, re]) => {
+    const n = (text.match(re) || []).length;
+    if (n > bestN) { bestN = n; best = k; }
+  });
+  return bestN >= 3 ? best : best && bestN > 0 ? best : null;
+}
+async function detectSettoreProgetto(){
+  const r = PROGETTO_RAW;
+  const base = (r.v53 || r.v51 || '').trim();
+  if (!base) return;
+  r.settore = null; r.nAda = 0; r.settoreDetecting = true;
+  renderEstrattoStatus();
+  try {
+    const sys = `Classifichi progetti di Servizio Civile Universale italiani nel settore d'impiego.
+Settori: A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace, diritti umani, cooperazione allo sviluppo.
+Rispondi SOLO con JSON: {"settore":"E","motivo":"max 100 caratteri"}`;
+    const raw = await callAI([{ role: 'user', content: 'ATTIVITÀ DEL PROGETTO:\n' + base.slice(0, 7000) + '\n\nSOLO JSON.' }], sys, 150);
+    const p = _tryParseJson(raw);
+    const s = String(p.settore || '').toUpperCase();
+    if (SETTORI_SCU[s]) { r.settore = s; r.settore_motivo = p.motivo || ''; }
+  } catch (e) { /* fallback sotto */ }
+  if (!r.settore) r.settore = detectSettoreKeyword(base.toLowerCase());
+  r.settoreDetecting = false;
+  if (r.settore) {
+    try { await ensureCatalogo(); r.nAda = (CATALOGO.settori[r.settore]?.ada || []).length; } catch (e) {}
+  }
+  renderEstrattoStatus();
 }
 
 const PROGETTO_SYS = `Sei un analista esperto di progetti di Servizio Civile Universale italiani (scheda progetto Allegato 3A).
@@ -1554,7 +1599,7 @@ async function analizzaProgetto(){
   try {
     const v53 = r.v53.slice(0, 60000);
     const v51 = r.v51.slice(0, 90000);
-    const msg = `${r.titolo ? 'TITOLO (voce 2): ' + r.titolo + '\n' : ''}${r.ente ? 'ENTE (voce 1): ' + r.ente + '\n' : ''}
+    const msg = `${r.titolo ? 'TITOLO (voce 2): ' + r.titolo + '\n' : ''}${r.ente ? 'ENTE (voce 1): ' + r.ente + '\n' : ''}${r.settore ? 'SETTORE PRE-RILEVATO: ' + r.settore + ' (confermalo o correggilo in base alle attività)\n' : ''}
 === VOCE 5.3 — RUOLO E ATTIVITÀ DEGLI OPERATORI VOLONTARI ===
 ${v53 || '(non disponibile)'}
 
@@ -1580,7 +1625,7 @@ Restituisci SOLO il JSON.`;
 function renderProgettoUI(){
   const p = PROGETTO_PARSED;
   const box = document.getElementById('prog-result');
-  const sett = (p.settore || 'E').toUpperCase();
+  const sett = ((p.settore || PROGETTO_RAW.settore || 'E') + '').toUpperCase();
   const settOpts = Object.keys(SETTORI_SCU).map(k =>
     `<option value="${k}" ${k === sett ? 'selected' : ''}>${k} — ${_escH(SETTORI_SCU[k].slice(0, 70))}${SETTORI_SCU[k].length > 70 ? '…' : ''}</option>`).join('');
   const sedeBtns = p.sedi.map((s, i) =>
@@ -1646,8 +1691,14 @@ async function ensureCatalogo(){
   throw lastErr || new Error('Catalogo non raggiungibile');
 }
 
+let SETTORE_ATTIVO = null; // lettera del settore applicato al catalogo runtime
+
 function applySettoreCatalog(letter){
   if (!CATALOGO || !CATALOGO.settori || !CATALOGO.settori[letter]) return 0;
+  // rimuove le ADA caricate da un settore precedente (le 14 curate e le mappature restano)
+  Object.keys(ADA_DB).forEach(k => {
+    if (ADA_DB[k]._cat && !mappings[k]) delete ADA_DB[k];
+  });
   const sett = CATALOGO.settori[letter];
   let added = 0;
   (sett.ada || []).forEach(a => {
@@ -1662,12 +1713,18 @@ function applySettoreCatalog(letter){
     ADA_DB[a.codice] = {
       code: a.codice, desc: a.titolo, sep: a.codice.split('.')[1] || '', level: null, scheda: null,
       source: 'Atlante del Lavoro INAPP — ' + (sett.nome || ('Settore ' + letter)) + ' (SCU)',
-      framework: '', compLinks: [],
+      framework: '', compLinks: [], _cat: true, _sett: letter,
       ra: (a.ra || []).map(r => ({ code: r.codice, desc: r.titolo, attivitaList: r.attivita || [] }))
     };
     added++;
   });
+  SETTORE_ATTIVO = letter;
   return added;
+}
+
+function _isInSettore(code, letter){
+  if (!CATALOGO || !CATALOGO.settori || !CATALOGO.settori[letter]) return false;
+  return (CATALOGO.settori[letter].ada || []).some(a => a.codice === code);
 }
 
 function registerCatalogAda(code){
@@ -1738,8 +1795,10 @@ async function searchCatalogo(){
   if (!box) return;
   if (q.length < 3) { box.innerHTML = ''; return; }
   try { await ensureCatalogo(); } catch (e) { box.innerHTML = '<div style="font-size:11px;color:#c62828;">Catalogo non disponibile (ada_catalogo_scu.json)</div>'; return; }
+  const att = PROJECT?.settore || SETTORE_ATTIVO || null;
+  const ordine = att ? [att].concat(Object.keys(CATALOGO.settori).filter(k => k !== att)) : Object.keys(CATALOGO.settori);
   const seen = new Set(); const hits = [];
-  for (const k of Object.keys(CATALOGO.settori)) {
+  for (const k of ordine) {
     for (const a of (CATALOGO.settori[k].ada || [])) {
       if (seen.has(a.codice)) continue;
       if (a.codice.toLowerCase().includes(q) || (a.titolo || '').toLowerCase().includes(q)) {
@@ -1750,8 +1809,8 @@ async function searchCatalogo(){
     if (hits.length >= 12) break;
   }
   box.innerHTML = hits.length ? hits.map(({ a, k }) =>
-    `<div onclick="addAdaFromCatalog('${a.codice}')" style="padding:6px 8px;border:1px solid var(--bordo);border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:11px;line-height:1.4;background:#fff;" onmouseover="this.style.background='#eef4fb'" onmouseout="this.style.background='#fff'">
-      <strong>${a.codice}</strong> <span style="color:var(--grigio);">· Sett. ${k}</span><br>${_escH((a.titolo || '').slice(0, 90))}</div>`).join('')
+    `<div onclick="addAdaFromCatalog('${a.codice}')" style="padding:6px 8px;border:1px solid ${k === att ? 'var(--blu-chiaro)' : 'var(--bordo)'};border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:11px;line-height:1.4;background:#fff;" onmouseover="this.style.background='#eef4fb'" onmouseout="this.style.background='#fff'">
+      <strong>${a.codice}</strong> <span style="color:${k === att ? 'var(--blu)' : 'var(--grigio)'};font-weight:${k === att ? '700' : '400'};">· Sett. ${k}${k === att ? ' ✓ progetto' : ''}</span><br>${_escH((a.titolo || '').slice(0, 90))}</div>`).join('')
     : '<div style="font-size:11px;color:var(--grigio);">Nessun risultato</div>';
 }
 
@@ -1773,8 +1832,12 @@ function addAdaFromCatalog(code){
 
 // ---------- Database ADA dinamico per i prompt AI ----------
 function buildAdaPromptDb(){
+  const sett = PROJECT?.settore || SETTORE_ATTIVO || null;
+  const strict = !!(sett && CATALOGO && CATALOGO.settori && CATALOGO.settori[sett]);
   const lines = [];
   Object.values(ADA_DB).forEach(a => {
+    // filtro rigoroso: con un settore attivo restano solo le ADA.QE trasversali e quelle del settore (da atlante_elenco-ada_ra_settori_scu)
+    if (strict && a.code.indexOf('ADA.QE') !== 0 && !_isInSettore(a.code, sett) && !mappings[a.code]) return;
     lines.push(`${a.code} — ${a.desc}`);
     (a.ra || []).forEach(r => {
       const d = String(r.desc || '').replace(/^RA\d*:\s*/, '').slice(0, 110);
