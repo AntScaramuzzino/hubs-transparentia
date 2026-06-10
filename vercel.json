@@ -1,11 +1,45 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/.well-known/did.json", "destination": "/api/did-document" },
-    { "source": "/guida", "destination": "/site/guida.html" },
-    { "source": "/analisi-progetto", "destination": "/site/analisi_progetto.html" },
-    { "source": "/mappatore", "destination": "/site/mappatore_competenze_ada.html" },
-    { "source": "/mappatore-competenze", "destination": "/site/mappatore_lifecomp_entrecomp.html" },
-    { "source": "/(.*)", "destination": "/site/$1" }
+    {
+      "source": "/.well-known/did.json",
+      "destination": "/api/did-document"
+    },
+    {
+      "source": "/guida",
+      "destination": "/site/guida.html"
+    },
+    {
+      "source": "/analisi-progetto",
+      "destination": "/site/analisi_progetto.html"
+    },
+    {
+      "source": "/mappatore-competenze",
+      "destination": "/site/mappatore_lifecomp_entrecomp.html"
+    },
+    {
+      "source": "/mappatore-semantico",
+      "destination": "/site/mappatore_semantico.html"
+    },
+    {
+      "source": "/mappatura-asc",
+      "destination": "/site/mappatore_competenze_ada_asc.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/site/$1"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/mappatore",
+      "destination": "/mappatura-asc",
+      "permanent": false
+    },
+    {
+      "source": "/mappatore_competenze_ada.html",
+      "destination": "/mappatura-asc",
+      "permanent": false
+    }
   ]
 }
