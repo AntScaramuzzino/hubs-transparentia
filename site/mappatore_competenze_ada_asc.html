@@ -310,6 +310,10 @@ details[open]{background:#fff}
     <div class="nav-num"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
     <div class="nav-info"><span class="nav-title">Agente Emersione</span><span class="nav-sub">Sessione guidata AI</span></div>
   </div>
+  <div class="nav-item" data-a="a3" onclick="toggleSidebar(false);navGo(0);setTimeout(()=>{ if (PROGETTO_PARSED) apriProgettista(); else _hint('Carica e analizza prima il progetto (Fase 0).'); }, 60);">
+    <div class="nav-num"><i class="fa-solid fa-compass-drafting" aria-hidden="true"></i></div>
+    <div class="nav-info"><span class="nav-title">Progettista — ADA per attività</span><span class="nav-sub">Riferimenti ADA nella voce 5.3</span></div>
+  </div>
   <a class="nav-item" data-a="a1" href="/analisi-progetto" target="_blank" rel="noopener">
     <div class="nav-num"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></div>
     <div class="nav-info"><span class="nav-title">Analisi voce 5.3</span><span class="nav-sub">Pagina dedicata</span></div>
@@ -1990,6 +1994,7 @@ REGOLE:
 - Identifica ogni SEDE DI ATTUAZIONE presente nella voce 5.3 (le sedi dove operano i volontari). Se la 5.3 non distingue sedi, crea un'unica sede "Tutte le sedi".
 - Per ogni sede elenca le ATTIVITÀ PREVISTE PER GLI OPERATORI VOLONTARI (dalla 5.3). Quando possibile collega ciascuna all'Azione/Attività della voce 5.1 nel campo "rif" (es. "Azione 2 / Att. 2.1").
 - Per ogni attività: "titolo" conciso (max 80 caratteri) e "descrizione" operativa (cosa fa concretamente il volontario, 1-3 frasi, verbi d'azione).
+- "ada": SOLO se nel testo della 5.3 quell'attività cita esplicitamente un codice ADA dell'Atlante (es. "ADA.18.01.06"), riportalo; altrimenti ometti il campo.
 - "ruolo": sintesi del ruolo dei volontari in quella sede (max 250 caratteri).
 - SII COMPATTO: massimo 10 attività per sede (le più rilevanti e operative), descrizioni max 25 parole, JSON senza spazi o ritorni a capo superflui. La risposta DEVE chiudersi con il JSON completo.
 - "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
@@ -2063,7 +2068,7 @@ Restituisci SOLO il JSON.`;
     const parsed = _tryParseJson(raw);
     if (!parsed.sedi || !parsed.sedi.length) throw new Error('Nessuna sede/attività individuata nella voce 5.3');
     PROGETTO_PARSED = parsed;
-    _selSedeIdx = 0; _attChecked = {};
+    _selSedeIdx = 0; _attChecked = {}; PROG_ADA = {}; _progettistaView = false;
     renderProgettoUI();
   } catch (e) {
     console.warn('Analisi progetto — risposta AI grezza:', window.__lastProgettoRaw);
@@ -2124,6 +2129,7 @@ function renderProgettoUI(){
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="applicaProgetto()">✓ Usa nel mappatore →</button>
+      <button class="btn btn-outline" onclick="apriProgettista()" title="Per i progettisti: definisci l'ADA di riferimento per ogni attività della 5.3, filtrata sul settore">🏗️ Progettista: ADA per attività</button>
       <span style="font-size:11px;color:var(--grigio);">Le attività selezionate compongono la descrizione del percorso; il catalogo ADA del settore viene caricato per la mappatura.</span>
     </div>`;
 }
@@ -2239,6 +2245,302 @@ async function applicaProgetto(){
       (nAdded ? ` · <span style="color:var(--verde);font-weight:600;">+${nAdded} ADA di settore caricate</span>` : '');
   }
   goStep(1);
+}
+
+// ==================== MODALITÀ PROGETTISTA — ADA associata a ogni attività della 5.3 (filtro settore) ====================
+let PROG_ADA = {};        // "sedeIdx-attIdx" -> { code, fonte:'dichiarata'|'ai'|'manuale', f:'alta|media|bassa', m:'' }
+let _progettistaView = false;
+
+function _settoreAttivo(){
+  return (document.getElementById('prog-settore-select')?.value || PROGETTO_PARSED?.settore || PROGETTO_RAW.settore || 'E').toUpperCase();
+}
+
+function _adaOptionsSettore(sett){
+  // ADA del settore + QE trasversali, dal catalogo ufficiale
+  const out = [];
+  if (CATALOGO && CATALOGO.settori && CATALOGO.settori[sett]) {
+    (CATALOGO.settori[sett].ada || []).forEach(a => out.push({ code: a.codice, titolo: a.titolo }));
+  }
+  Object.values(ADA_DB).forEach(a => {
+    if (a.code.indexOf('ADA.QE') === 0 && !out.find(x => x.code === a.code)) out.push({ code: a.code, titolo: a.desc });
+  });
+  out.sort((x, y) => x.code.localeCompare(y.code));
+  return out;
+}
+
+function _adaTitolo(code){
+  if (!code) return '';
+  if (ADA_DB[code]) return ADA_DB[code].desc;
+  if (CATALOGO && CATALOGO.settori) {
+    for (const k of Object.keys(CATALOGO.settori)) {
+      const a = (CATALOGO.settori[k].ada || []).find(x => x.codice === code);
+      if (a) return a.titolo;
+    }
+  }
+  return '';
+}
+
+function _rilevaAdaDichiarata(a){
+  // ADA già prevista nella 5.3 per questa attività (testo o campo ada dell'AI)
+  const m = ((a.ada || '') + ' ' + (a.titolo || '') + ' ' + (a.descrizione || '') + ' ' + (a.rif || '')).match(/ADA[.\s]?(\d{2})[.\s]?(\d{2})[.\s]?(\d{2})/i);
+  if (m) return `ADA.${m[1]}.${m[2]}.${m[3]}`;
+  const qe = ((a.ada || '') + ' ' + (a.descrizione || '')).match(/ADA[.\s]?QE[.\s]?(\d{2})[.\s]?(\d{2})/i);
+  if (qe) return `ADA.QE.${qe[1]}.${qe[2]}`;
+  return null;
+}
+
+async function apriProgettista(){
+  const p = PROGETTO_PARSED;
+  if (!p || !p.sedi || !p.sedi.length) { alert('Prima carica e analizza il progetto (Analizza progetto).'); return; }
+  try { await ensureCatalogo(); } catch (e) { alert('Catalogo ADA non disponibile: ' + e.message); return; }
+  const sett = _settoreAttivo();
+  applySettoreCatalog(sett);
+  // pre-popola le ADA già dichiarate nella 5.3
+  p.sedi.forEach((s, si) => (s.attivita || []).forEach((a, ai) => {
+    const k = si + '-' + ai;
+    if (!PROG_ADA[k]) {
+      const dich = _rilevaAdaDichiarata(a);
+      if (dich) PROG_ADA[k] = { code: dich, fonte: 'dichiarata', f: 'alta', m: 'Già prevista nella 5.3' };
+    }
+  }));
+  _progettistaView = true;
+  renderProgettistaUI();
+}
+
+function chiudiProgettista(){ _progettistaView = false; renderProgettoUI(); }
+
+function renderProgettistaUI(){
+  const p = PROGETTO_PARSED;
+  const box = document.getElementById('prog-result');
+  const sett = _settoreAttivo();
+  const opts = _adaOptionsSettore(sett);
+  const nTot = p.sedi.reduce((n, s) => n + (s.attivita || []).length, 0);
+  const nAss = Object.keys(PROG_ADA).filter(k => PROG_ADA[k] && PROG_ADA[k].code).length;
+  const nDich = Object.values(PROG_ADA).filter(v => v && v.fonte === 'dichiarata').length;
+
+  const optionsHtml = (sel) => '<option value="">— nessuna —</option>' + opts.map(o =>
+    `<option value="${o.code}" ${o.code === sel ? 'selected' : ''}>${o.code} — ${_escH(o.titolo.slice(0, 70))}</option>`).join('');
+
+  const fonteBadge = (v) => !v || !v.code ? '<span class="badge" style="background:#fff3e0;color:#7a4a00;">da definire</span>'
+    : v.fonte === 'dichiarata' ? '<span class="badge" style="background:var(--c-a2bg);color:var(--c-a2);">già in 5.3</span>'
+    : v.fonte === 'ai' ? `<span class="badge" style="background:var(--c-a4bg);color:var(--c-a4);">AI · ${_escH(v.f || '')}</span>`
+    : '<span class="badge" style="background:var(--c-a1bg);color:var(--c-a1);">manuale</span>';
+
+  let righe = '';
+  p.sedi.forEach((s, si) => {
+    righe += `<tr><td colspan="4" style="background:var(--c-a1bg);font-weight:800;font-size:.8rem;padding:8px 10px;border:1px solid var(--border);">🏢 ${_escH(s.nome || ('Sede ' + (si + 1)))}</td></tr>`;
+    (s.attivita || []).forEach((a, ai) => {
+      const k = si + '-' + ai;
+      const v = PROG_ADA[k];
+      righe += `<tr>
+        <td style="border:1px solid var(--border);padding:7px 9px;font-size:.72rem;white-space:nowrap;color:var(--sub);">${_escH(a.rif || '—')}</td>
+        <td style="border:1px solid var(--border);padding:7px 9px;font-size:.8rem;min-width:220px;"><strong>${_escH(a.titolo)}</strong>${a.descrizione ? `<br><span style="font-size:.72rem;color:var(--sub);">${_escH(a.descrizione.slice(0, 140))}</span>` : ''}</td>
+        <td style="border:1px solid var(--border);padding:6px 8px;min-width:260px;">
+          <select onchange="setProgAda('${k}', this.value)" style="font-size:.74rem;">${optionsHtml(v?.code || '')}</select>
+          ${v?.m && v.fonte !== 'manuale' ? `<div style="font-size:.68rem;color:var(--sub);margin-top:3px;">${_escH(v.m)}</div>` : ''}
+        </td>
+        <td style="border:1px solid var(--border);padding:7px 9px;text-align:center;">${fonteBadge(v)}</td>
+      </tr>`;
+    });
+  });
+
+  box.innerHTML = `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#fff;display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+      <div style="flex:1;min-width:260px;">
+        <div style="font-weight:800;">🏗️ Modalità progettista — ADA per attività</div>
+        <div style="font-size:.76rem;color:var(--sub);">Settore ${sett} — ${_escH((SETTORI_SCU[sett] || '').slice(0, 60))} · ${opts.length} ADA disponibili · ${nAss}/${nTot} attività associate${nDich ? ` (${nDich} già in 5.3)` : ''}</div>
+      </div>
+      <button class="btn-ai" id="btn-sugg-ada" style="margin:0;width:auto;padding:10px 16px;" onclick="suggerisciAdaProgettista()"><span id="sugg-ada-icon">🤖</span> <span id="sugg-ada-label">Suggerisci ADA mancanti con AI</span></button>
+      <button class="btn btn-outline btn-sm" onclick="chiudiProgettista()">← Selezione sede (tutor)</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;background:#fff;">
+        <tr>
+          <th style="background:var(--c-a1);color:#fff;padding:7px 9px;font-size:.7rem;text-align:left;">Rif. 5.1</th>
+          <th style="background:var(--c-a1);color:#fff;padding:7px 9px;font-size:.7rem;text-align:left;">Attività del volontario (5.3)</th>
+          <th style="background:var(--c-a1);color:#fff;padding:7px 9px;font-size:.7rem;text-align:left;">ADA associata (Atlante INAPP — settore ${sett})</th>
+          <th style="background:var(--c-a1);color:#fff;padding:7px 9px;font-size:.7rem;">Fonte</th>
+        </tr>
+        ${righe}
+      </table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-success btn-sm" onclick="downloadProgettistaDocx()">📄 Tabella .docx</button>
+      <button class="btn btn-success btn-sm" onclick="downloadTesto53Docx()">📝 Testo 5.3 annotato .docx</button>
+      <button class="btn btn-outline btn-sm" onclick="copiaProgettistaTSV()">📋 Copia tabella (Excel/Word)</button>
+      <button class="btn btn-outline btn-sm" onclick="copiaTesto53()">📋 Copia testo 5.3 annotato</button>
+      <span style="flex:1;"></span>
+      <button class="btn btn-primary btn-sm" onclick="applicaProgettista()">↪ Porta le ADA nella mappatura (Fase 3)</button>
+    </div>
+    <div style="font-size:.72rem;color:var(--sub);margin-top:8px;">Il testo annotato inserisce dopo ogni attività il riferimento <em>[Rif. Atlante INAPP: ADA.xx.xx.xx — titolo]</em>, pronto da incollare nella voce 5.3 della scheda progetto.</div>`;
+}
+
+function setProgAda(k, code){
+  if (!code) { delete PROG_ADA[k]; }
+  else {
+    const prev = PROG_ADA[k];
+    PROG_ADA[k] = { code, fonte: (prev && prev.code === code && prev.fonte !== 'manuale') ? prev.fonte : 'manuale', f: prev?.f || '', m: prev?.code === code ? (prev.m || '') : '' };
+  }
+  renderProgettistaUI();
+}
+
+const PROGETTISTA_SYS_HEAD = `Sei un progettista esperto di Servizio Civile Universale e dell'Atlante del Lavoro INAPP.
+Per OGNI attività dei volontari indicata, scegli l'ADA più pertinente dal catalogo fornito (solo quei codici).
+Criteri: pertinenza operativa (cosa fa il volontario), non il tema generale del progetto. Le ADA.QE (digitali) solo per attività prevalentemente digitali.
+Rispondi SOLO JSON compatto: {"associazioni":[{"k":"0-1","ada":"ADA.18.01.06","f":"alta","m":"max 10 parole"}]}
+"f" = fiducia: alta|media|bassa. Includi TUTTE le chiavi richieste.`;
+
+async function suggerisciAdaProgettista(){
+  const p = PROGETTO_PARSED;
+  const sett = _settoreAttivo();
+  const opts = _adaOptionsSettore(sett);
+  const daFare = [];
+  p.sedi.forEach((s, si) => (s.attivita || []).forEach((a, ai) => {
+    const k = si + '-' + ai;
+    if (!PROG_ADA[k] || !PROG_ADA[k].code) daFare.push({ k, sede: s.nome, titolo: a.titolo, desc: a.descrizione || '' });
+  }));
+  if (!daFare.length) { alert('Tutte le attività hanno già un\'ADA associata.'); return; }
+
+  const btn = document.getElementById('btn-sugg-ada');
+  const icon = document.getElementById('sugg-ada-icon');
+  const label = document.getElementById('sugg-ada-label');
+  if (btn) btn.disabled = true;
+  if (icon) icon.outerHTML = '<span id="sugg-ada-icon" class="ai-spinner"></span>';
+  if (label) label.textContent = `Associazione di ${daFare.length} attività…`;
+
+  try {
+    const catalogoTxt = opts.map(o => `${o.code} — ${o.titolo}`).join('\n');
+    const attTxt = daFare.map(d => `${d.k}: [${(d.sede || '').slice(0, 40)}] ${d.titolo}${d.desc ? ' — ' + d.desc.slice(0, 160) : ''}`).join('\n');
+    const msg = `CATALOGO ADA (settore ${sett} + QE):\n${catalogoTxt}\n\nATTIVITÀ DEI VOLONTARI:\n${attTxt}\n\nSOLO JSON.`;
+    const raw = await callAI([{ role: 'user', content: msg }], PROGETTISTA_SYS_HEAD, 6000, 'claude-sonnet-4-6');
+    window.__lastProgettistaRaw = raw;
+    const parsed = _tryParseJson(raw);
+    let n = 0;
+    (parsed.associazioni || []).forEach(x => {
+      if (!x || !x.k || !x.ada) return;
+      if (!opts.find(o => o.code === x.ada)) return; // fuori catalogo/settore: scarta
+      PROG_ADA[x.k] = { code: x.ada, fonte: 'ai', f: x.f || 'media', m: x.m || '' };
+      n++;
+    });
+    renderProgettistaUI();
+    if (!n) alert('L\'AI non ha prodotto associazioni valide: riprova.');
+  } catch (e) {
+    console.warn('Suggerimento ADA — risposta grezza:', window.__lastProgettistaRaw);
+    alert('Errore suggerimento ADA: ' + e.message);
+    renderProgettistaUI();
+  }
+}
+
+function _progettistaRows(){
+  const rows = [];
+  PROGETTO_PARSED.sedi.forEach((s, si) => (s.attivita || []).forEach((a, ai) => {
+    const v = PROG_ADA[si + '-' + ai];
+    rows.push({
+      sede: s.nome || ('Sede ' + (si + 1)), rif: a.rif || '', titolo: a.titolo || '', desc: a.descrizione || '',
+      ada: v?.code || '', adaTitolo: v?.code ? _adaTitolo(v.code) : '',
+      fonte: !v || !v.code ? 'da definire' : v.fonte === 'dichiarata' ? 'già in 5.3' : v.fonte
+    });
+  }));
+  return rows;
+}
+
+function copiaProgettistaTSV(){
+  const rows = _progettistaRows();
+  const tsv = 'Sede\tRif. 5.1\tAttività del volontario\tADA\tTitolo ADA\tFonte\n' +
+    rows.map(r => [r.sede, r.rif, r.titolo, r.ada, r.adaTitolo, r.fonte].map(c => String(c).replace(/\t/g, ' ')).join('\t')).join('\n');
+  navigator.clipboard.writeText(tsv).then(() => alert('Tabella copiata (formato Excel/Word).'));
+}
+
+function _testo53Annotato(){
+  const p = PROGETTO_PARSED;
+  let out = '';
+  p.sedi.forEach((s, si) => {
+    out += `SEDE DI ATTUAZIONE: ${s.nome || ('Sede ' + (si + 1))}\n`;
+    if (s.ruolo) out += `${s.ruolo}\n`;
+    (s.attivita || []).forEach((a, ai) => {
+      const v = PROG_ADA[si + '-' + ai];
+      out += `\n${a.rif ? a.rif + ' — ' : ''}${a.titolo}\n`;
+      if (a.descrizione) out += `${a.descrizione}\n`;
+      if (v?.code) out += `[Rif. Atlante INAPP: ${v.code} — ${_adaTitolo(v.code)}]\n`;
+    });
+    out += '\n';
+  });
+  return out;
+}
+
+function copiaTesto53(){
+  navigator.clipboard.writeText(_testo53Annotato()).then(() => alert('Testo 5.3 annotato copiato.'));
+}
+
+async function downloadProgettistaDocx(){
+  try {
+    const sett = _settoreAttivo();
+    const rows = _progettistaRows();
+    let xml = '';
+    xml += _wH('ADA ASSOCIATE ALLE ATTIVITÀ DEI VOLONTARI (VOCE 5.3)', 2);
+    xml += _wP(`Progetto: ${PROGETTO_PARSED.titolo || PROGETTO_RAW.titolo || '—'} · Settore ${sett} — ${SETTORI_SCU[sett] || ''} · ${new Date().toLocaleDateString('it-IT')}`, { sz: 16, color: '444444' });
+    xml += _wBr();
+    xml += _wDataTableW(
+      ['Sede', 'Rif. 5.1', 'Attività del volontario', 'ADA (Atlante INAPP)', 'Fonte'],
+      rows.map(r => [r.sede, r.rif || '—', r.titolo + (r.desc ? '\n' + r.desc.slice(0, 180) : ''), r.ada ? r.ada + '\n' + r.adaTitolo : '— da definire —', r.fonte]),
+      [3, 2, 6, 5, 2]
+    );
+    xml += _wBr();
+    xml += _wP('Le ADA sono filtrate sul settore d\'impiego del progetto secondo atlante_elenco-ada_ra_settori_scu (INAPP). Fonte "già in 5.3" = riferimento già presente nella scheda; "ai" = suggerimento automatico da validare; "manuale" = scelta del progettista.', { italic: true, sz: 14, color: '666666' });
+    const blob = await _assembleDocx(xml, 'ADA per attività — progettista');
+    _saveBlob(blob, `HubS_Progettista_ADA_Attivita_${_ymd()}.docx`);
+  } catch (e) { alert('Errore generazione docx: ' + e.message); }
+}
+
+async function downloadTesto53Docx(){
+  try {
+    const sett = _settoreAttivo();
+    let xml = '';
+    xml += _wH('VOCE 5.3 — RUOLO ED ATTIVITÀ DEI VOLONTARI, CON RIFERIMENTI ADA', 2);
+    xml += _wP(`Progetto: ${PROGETTO_PARSED.titolo || PROGETTO_RAW.titolo || '—'} · Settore ${sett} · Testo pronto da incollare nella scheda progetto`, { sz: 16, color: '444444' });
+    xml += _wBr();
+    PROGETTO_PARSED.sedi.forEach((s, si) => {
+      xml += _wH('SEDE DI ATTUAZIONE: ' + (s.nome || ('Sede ' + (si + 1))), 3);
+      if (s.ruolo) xml += _wP(s.ruolo, { sz: 18 });
+      (s.attivita || []).forEach((a, ai) => {
+        const v = PROG_ADA[si + '-' + ai];
+        xml += _wP((a.rif ? a.rif + ' — ' : '') + a.titolo, { bold: true, sz: 18 });
+        if (a.descrizione) xml += _wP(a.descrizione, { sz: 18 });
+        if (v?.code) xml += _wP(`[Rif. Atlante INAPP: ${v.code} — ${_adaTitolo(v.code)}]`, { sz: 16, color: '1a5276' });
+      });
+      xml += _wBr();
+    });
+    const blob = await _assembleDocx(xml, 'Voce 5.3 annotata con ADA');
+    _saveBlob(blob, `HubS_Voce53_Annotata_ADA_${_ymd()}.docx`);
+  } catch (e) { alert('Errore generazione docx: ' + e.message); }
+}
+
+function applicaProgettista(){
+  const sett = _settoreAttivo();
+  applySettoreCatalog(sett);
+  const byAda = {};
+  PROGETTO_PARSED.sedi.forEach((s, si) => (s.attivita || []).forEach((a, ai) => {
+    const v = PROG_ADA[si + '-' + ai];
+    if (v?.code) { (byAda[v.code] = byAda[v.code] || []).push(a.titolo); }
+  }));
+  const codes = Object.keys(byAda);
+  if (!codes.length) { alert('Nessuna ADA associata: usa il suggerimento AI o i menu a tendina.'); return; }
+  let n = 0;
+  codes.forEach(code => {
+    if (!ADA_DB[code]) registerCatalogAda(code);
+    const ada = ADA_DB[code];
+    if (!ada) return;
+    if (!mappings[code]) {
+      mappings[code] = { adaKey: code, validated: false, livello: 2, attivita: byAda[code].slice(0, 3).join('; ').slice(0, 160), comps: [], ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' })) };
+      n++;
+    }
+  });
+  if (!PROJECT) {
+    PROJECT = { titolo: PROGETTO_PARSED.titolo || PROGETTO_RAW.titolo || '', ente: PROGETTO_PARSED.ente || PROGETTO_RAW.ente || '',
+      settore: sett, settoreNome: SETTORI_SCU[sett] || '', sede: (PROGETTO_PARSED.sedi[0]?.nome) || '', ruolo: '', attivita: [] };
+  }
+  goStep(3);
+  _hint(`Aggiunte ${n} ADA del progettista alla mappatura (da validare).`);
 }
 
 // ---------- Ricerca nel catalogo ADA (Passo 3) ----------
