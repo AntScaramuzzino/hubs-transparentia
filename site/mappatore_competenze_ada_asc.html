@@ -286,7 +286,7 @@ details[open]{background:#fff}
   </div>
   <div class="nav-item" data-a="a2" id="nav-fase-1" onclick="navGo(1)">
     <div class="nav-num">1</div>
-    <div class="nav-info"><span class="nav-title">Descrizione</span><span class="nav-sub">Attività del volontario</span></div>
+    <div class="nav-info"><span class="nav-title">Descrizione</span><span class="nav-sub">Attività effettive dell'OV · ingresso manuale</span></div>
     <span class="nav-status" id="nav-status-1"></span>
   </div>
   <div class="nav-item" data-a="a3" id="nav-fase-2" onclick="navGo(2)">
@@ -326,7 +326,7 @@ details[open]{background:#fff}
 
 <div class="fase-stepper" id="fase-stepper">
   <button class="step active" data-f="0" id="step-tab-0" onclick="goStep(0)"><span class="num" id="step-num-0">0</span><span class="step-txt"><b>Progetto SCU</b><span class="step-sub">Allegato 3A → 5.1/5.3</span></span></button>
-  <button class="step" data-f="1" id="step-tab-1" onclick="goStep(1)"><span class="num" id="step-num-1">1</span><span class="step-txt"><b>Descrizione</b><span class="step-sub">Attività del volontario</span></span></button>
+  <button class="step" data-f="1" id="step-tab-1" onclick="goStep(1)"><span class="num" id="step-num-1">1</span><span class="step-txt"><b>Descrizione</b><span class="step-sub">Cosa ha fatto davvero l'OV</span></span></button>
   <button class="step" data-f="2" id="step-tab-2" onclick="goStep(2)"><span class="num" id="step-num-2">2</span><span class="step-txt"><b>Competenze emerse</b><span class="step-sub">Quadri europei</span></span></button>
   <button class="step" data-f="3" id="step-tab-3" onclick="goStep(3)"><span class="num" id="step-num-3">3</span><span class="step-txt"><b>Mappatura ADA</b><span class="step-sub">Atlante INAPP</span></span></button>
   <button class="step" data-f="4" id="step-tab-4" onclick="goStep(4)"><span class="num" id="step-num-4">4</span><span class="step-txt"><b>Export</b><span class="step-sub">All. 6C/6D · documenti</span></span></button>
@@ -2128,9 +2128,10 @@ function renderProgettoUI(){
       </div>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="applicaProgetto()">✓ Usa nel mappatore →</button>
+      <button class="btn btn-primary" onclick="applicaProgetto(true)">✓ Usa e analizza → Mappatura ADA</button>
+      <button class="btn btn-outline" onclick="applicaProgetto(false)" title="Si ferma alla Fase 1 per adattare il testo alle attività effettivamente svolte dal volontario">✏️ Applica e rifinisci la descrizione</button>
       <button class="btn btn-outline" onclick="apriProgettista()" title="Per i progettisti: definisci l'ADA di riferimento per ogni attività della 5.3, filtrata sul settore">🏗️ Progettista: ADA per attività</button>
-      <span style="font-size:11px;color:var(--grigio);">Le attività selezionate compongono la descrizione del percorso; il catalogo ADA del settore viene caricato per la mappatura.</span>
+      <span style="font-size:11px;color:var(--grigio);">"Usa e analizza" porta direttamente alle proposte ADA; "rifinisci" si ferma alla descrizione per adattarla a ciò che il volontario ha fatto davvero.</span>
     </div>`;
 }
 
@@ -2216,7 +2217,7 @@ function registerCatalogAda(code){
   return null;
 }
 
-async function applicaProgetto(){
+async function applicaProgetto(autoAnalisi){
   const p = PROGETTO_PARSED;
   if (!p) return;
   const sede = p.sedi[_selSedeIdx];
@@ -2258,6 +2259,10 @@ async function applicaProgetto(){
       (nAdded ? ` · <span style="color:var(--verde);font-weight:600;">+${nAdded} ADA di settore caricate</span>` : '');
   }
   goStep(1);
+  if (autoAnalisi) {
+    // descrizione pronta: analisi AI immediata → Fase 3 (Mappatura), senza sosta in Fase 1
+    setTimeout(() => { try { analizzaAttivita(); } catch (e) { console.warn(e); } }, 80);
+  }
 }
 
 // ==================== MODALITÀ PROGETTISTA — ADA associata a ogni attività della 5.3 (filtro settore) ====================
