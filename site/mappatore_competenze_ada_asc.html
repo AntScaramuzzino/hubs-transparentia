@@ -1798,6 +1798,7 @@ let CATALOGO = null;           // ada_catalogo_scu.json (lazy)
 let _selSedeIdx = 0;
 let _attChecked = {};          // "sede-att" -> bool
 let PENDING_MAP = null;        // proposte ADA dalla chiamata unificata (con chiavi ks)
+let PENDING_MAP_SETTORE = null; // settore del catalogo usato per le proposte correnti
 let _autoAnalisiFatta = false; // analisi automatica una sola volta per file
 
 const SETTORI_SCU = {
@@ -2125,6 +2126,7 @@ Restituisci SOLO il JSON.`;
     if (!parsed.sedi || !parsed.sedi.length) throw new Error('Nessuna sede/attività individuata nella voce 5.3');
     PROGETTO_PARSED = parsed;
     PENDING_MAP = Array.isArray(parsed.mappatura) ? parsed.mappatura : null;
+    PENDING_MAP_SETTORE = PENDING_MAP ? (r.settore || null) : null;
     _selSedeIdx = 0; _attChecked = {}; PROG_ADA = {}; _progettistaView = false;
     renderProgettoUI();
   } catch (e) {
@@ -2170,7 +2172,8 @@ function renderProgettoUI(){
       </div>
       <div style="margin-top:10px;">
         <span style="color:var(--grigio);font-size:10px;">SETTORE SCU (modificabile — determina il catalogo ADA proposto)</span>
-        <select id="prog-settore-select" style="width:100%;margin-top:3px;">${settOpts}</select>
+        <select id="prog-settore-select" style="width:100%;margin-top:3px;" onchange="cambiaSettoreProgetto(this.value)">${settOpts}</select>
+        <div id="settore-remap-status" style="font-size:11px;margin-top:4px;"></div>
         ${p.settore_motivo ? `<div style="font-size:11px;color:var(--grigio);margin-top:4px;">💡 ${_escH(p.settore_motivo)}</div>` : ''}
       </div>
     </div>
@@ -2275,6 +2278,57 @@ function registerCatalogAda(code){
   return null;
 }
 
+const RIMAPPA_SYS = `Mappi le attività dei volontari SCU sulle ADA dell'Atlante INAPP.
+Usa SOLO i codici del CATALOGO fornito (settore + ADA.QE digitali). Le ADA.QE solo per attività prevalentemente digitali.
+Rispondi SOLO JSON compatto: {"mappatura":[{"ada_code":"ADA.xx.xx.xx","ra_codes":["RA..."],"livello":1|2,"comp_ids":["lc4"],"attivita":"nome breve","ks":["0-1"]}]}
+ks = indici sede-attività coperti. Max 12 voci, raggruppa le attività nella stessa ADA. COMP_IDS validi: dc1..dc5, lc1, lc3..lc7, ec1, ec3..ec7, eu1, eu5, eu6, eu7.`;
+
+async function rimappaProposte(sett){
+  const p = PROGETTO_PARSED;
+  if (!p || !p.sedi || !p.sedi.length) return;
+  const righe = [];
+  p.sedi.forEach((s, si) => (s.attivita || []).forEach((a, ai) =>
+    righe.push(`${si}-${ai}: [${(s.nome || '').slice(0, 40)}] ${a.titolo}${a.descrizione ? ' — ' + a.descrizione.slice(0, 140) : ''}`)));
+  const msg = `CATALOGO ADA (settore ${sett} + QE — usa SOLO questi codici):\n${buildAdaPromptDb()}\n\nATTIVITÀ DEI VOLONTARI:\n${righe.join('\n')}\n\nSOLO JSON.`;
+  const raw = await callAI([{ role: 'user', content: msg }], RIMAPPA_SYS, 6000, 'claude-sonnet-4-6');
+  window.__lastRimappaRaw = raw;
+  const parsed = _tryParseJson(raw);
+  PENDING_MAP = Array.isArray(parsed.mappatura) ? parsed.mappatura.filter(m => m && m.ada_code) : [];
+  PENDING_MAP_SETTORE = sett;
+}
+
+async function cambiaSettoreProgetto(nuovo){
+  nuovo = String(nuovo || '').toUpperCase();
+  if (!SETTORI_SCU[nuovo] || !PROGETTO_PARSED) return;
+  if (PENDING_MAP_SETTORE === nuovo) return; // nessun cambio reale
+  const sel = document.getElementById('prog-settore-select');
+  const st = document.getElementById('settore-remap-status');
+  if (sel) sel.disabled = true;
+  if (st) st.innerHTML = '<span class="ai-spinner" style="width:11px;height:11px;display:inline-block;vertical-align:middle;"></span> Settore ' + nuovo + ': aggiorno catalogo e proposte ADA…';
+  try {
+    await ensureCatalogo();
+    applySettoreCatalog(nuovo);                 // carica il nuovo catalogo (rimuove le ADA del precedente non mappate)
+    PROGETTO_PARSED.settore = nuovo;
+    PROGETTO_PARSED.settore_motivo = 'Settore scelto manualmente';
+    if (PROJECT) { PROJECT.settore = nuovo; PROJECT.settoreNome = SETTORI_SCU[nuovo] || ''; }
+    PROGETTO_RAW.settore = nuovo;
+    PROGETTO_RAW.nAda = (CATALOGO.settori[nuovo]?.ada || []).length;
+    // i suggerimenti AI del progettista appartenevano al vecchio settore
+    Object.keys(PROG_ADA).forEach(k => { if (PROG_ADA[k]?.fonte === 'ai') delete PROG_ADA[k]; });
+    await rimappaProposte(nuovo);               // chiamata leggera: solo attività già strutturate + nuovo catalogo
+    renderEstrattoStatus();
+    renderProgettoUI();
+    _hint(`Settore ${nuovo}: catalogo e proposte ADA aggiornati (${(PENDING_MAP || []).length} proposte).`);
+  } catch (e) {
+    console.warn('Rimappatura settore:', e, window.__lastRimappaRaw);
+    PENDING_MAP = null; PENDING_MAP_SETTORE = null; // le vecchie proposte non valgono più: fallback a 2 passi in conferma
+    renderProgettoUI();
+    if (st) st.innerHTML = '<span style="color:var(--c-a5l);">Proposte non aggiornate (' + _escH(e.message) + '): alla conferma verrà rieseguita l\'analisi delle attività.</span>';
+  } finally {
+    const s2 = document.getElementById('prog-settore-select'); if (s2) s2.disabled = false;
+  }
+}
+
 async function applicaProgetto(autoAnalisi){
   const p = PROGETTO_PARSED;
   if (!p) return;
@@ -2317,6 +2371,10 @@ async function applicaProgetto(autoAnalisi){
       (nAdded ? ` · <span style="color:var(--verde);font-weight:600;">+${nAdded} ADA di settore caricate</span>` : '');
   }
   if (autoAnalisi) {
+    // guardia: se il settore scelto non coincide con quello delle proposte, rimappa prima di filtrare
+    if (PENDING_MAP && PENDING_MAP.length && PENDING_MAP_SETTORE !== settore) {
+      try { await rimappaProposte(settore); } catch (e) { console.warn('remap in conferma:', e); PENDING_MAP = null; }
+    }
     // le proposte ADA sono già arrivate con la chiamata unificata: filtra per le attività selezionate
     const ks = new Set();
     (sede.attivita || []).forEach((a, j) => { if (_attChecked[_selSedeIdx + '-' + j] !== false) ks.add(_selSedeIdx + '-' + j); });
