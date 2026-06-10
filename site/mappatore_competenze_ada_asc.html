@@ -643,7 +643,7 @@ const ADA_DB = {
   "ADA.QE.01.01": {
     code:"ADA.QE.01.01", desc:"Ricerca e gestione di informazioni, dati e contenuti digitali",
     sep:"QE.01", level:"L1", scheda:null,
-    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante · ADA digitale trasversale (extra elenco Dipartimento)",
+    source:"Quadro DigComp 2.1 ↔ ADA (Dipartimento SCU) · GOL/EDO Regione Calabria n.15242/2025",
     framework:"DigComp 2.2 — Area 1: Informazione e dati",
     compLinks:["dc1"],
     ra:[
@@ -655,7 +655,7 @@ const ADA_DB = {
   "ADA.QE.01.02": {
     code:"ADA.QE.01.02", desc:"Comunicazione e collaborazione in contesti digitali",
     sep:"QE.01", level:"L1", scheda:null,
-    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante · ADA digitale trasversale (extra elenco Dipartimento)",
+    source:"Quadro DigComp 2.1 ↔ ADA (Dipartimento SCU) · GOL/EDO Regione Calabria n.15242/2025",
     framework:"DigComp 2.2 — Area 2: Comunicazione e collaborazione",
     compLinks:["dc2"],
     ra:[
@@ -670,7 +670,7 @@ const ADA_DB = {
   "ADA.QE.01.03": {
     code:"ADA.QE.01.03", desc:"Creazione di contenuti digitali",
     sep:"QE.01", level:"L1", scheda:null,
-    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante · ADA digitale trasversale (extra elenco Dipartimento)",
+    source:"Quadro DigComp 2.1 ↔ ADA (Dipartimento SCU) · GOL/EDO Regione Calabria n.15242/2025",
     framework:"DigComp 2.2 — Area 3: Creazione di contenuti digitali",
     compLinks:["dc3"],
     ra:[
@@ -683,7 +683,7 @@ const ADA_DB = {
   "ADA.QE.01.04": {
     code:"ADA.QE.01.04", desc:"Sicurezza Digitale",
     sep:"QE.01", level:"L1", scheda:null,
-    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante · ADA digitale trasversale (extra elenco Dipartimento)",
+    source:"Quadro DigComp 2.1 ↔ ADA (Dipartimento SCU) · GOL/EDO Regione Calabria n.15242/2025",
     framework:"DigComp 2.2 — Area 4: Sicurezza",
     compLinks:["dc4"],
     ra:[
@@ -696,7 +696,7 @@ const ADA_DB = {
   "ADA.QE.01.05": {
     code:"ADA.QE.01.05", desc:"Soluzione di problemi tecnici",
     sep:"QE.01", level:"L1", scheda:null,
-    source:"GOL/EDO Regione Calabria n.15242/2025 + INAPP Atlante · ADA digitale trasversale (extra elenco Dipartimento)",
+    source:"Quadro DigComp 2.1 ↔ ADA (Dipartimento SCU) · GOL/EDO Regione Calabria n.15242/2025",
     framework:"DigComp 2.2 — Area 5: Risoluzione di problemi",
     compLinks:["dc5"],
     ra:[
@@ -2143,7 +2143,7 @@ async function ensureCatalogo(){
   for (const url of ['ada_catalogo_scu.json', '/ada_catalogo_scu.json']) {
     try {
       const r = await fetch(url);
-      if (r.ok) { CATALOGO = await r.json(); return CATALOGO; }
+      if (r.ok) { CATALOGO = await r.json(); applyQuadroDigcomp(); return CATALOGO; }
       lastErr = new Error('HTTP ' + r.status);
     } catch (e) { lastErr = e; }
   }
@@ -2151,6 +2151,19 @@ async function ensureCatalogo(){
 }
 
 let SETTORE_ATTIVO = null; // lettera del settore applicato al catalogo runtime
+
+function applyQuadroDigcomp(){
+  // arricchisce le ADA.QE statiche con le liste attività del Quadro DigComp del Dipartimento
+  if (!CATALOGO || !CATALOGO.digcomp) return;
+  (CATALOGO.digcomp.ada || []).forEach(a => {
+    const ex = ADA_DB[a.codice];
+    if (!ex) return;
+    (a.ra || []).forEach(cr => {
+      const r = (ex.ra || []).find(x => x.code === cr.codice);
+      if (r && !r.attivitaList && cr.attivita && cr.attivita.length) r.attivitaList = cr.attivita;
+    });
+  });
+}
 
 function applySettoreCatalog(letter){
   if (!CATALOGO || !CATALOGO.settori || !CATALOGO.settori[letter]) return 0;
@@ -2294,7 +2307,7 @@ function _settoriDiAda(code){
 // dalle ADA trasversali digitali (QE) e da quelle fuori elenco
 function _fonteAda(code, fallback){
   if (!code) return fallback || 'Atlante del Lavoro INAPP';
-  if (String(code).indexOf('ADA.QE') === 0) return 'ADA digitale trasversale (EQF/DigComp — GOL/EDO) · extra elenco Dipartimento';
+  if (String(code).indexOf('ADA.QE') === 0) return '✓ Quadro DigComp ↔ ADA del Dipartimento SCU · trasversale digitale';
   const setts = _settoriDiAda(code);
   if (setts.length) return '✓ Elenco Dipartimento SCU — settor' + (setts.length > 1 ? 'i ' : 'e ') + setts.join(', ') + ' · Atlante del Lavoro INAPP';
   if (ADA_DB[code] && ADA_DB[code]._cat) return '✓ Elenco Dipartimento SCU — settore ' + (ADA_DB[code]._sett || '') + ' · Atlante del Lavoro INAPP';
@@ -2345,7 +2358,7 @@ function renderProgettistaUI(){
     const opt = (o) => `<option value="${o.code}" ${o.code === sel ? 'selected' : ''}>${o.code} — ${_escH(o.titolo.slice(0, 70))}</option>`;
     return '<option value="">— nessuna —</option>' +
       `<optgroup label="✓ Elenco Dipartimento SCU — settore ${sett} (${dip.length})">` + dip.map(opt).join('') + '</optgroup>' +
-      `<optgroup label="ADA digitali trasversali — extra elenco (${qe.length})">` + qe.map(opt).join('') + '</optgroup>';
+      `<optgroup label="ADA digitali — Quadro DigComp Dipartimento (${qe.length})">` + qe.map(opt).join('') + '</optgroup>';
   };
 
   const fonteBadge = (v) => !v || !v.code ? '<span class="badge" style="background:#fff3e0;color:#7a4a00;">da definire</span>'
@@ -2365,7 +2378,7 @@ function renderProgettistaUI(){
         <td style="border:1px solid var(--border);padding:6px 8px;min-width:260px;">
           <select onchange="setProgAda('${k}', this.value)" style="font-size:.74rem;">${optionsHtml(v?.code || '')}</select>
           ${v?.m && v.fonte !== 'manuale' ? `<div style="font-size:.68rem;color:var(--sub);margin-top:3px;">${_escH(v.m)}</div>` : ''}
-          ${v?.code ? `<div style="font-size:.66rem;margin-top:3px;color:${v.code.indexOf('ADA.QE') === 0 ? 'var(--c-a3)' : 'var(--c-a2)'};font-weight:700;">${v.code.indexOf('ADA.QE') === 0 ? 'ADA trasversale digitale — extra elenco Dipartimento' : '✓ elenco Dipartimento SCU'}</div>` : ''}
+          ${v?.code ? `<div style="font-size:.66rem;margin-top:3px;color:${v.code.indexOf('ADA.QE') === 0 ? 'var(--c-a3)' : 'var(--c-a2)'};font-weight:700;">${v.code.indexOf('ADA.QE') === 0 ? '✓ Quadro DigComp (Dipartimento) — trasversale digitale' : '✓ elenco Dipartimento SCU'}</div>` : ''}
         </td>
         <td style="border:1px solid var(--border);padding:7px 9px;text-align:center;">${fonteBadge(v)}</td>
       </tr>`;
@@ -2514,7 +2527,7 @@ async function downloadProgettistaDocx(){
       [3, 2, 6, 5, 2]
     );
     xml += _wBr();
-    xml += _wP('Le ADA proposte appartengono all\'elenco per settore SCU filtrato dal Dipartimento per le politiche giovanili e il servizio civile universale (da Atlante del Lavoro INAPP); le sole eccezioni, segnalate, sono le ADA digitali trasversali (EQF/DigComp). Fonte "già in 5.3" = riferimento già presente nella scheda; "ai" = suggerimento automatico da validare; "manuale" = scelta del progettista.', { italic: true, sz: 14, color: '666666' });
+    xml += _wP('Le ADA proposte appartengono all\'elenco per settore SCU filtrato dal Dipartimento per le politiche giovanili e il servizio civile universale (da Atlante del Lavoro INAPP); le ADA digitali trasversali provengono dal Quadro DigComp ↔ ADA dello stesso Dipartimento. Fonte "già in 5.3" = riferimento già presente nella scheda; "ai" = suggerimento automatico da validare; "manuale" = scelta del progettista.', { italic: true, sz: 14, color: '666666' });
     const blob = await _assembleDocx(xml, 'ADA per attività — progettista');
     _saveBlob(blob, `HubS_Progettista_ADA_Attivita_${_ymd()}.docx`);
   } catch (e) { alert('Errore generazione docx: ' + e.message); }
