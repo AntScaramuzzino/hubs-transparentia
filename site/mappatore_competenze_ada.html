@@ -225,9 +225,10 @@ details[open]{background:#fff}
 .sub{color:var(--sub)}
 
 /* ====== AGENTE EMERSIONE (modal) ====== */
-.agente-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:300;align-items:center;justify-content:center;padding:20px}
-.agente-overlay.visible{display:flex}
-.agente-panel{width:min(760px,96vw);height:min(640px,92vh);background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.agente-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:300}
+.agente-panel{position:fixed;right:24px;bottom:24px;width:min(700px,94vw);height:min(630px,86vh);background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden;z-index:301;opacity:0;pointer-events:none;transform:translateY(18px);transition:opacity .22s,transform .22s}
+.agente-panel.open{opacity:1;pointer-events:auto;transform:none}
+.agente-suggestion-bar h5{font-size:.74rem;color:var(--sub);margin-bottom:6px}
 .agente-header{background:linear-gradient(135deg,#4a235a,#8e44ad);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
 .agente-header-title{font-weight:800;font-size:1rem}
 .agente-header-sub{font-size:.74rem;opacity:.85}
@@ -1736,7 +1737,7 @@ function switchTab(name){
 }
 
 // Init
-document.addEventListener('DOMContentLoaded', ()=>{ refreshLists(); updateNav(0); });
+document.addEventListener('DOMContentLoaded', ()=>{ refreshLists(); goStep(0); });
 
 // ==================== AI ENDPOINT ====================
 const API_URL = '/api/chat';
