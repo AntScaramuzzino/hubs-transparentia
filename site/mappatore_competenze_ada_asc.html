@@ -567,6 +567,13 @@ details[open]{background:#fff}
 <!-- SCREEN 4 -->
 <div class="screen" id="screen-4">
   <div class="panel-left">
+    <div class="section" style="background:var(--c-a4bg);border-left:3px solid var(--c-a4);">
+      <div class="section-title" style="color:var(--c-a4);"><i class="fa-solid fa-table-list" aria-hidden="true"></i> DATI PER HELIOS</div>
+      <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;line-height:1.5;">Campi pronti da ricopiare nella piattaforma Helios: ADA, RA, attività ufficiali da selezionare, DigComp, LifeComp ed EntreComp (valori ufficiali).</div>
+      <button class="btn btn-primary btn-sm" style="width:100%;margin-bottom:6px;" onclick="renderHeliosAnteprima()"><i class="fa-solid fa-eye" aria-hidden="true"></i> Anteprima dati Helios</button>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:6px;" onclick="copiaDatiHelios()"><i class="fa-solid fa-copy" aria-hidden="true"></i> Copia (testo)</button>
+      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="downloadHeliosDocx()"><i class="fa-solid fa-file-word" aria-hidden="true"></i> Scarica .docx</button>
+    </div>
     <div class="section" style="background:#eef4fb;border-left:3px solid var(--blu);">
       <div class="section-title" style="color:var(--blu);">📑 MODELLI UFFICIALI (All. 6C / 6D)</div>
       <div style="font-size:11px;color:var(--grigio);margin-bottom:8px;line-height:1.5;">Compila i dati e genera i due modelli precompilati con la mappatura ADA validata. I campi vuoti restano come linee da completare.</div>
@@ -872,20 +879,32 @@ const DIGCOMP_ITEMS = [
   {id:'dc5', name:'Risoluzione di problemi tecnici', desc:'Diagnostica e risolve problemi con strumenti digitali'},
 ];
 const LIFECOMP_ITEMS = [
-  {id:'lc3', name:'Empatia', area:'Sociale', desc:'Comprende e condivide i vissuti e le prospettive degli altri'},
-  {id:'lc4', name:'Comunicazione (LifeComp)', area:'Sociale', desc:'Comunica in modo efficace nei contesti relazionali e sociali'},
-  {id:'lc5', name:'Collaborazione', area:'Sociale', desc:'Lavora in team verso obiettivi comuni, co-costruisce soluzioni'},
-  {id:'lc6', name:'Crescita continua e apprendimento', area:'Imparare ad imparare', desc:'Riflette sull\'esperienza e organizza il proprio sviluppo'},
-  {id:'lc7', name:'Pensiero critico', area:'Imparare ad imparare', desc:'Valuta informazioni e situazioni con spirito analitico'},
-  {id:'lc1', name:'Autoregolazione e benessere', area:'Personale', desc:'Gestisce emozioni, stress e adattamento ai cambiamenti'},
+  {id:'lc1', code:'P1', name:'Autoregolazione', area:'Personale', desc:'Consapevolezza e gestione di emozioni, pensieri e comportamento'},
+  {id:'lcP2', code:'P2', name:'Flessibilità', area:'Personale', desc:'Capacità di gestire le transizioni e l’incertezza e di affrontare le sfide'},
+  {id:'lcP3', code:'P3', name:'Benessere', area:'Personale', desc:'Ricerca della soddisfazione nella vita, cura della salute fisica, mentale e sociale e adoz'},
+  {id:'lc3', code:'S1', name:'Empatia', area:'Sociale', desc:'Comprensione delle emozioni, esperienze e valori di un’altra persona e capacità di fornire'},
+  {id:'lc4', code:'S2', name:'Comunicazione', area:'Sociale', desc:'Uso di strategie comunicative pertinenti, codici e strumenti specifici in base al contesto'},
+  {id:'lc5', code:'S3', name:'Collaborazione', area:'Sociale', desc:'Impegno in attività di gruppo e lavoro di squadra, riconoscendo e rispettando gli altri'},
+  {id:'lc6', code:'L1', name:'Mentalità di crescita', area:'Imparare ad imparare', desc:'Fiducia nel potenziale proprio e altrui di apprendere e progredire continuamente'},
+  {id:'lc7', code:'L2', name:'Pensiero critico', area:'Imparare ad imparare', desc:'Valutazione di informazioni e argomentazioni per sostenere conclusioni motivate e sviluppa'},
+  {id:'lcL3', code:'L3', name:'Gestione dell’apprendimento', area:'Imparare ad imparare', desc:'Pianificazione, organizzazione, monitoraggio e revisione del proprio apprendimento'}
 ];
 const ENTRECOMP_ITEMS = [
-  {id:'ec5', name:'Iniziativa e azione', area:'Into Action', desc:'Trasforma idee in azioni concrete con determinazione'},
-  {id:'ec6', name:'Pianificazione e gestione', area:'Into Action', desc:'Pianifica, monitora e adatta il lavoro per raggiungere obiettivi'},
-  {id:'ec7', name:'Lavorare con gli altri', area:'Into Action', desc:'Collabora e co-crea con persone diverse verso obiettivi condivisi'},
-  {id:'ec1', name:'Creatività e generazione di idee', area:'Ideas & Opportunities', desc:'Identifica opportunità e genera soluzioni innovative'},
-  {id:'ec3', name:'Motivazione e perseveranza', area:'Resources', desc:'Mantiene impegno e resilienza di fronte agli ostacoli'},
-  {id:'ec4', name:'Mobilitare risorse e collaboratori', area:'Resources', desc:'Attiva e coordina risorse umane, materiali, informative'},
+  {id:'ec11', code:'1.1', name:'Riconoscere le opportunità', area:'Idee e opportunità', desc:'Usare la propria immaginazione e abilità per identificare opportunità per creare valore.'},
+  {id:'ec1', code:'1.2', name:'Creatività', area:'Idee e opportunità', desc:'Sviluppare idee creative e finalizzate.'},
+  {id:'ec13', code:'1.3', name:'Visione', area:'Idee e opportunità', desc:'Lavorare verso la propria visione del futuro.'},
+  {id:'ec14', code:'1.4', name:'Valorizzare le idee', area:'Idee e opportunità', desc:'Sfruttare al meglio idee e opportunità.'},
+  {id:'ec15', code:'1.5', name:'Pensiero etico e sostenibile', area:'Idee e opportunità', desc:'Valutare conseguenze e impatto di idee, opportunità e azioni.'},
+  {id:'ec21', code:'2.1', name:'Consapevolezza di sé e autoefficacia', area:'Risorse', desc:'Credere in se stessi e continuare a svilupparsi.'},
+  {id:'ec3', code:'2.2', name:'Motivazione e perseveranza', area:'Risorse', desc:'Restare concentrati e non arrendersi.'},
+  {id:'ec4', code:'2.3', name:'Mobilitare le risorse', area:'Risorse', desc:'Raccogliere e gestire le risorse necessarie.'},
+  {id:'ec24', code:'2.4', name:'Alfabetizzazione finanziaria ed economica', area:'Risorse', desc:'Sviluppare conoscenze finanziarie ed economiche.'},
+  {id:'ec25', code:'2.5', name:'Mobilitare gli altri', area:'Risorse', desc:'Ispirare, entusiasmare e coinvolgere gli altri.'},
+  {id:'ec5', code:'3.1', name:'Prendere l’iniziativa', area:'In azione', desc:'Agire.'},
+  {id:'ec6', code:'3.2', name:'Pianificazione e gestione', area:'In azione', desc:'Dare priorità, organizzare e monitorare.'},
+  {id:'ec33', code:'3.3', name:'Affrontare incertezza, ambiguità e rischio', area:'In azione', desc:'Prendere decisioni affrontando incertezza, ambiguità e rischio.'},
+  {id:'ec7', code:'3.4', name:'Lavorare con gli altri', area:'In azione', desc:'Fare squadra, collaborare e creare reti.'},
+  {id:'ec35', code:'3.5', name:'Imparare dall’esperienza', area:'In azione', desc:'Imparare facendo.'}
 ];
 const EU8_ITEMS = [
   {id:'eu1', name:'Comunicazione nella madrelingua', desc:'Esprime e interpreta concetti in forma orale e scritta'},
@@ -1139,7 +1158,7 @@ function renderMappingCards() {
       <div class="ada-card-body">
         ${l1warn}
         <div class="livello-row">
-          <span class="livello-label">Livello realizzazione:</span>
+          <span class="livello-label">Livello realizzazione <span style="font-weight:400;color:var(--c-a3);">(suggerito — conferma sulle evidenze)</span>:</span>
           <div class="livello-btns">${lvlBtns}</div>
         </div>
         <div class="livello-desc">${levelDescs[map.livello]||'—'}</div>
@@ -2093,16 +2112,18 @@ REGOLE:
 - Identifica ogni SEDE DI ATTUAZIONE presente nella voce 5.3 (le sedi dove operano i volontari). Se la 5.3 non distingue sedi, crea un'unica sede "Tutte le sedi".
 - Per ogni sede elenca le ATTIVITÀ PREVISTE PER GLI OPERATORI VOLONTARI (dalla 5.3). Quando possibile collega ciascuna all'Azione/Attività della voce 5.1 nel campo "rif" (es. "Azione 2 / Att. 2.1").
 - Per ogni attività: "titolo" conciso (max 80 caratteri) e "descrizione" operativa (cosa fa concretamente il volontario, 1-3 frasi, verbi d'azione).
+- RUOLO OV — verbi ammessi: supportare, collaborare, affiancare, partecipare, predisporre, raccogliere, aggiornare, diffondere, accompagnare. Verbi da EVITARE perché impropri per un volontario: dirigere, coordinare autonomamente, gestire autonomamente, certificare, validare, assumere responsabilità tecniche/professionali. Riformula le descrizioni con i verbi ammessi.
+- "rischio": true SOLO se la formulazione dell'attività (nella 5.3) attribuisce all'operatore volontario responsabilità professionali, autonomia tecnica, direzione, coordinamento autonomo, funzioni specialistiche o validazioni; altrimenti ometti il campo. Se rischio=true aggiungi "rischio_nota" (max 18 parole: cosa va riformulato e come).
 - "ada": SOLO se nel testo della 5.3 quell'attività cita esplicitamente un codice ADA dell'Atlante (es. "ADA.18.01.06"), riportalo; altrimenti ometti il campo.
 - "ruolo": sintesi del ruolo dei volontari in quella sede (max 250 caratteri).
 - SII COMPATTO: massimo 10 attività per sede (le più rilevanti e operative), descrizioni max 25 parole, JSON senza spazi o ritorni a capo superflui. La risposta DEVE chiudersi con il JSON completo.
 - "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
 - Se titolo/ente sono indicati nel messaggio, riportali; altrimenti deducili dal testo.
 
-- Se il messaggio contiene un CATALOGO ADA, aggiungi anche "mappatura": le ADA pertinenti alle attività dei volontari (SOLO codici del catalogo). Ogni voce: {"ada_code","ra_codes":[codici RA],"livello":1|2,"comp_ids":[max 3],"attivita":"nome breve","ks":["0-1"]} dove ks = indici sede-attività coperti (es. "0-1" = sede 0, attività 1). COMP_IDS validi: dc1..dc5, lc1, lc3..lc7, ec1, ec3..ec7, eu1, eu5, eu6, eu7. Massimo 12 voci, raggruppa le attività nella stessa ADA.
+- Se il messaggio contiene un CATALOGO ADA, aggiungi anche "mappatura": le ADA pertinenti alle attività dei volontari (SOLO codici del catalogo). Ogni voce: {"ada_code","ra_codes":[codici RA],"livello":1|2,"comp_ids":[max 3],"attivita":"nome breve","ks":["0-1"]} dove ks = indici sede-attività coperti (es. "0-1" = sede 0, attività 1). COMP_IDS validi: dc1..dc5, eu1, eu5, eu6, eu7, LifeComp: lc1, lcP2, lcP3, lc3, lc4, lc5, lc6, lc7, lcL3, EntreComp: ec11, ec1, ec13, ec14, ec15, ec21, ec3, ec4, ec24, ec25, ec5, ec6, ec33, ec7, ec35. Massimo 12 voci, raggruppa le attività nella stessa ADA.
 
 OUTPUT — SOLO JSON, nessun testo prima o dopo:
-{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"..."}]}],"mappatura":[{"ada_code":"ADA.18.01.06","ra_codes":["RA.18.01.06.1"],"livello":2,"comp_ids":["lc4"],"attivita":"...","ks":["0-0","0-1"]}]}`;
+{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"...","rischio":false}]}],"mappatura":[{"ada_code":"ADA.18.01.06","ra_codes":["RA.18.01.06.1"],"livello":2,"comp_ids":["lc4"],"attivita":"...","ks":["0-0","0-1"]}]}`;
 
 function _balanceJson(s){
   // taglia all'ultima chiusura strutturale e bilancia le parentesi rimaste aperte (string-aware)
@@ -2224,6 +2245,7 @@ function renderProgettoUI(){
           ${a.descrizione ? `<br><span style="color:var(--grigio);font-size:11px;">${_escH(a.descrizione)}</span>` : ''}
         </span>
       </label>
+      ${a.rischio ? `<div style="margin:6px 0 0 26px;padding:6px 10px;background:var(--c-a3bg);border:1px solid var(--c-a3l);border-radius:7px;font-size:11px;color:var(--c-a3);"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> <strong>Formulazione a rischio per un volontario.</strong> ${_escH(a.rischio_nota || 'Attribuisce responsabilità/autonomia non proprie dell\'OV: riformula con verbi come supportare, affiancare, collaborare.')}</div>` : ''}
       ${adaProposte.length ? `<div style="margin:6px 0 0 26px;display:flex;flex-direction:column;gap:3px;"><div style="font-size:9.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;font-weight:700;">ADA proposte — deseleziona quelle non pertinenti</div>${adaRows}</div>` : ''}
     </div>`;
   }).join('');
@@ -2349,7 +2371,7 @@ function registerCatalogAda(code){
 const RIMAPPA_SYS = `Mappi le attività dei volontari SCU sulle ADA dell'Atlante INAPP.
 Usa SOLO i codici del CATALOGO fornito (settore + ADA.QE digitali). Le ADA.QE solo per attività prevalentemente digitali.
 Rispondi SOLO JSON compatto: {"mappatura":[{"ada_code":"ADA.xx.xx.xx","ra_codes":["RA..."],"livello":1|2,"comp_ids":["lc4"],"attivita":"nome breve","ks":["0-1"]}]}
-ks = indici sede-attività coperti. Max 12 voci, raggruppa le attività nella stessa ADA. COMP_IDS validi: dc1..dc5, lc1, lc3..lc7, ec1, ec3..ec7, eu1, eu5, eu6, eu7.`;
+ks = indici sede-attività coperti. Max 12 voci, raggruppa le attività nella stessa ADA. COMP_IDS validi: dc1..dc5, eu1, eu5, eu6, eu7, LifeComp: lc1, lcP2, lcP3, lc3, lc4, lc5, lc6, lc7, lcL3, EntreComp: ec11, ec1, ec13, ec14, ec15, ec21, ec3, ec4, ec24, ec25, ec5, ec6, ec33, ec7, ec35.`;
 
 async function rimappaProposte(sett){
   const p = PROGETTO_PARSED;
@@ -2978,21 +3000,33 @@ DigComp 2.2:
 - dc4: Sicurezza digitale (privacy, dati, dispositivi)
 - dc5: Risoluzione di problemi tecnici
 
-LifeComp (framework europeo):
-- lc1: Autoregolazione e benessere
-- lc3: Empatia
-- lc4: Comunicazione (LifeComp)
-- lc5: Collaborazione
-- lc6: Crescita continua e apprendimento
-- lc7: Pensiero critico
+LifeComp (framework europeo ufficiale — usa questi id):
+- lc1: Autoregolazione (LifeComp Personale)
+- lcP2: Flessibilità (LifeComp Personale)
+- lcP3: Benessere (LifeComp Personale)
+- lc3: Empatia (LifeComp Sociale)
+- lc4: Comunicazione (LifeComp Sociale)
+- lc5: Collaborazione (LifeComp Sociale)
+- lc6: Mentalità di crescita (LifeComp Imparare ad imparare)
+- lc7: Pensiero critico (LifeComp Imparare ad imparare)
+- lcL3: Gestione dell’apprendimento (LifeComp Imparare ad imparare)
 
-EntreComp (framework europeo):
-- ec1: Creatività e generazione di idee
-- ec3: Motivazione e perseveranza
-- ec4: Mobilitare risorse e collaboratori
-- ec5: Iniziativa e azione
-- ec6: Pianificazione e gestione
-- ec7: Lavorare con gli altri
+EntreComp (framework europeo ufficiale — usa questi id):
+- ec11: Riconoscere le opportunità (EntreComp Idee e opportunità)
+- ec1: Creatività (EntreComp Idee e opportunità)
+- ec13: Visione (EntreComp Idee e opportunità)
+- ec14: Valorizzare le idee (EntreComp Idee e opportunità)
+- ec15: Pensiero etico e sostenibile (EntreComp Idee e opportunità)
+- ec21: Consapevolezza di sé e autoefficacia (EntreComp Risorse)
+- ec3: Motivazione e perseveranza (EntreComp Risorse)
+- ec4: Mobilitare le risorse (EntreComp Risorse)
+- ec24: Alfabetizzazione finanziaria ed economica (EntreComp Risorse)
+- ec25: Mobilitare gli altri (EntreComp Risorse)
+- ec5: Prendere l’iniziativa (EntreComp In azione)
+- ec6: Pianificazione e gestione (EntreComp In azione)
+- ec33: Affrontare incertezza, ambiguità e rischio (EntreComp In azione)
+- ec7: Lavorare con gli altri (EntreComp In azione)
+- ec35: Imparare dall’esperienza (EntreComp In azione)
 
 EU 8 Competenze chiave:
 - eu1: Comunicazione nella madrelingua
@@ -3034,12 +3068,31 @@ const LEVEL_NAMES = {1:'Esecutivo',2:'Con supervisione',3:'Autonomo',4:'Expert'}
 const ALL_COMPS = {
   dc1:'Ricerca e gestione informazioni online', dc2:'Comunicazione e collaborazione digitale',
   dc3:'Creazione di contenuti digitali', dc4:'Sicurezza digitale', dc5:'Risoluzione problemi tecnici',
-  lc1:'Autoregolazione e benessere', lc3:'Empatia', lc4:'Comunicazione (LifeComp)',
-  lc5:'Collaborazione', lc6:'Crescita continua', lc7:'Pensiero critico',
-  ec1:'Creatività e generazione di idee', ec3:'Motivazione e perseveranza',
-  ec4:'Mobilitare risorse', ec5:'Iniziativa e azione', ec6:'Pianificazione e gestione', ec7:'Lavorare con gli altri',
-  eu1:'Comunicazione madrelingua', eu5:'Imparare ad imparare',
-  eu6:'Competenze sociali e civiche', eu7:'Spirito di iniziativa'
+  eu1:'Comunicazione madrelingua', eu5:'Imparare ad imparare', eu6:'Competenze sociali e civiche', eu7:'Spirito di iniziativa',
+  lc1:'Autoregolazione',
+  lcP2:'Flessibilità',
+  lcP3:'Benessere',
+  lc3:'Empatia',
+  lc4:'Comunicazione',
+  lc5:'Collaborazione',
+  lc6:'Mentalità di crescita',
+  lc7:'Pensiero critico',
+  lcL3:'Gestione dell’apprendimento',
+  ec11:'Riconoscere le opportunità',
+  ec1:'Creatività',
+  ec13:'Visione',
+  ec14:'Valorizzare le idee',
+  ec15:'Pensiero etico e sostenibile',
+  ec21:'Consapevolezza di sé e autoefficacia',
+  ec3:'Motivazione e perseveranza',
+  ec4:'Mobilitare le risorse',
+  ec24:'Alfabetizzazione finanziaria ed economica',
+  ec25:'Mobilitare gli altri',
+  ec5:'Prendere l’iniziativa',
+  ec6:'Pianificazione e gestione',
+  ec33:'Affrontare incertezza, ambiguità e rischio',
+  ec7:'Lavorare con gli altri',
+  ec35:'Imparare dall’esperienza',
 };
 
 // System prompt completo per mappatura diretta attività → ADA + comp_ids
@@ -3051,8 +3104,32 @@ DATABASE ADA — usa SOLO questi codici:`;
 
 const HUBS_ANALISI_TAIL = `COMP_IDS DA USARE (solo questi, nei campi comp_ids):
 DigComp: dc1, dc2, dc3, dc4, dc5
-LifeComp: lc1 (autoregolazione), lc3 (empatia), lc4 (comunicazione), lc5 (collaborazione), lc6 (crescita), lc7 (pensiero critico)
-EntreComp: ec1 (creatività), ec3 (motivazione), ec4 (mobilitare risorse), ec5 (iniziativa), ec6 (pianificazione), ec7 (lavorare con altri)
+LifeComp (id ufficiali):
+lc1: Autoregolazione — Personale
+lcP2: Flessibilità — Personale
+lcP3: Benessere — Personale
+lc3: Empatia — Sociale
+lc4: Comunicazione — Sociale
+lc5: Collaborazione — Sociale
+lc6: Mentalità di crescita — Imparare ad imparare
+lc7: Pensiero critico — Imparare ad imparare
+lcL3: Gestione dell’apprendimento — Imparare ad imparare
+EntreComp (id ufficiali):
+ec11: Riconoscere le opportunità — Idee e opportunità
+ec1: Creatività — Idee e opportunità
+ec13: Visione — Idee e opportunità
+ec14: Valorizzare le idee — Idee e opportunità
+ec15: Pensiero etico e sostenibile — Idee e opportunità
+ec21: Consapevolezza di sé e autoefficacia — Risorse
+ec3: Motivazione e perseveranza — Risorse
+ec4: Mobilitare le risorse — Risorse
+ec24: Alfabetizzazione finanziaria ed economica — Risorse
+ec25: Mobilitare gli altri — Risorse
+ec5: Prendere l’iniziativa — In azione
+ec6: Pianificazione e gestione — In azione
+ec33: Affrontare incertezza, ambiguità e rischio — In azione
+ec7: Lavorare con gli altri — In azione
+ec35: Imparare dall’esperienza — In azione
 EU8: eu1 (comunicazione madrelingua), eu5 (imparare ad imparare), eu6 (sociali e civiche), eu7 (spirito iniziativa)
 
 LIVELLI (SCU tipicamente 1-2):
@@ -3062,6 +3139,7 @@ LIVELLI (SCU tipicamente 1-2):
 4 = Expertise (rarissimo in SCU)
 
 REGOLE CRITICHE:
+- RUOLO OV: usa/riformula con verbi ammessi (supportare, affiancare, collaborare, partecipare, predisporre, raccogliere, aggiornare, diffondere); evita dirigere, coordinare/gestire autonomamente, certificare, validare, responsabilità tecniche.
 - Estrai SOLO attività OPERATIVE con verbi concreti (gestire, condurre, supportare, accompagnare, accogliere, monitorare, elaborare…). Ignora descrizioni vaghe.
 - Usa SOLO i codici ada_code e comp_ids della lista sopra.
 - Per ra_codes: usa il codice esatto (es. "RA.18.01.06.1") solo se quell'RA è effettivamente coperto dall'attività.
@@ -3378,20 +3456,32 @@ const DC_ROWS = [
   {id:'dc5', area:'Area 5 — Risoluzione di problemi', name:'Risoluzione di problemi tecnici', ada:'ADA.QE.01.05'},
 ];
 const LC_ROWS = [
-  {id:'lc1', area:'Personale', name:'Autoregolazione e benessere'},
-  {id:'lc3', area:'Sociale', name:'Empatia'},
-  {id:'lc4', area:'Sociale', name:'Comunicazione efficace'},
-  {id:'lc5', area:'Sociale', name:'Collaborazione'},
-  {id:'lc6', area:'Imparare ad imparare', name:'Crescita continua e apprendimento'},
-  {id:'lc7', area:'Imparare ad imparare', name:'Pensiero critico'},
+  {id:'lc1', code:'P1', area:'Personale', name:'Autoregolazione'},
+  {id:'lcP2', code:'P2', area:'Personale', name:'Flessibilità'},
+  {id:'lcP3', code:'P3', area:'Personale', name:'Benessere'},
+  {id:'lc3', code:'S1', area:'Sociale', name:'Empatia'},
+  {id:'lc4', code:'S2', area:'Sociale', name:'Comunicazione'},
+  {id:'lc5', code:'S3', area:'Sociale', name:'Collaborazione'},
+  {id:'lc6', code:'L1', area:'Imparare ad imparare', name:'Mentalità di crescita'},
+  {id:'lc7', code:'L2', area:'Imparare ad imparare', name:'Pensiero critico'},
+  {id:'lcL3', code:'L3', area:'Imparare ad imparare', name:'Gestione dell’apprendimento'}
 ];
 const EC_ROWS = [
-  {id:'ec1', area:'Ideas & Opportunities', name:'Creatività e generazione di idee'},
-  {id:'ec3', area:'Resources', name:'Motivazione e perseveranza'},
-  {id:'ec4', area:'Resources', name:'Mobilitare risorse e collaboratori'},
-  {id:'ec5', area:'Into Action', name:'Iniziativa e azione'},
-  {id:'ec6', area:'Into Action', name:'Pianificazione e gestione'},
-  {id:'ec7', area:'Into Action', name:'Lavorare con gli altri'},
+  {id:'ec11', code:'1.1', area:'Idee e opportunità', name:'Riconoscere le opportunità'},
+  {id:'ec1', code:'1.2', area:'Idee e opportunità', name:'Creatività'},
+  {id:'ec13', code:'1.3', area:'Idee e opportunità', name:'Visione'},
+  {id:'ec14', code:'1.4', area:'Idee e opportunità', name:'Valorizzare le idee'},
+  {id:'ec15', code:'1.5', area:'Idee e opportunità', name:'Pensiero etico e sostenibile'},
+  {id:'ec21', code:'2.1', area:'Risorse', name:'Consapevolezza di sé e autoefficacia'},
+  {id:'ec3', code:'2.2', area:'Risorse', name:'Motivazione e perseveranza'},
+  {id:'ec4', code:'2.3', area:'Risorse', name:'Mobilitare le risorse'},
+  {id:'ec24', code:'2.4', area:'Risorse', name:'Alfabetizzazione finanziaria ed economica'},
+  {id:'ec25', code:'2.5', area:'Risorse', name:'Mobilitare gli altri'},
+  {id:'ec5', code:'3.1', area:'In azione', name:'Prendere l’iniziativa'},
+  {id:'ec6', code:'3.2', area:'In azione', name:'Pianificazione e gestione'},
+  {id:'ec33', code:'3.3', area:'In azione', name:'Affrontare incertezza, ambiguità e rischio'},
+  {id:'ec7', code:'3.4', area:'In azione', name:'Lavorare con gli altri'},
+  {id:'ec35', code:'3.5', area:'In azione', name:'Imparare dall’esperienza'}
 ];
 const EU8_ROWS = [
   {id:'eu1', code:'EU1', name:'Comunicazione nella madrelingua'},
@@ -3645,6 +3735,84 @@ function _esperienzeText(){
     return PROJECT.attivita.map(a => `${a.titolo}${a.descrizione ? ': ' + a.descrizione : ''}`).join(' • ').slice(0, 900);
   }
   return (document.getElementById('perc-desc')?.value || '').slice(0, 600);
+}
+
+
+// ==================== DATI PER HELIOS — vista ricopiabile (ADA/RA/Attività + LifeComp/EntreComp/DigComp ufficiali) ====================
+const _LVL_NOTA = 'suggerito, da confermare sulle evidenze';
+function _lcUff(id){ const x=(typeof LIFECOMP_ITEMS!=='undefined'?LIFECOMP_ITEMS:[]).find(i=>i.id===id); return x?{area:x.area,nome:x.name,code:x.code}:null; }
+function _ecUff(id){ const x=(typeof ENTRECOMP_ITEMS!=='undefined'?ENTRECOMP_ITEMS:[]).find(i=>i.id===id); return x?{nome:x.name,area:x.area,code:x.code}:null; }
+function _heliosModel(){
+  const codeOf=m=>(ADA_DB[m.adaKey]?.code||m.adaKey);
+  const isQE=m=>String(codeOf(m)).indexOf('ADA.QE')===0;
+  const all=Object.values(mappings);
+  const val=all.filter(m=>m.validated);
+  const pool=val.length?val:all;
+  const lvlD={1:'Esecutivo con istruzioni',2:'Autonomia operativa con supervisione',3:'Autonomia realizzativa',4:'Expertise tecnico'};
+  const row=m=>{const ada=ADA_DB[m.adaKey]||{};const raCov=(m.ra||[]).filter(r=>r.coverage);const raL=raCov.length?raCov:(m.ra||[]);
+    return {code:ada.code||m.adaKey,titolo:ada.desc||'',livello:m.livello||null,livelloDesc:m.livello?(lvlD[m.livello]||''):'',validated:!!m.validated,
+      ra:raL.map(r=>({code:r.code,titolo:String(r.desc||'').replace(/^RA\d*:\s*/,''),coverage:r.coverage||null,
+        attivita:(r.attivita||'').split(' • ').filter(Boolean)}))};};
+  return {
+    ada: pool.filter(m=>!isQE(m)).map(row),
+    digcomp: pool.filter(isQE).map(row),
+    lifecomp: Object.keys(selections).filter(id=>id.startsWith('lc')).map(id=>({...(_lcUff(id)||{nome:selections[id]?.compName||id,area:''}),livello:selections[id]?.level})).filter(x=>x.nome),
+    entrecomp: Object.keys(selections).filter(id=>id.startsWith('ec')).map(id=>({...(_ecUff(id)||{nome:selections[id]?.compName||id,area:''}),livello:selections[id]?.level})).filter(x=>x.nome)
+  };
+}
+function _heliosVuoto(){ const M=_heliosModel(); return !(M.ada.length||M.digcomp.length||M.lifecomp.length||M.entrecomp.length); }
+
+function renderHeliosAnteprima(){
+  const box=document.getElementById('export-output'); if(!box) return;
+  if(_heliosVuoto()){ box.innerHTML='<div class="empty-mapping">Nessun dato: valida ADA nella Mappatura e seleziona le competenze.</div>'; return; }
+  const M=_heliosModel();
+  const lvlTag=l=>l?` <span style="font-size:10px;color:var(--c-a3);font-weight:700;">Liv. ${l} (${_LVL_NOTA})</span>`:'';
+  const adaSec=(titolo,arr)=>!arr.length?'':`<h3 style="margin:14px 0 8px;">${titolo}</h3>`+arr.map(a=>`
+    <div class="ada-card" style="margin-bottom:10px;"><div class="ada-card-header"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;">
+      <a class="ada-code" href="${adaInappUrl(a.code)}" target="_blank" rel="noopener">${a.code}</a>
+      <span class="ada-title" style="flex:1;">${_escH(a.titolo)}</span>${lvlTag(a.livello)}</div></div>
+      <div class="ada-card-body"><table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+      <tr><th style="text-align:left;background:var(--grey);padding:4px 6px;">RA da selezionare</th><th style="text-align:left;background:var(--grey);padding:4px 6px;">Attività ufficiali da selezionare su Helios</th></tr>
+      ${a.ra.map(r=>`<tr><td style="border:1px solid var(--border);padding:5px 6px;vertical-align:top;"><strong>${r.code}</strong> — ${_escH(r.titolo)}${r.coverage?` <em style="color:var(--sub);">(${r.coverage})</em>`:''}</td>
+        <td style="border:1px solid var(--border);padding:5px 6px;">${r.attivita.length?r.attivita.map(t=>'• '+_escH(t)).join('<br>'):'<span style="color:var(--sub);">— seleziona dalle attività del RA —</span>'}</td></tr>`).join('')}
+      </table></div></div>`).join('');
+  const compTab=(titolo,rows,c1,c2)=>!rows.length?'':`<h3 style="margin:14px 0 8px;">${titolo}</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:6px;">
+    <tr><th style="text-align:left;background:var(--grey);padding:4px 6px;">${c1}</th><th style="text-align:left;background:var(--grey);padding:4px 6px;">${c2}</th></tr>
+    ${rows.map(r=>`<tr><td style="border:1px solid var(--border);padding:5px 6px;">${_escH(r.a)}</td><td style="border:1px solid var(--border);padding:5px 6px;">${_escH(r.b)}${r.l?` <span style="font-size:10px;color:var(--c-a3);">· Liv. ${r.l} (${_LVL_NOTA})</span>`:''}</td></tr>`).join('')}</table>`;
+  box.innerHTML=`<div style="margin-bottom:10px;"><h2>Dati per Helios</h2><p style="font-size:12px;color:var(--sub);">Valori ufficiali pronti da ricopiare. Il <strong>livello</strong> è un suggerimento: confermalo sulle evidenze del volontario.</p></div>`
+    + adaSec('ADA / RA — settore', M.ada)
+    + adaSec('DigComp (Quadro DigComp ↔ ADA)', M.digcomp)
+    + compTab('LifeComp', M.lifecomp.map(x=>({a:x.area,b:x.nome,l:x.livello})), 'Area LifeComp', 'Competenza LifeComp')
+    + compTab('EntreComp', M.entrecomp.map(x=>({a:x.nome,b:x.area,l:x.livello})), 'Competenza EntreComp', 'Area / Priorità tematica');
+}
+function _heliosTesto(){
+  const M=_heliosModel(); let o='DATI PER HELIOS\n(Il livello è suggerito, da confermare sulle evidenze)\n';
+  const sec=(t,arr)=>{if(!arr.length)return;o+=`\n== ${t} ==\n`;arr.forEach(a=>{o+=`\n${a.code} — ${a.titolo}${a.livello?` [Liv. ${a.livello} suggerito]`:''}\n`;
+    a.ra.forEach(r=>{o+=`  RA ${r.code} — ${r.titolo}${r.coverage?' ('+r.coverage+')':''}\n`;r.attivita.forEach(t2=>o+=`    • ${t2}\n`);});});};
+  sec('ADA / RA — settore',M.ada); sec('DigComp',M.digcomp);
+  if(M.lifecomp.length){o+='\n== LifeComp ==\n';M.lifecomp.forEach(x=>o+=`Area: ${x.area} | Competenza: ${x.nome}${x.livello?` | Liv. ${x.livello} (suggerito)`:''}\n`);}
+  if(M.entrecomp.length){o+='\n== EntreComp ==\n';M.entrecomp.forEach(x=>o+=`Competenza: ${x.nome} | Area/Priorità tematica: ${x.area}${x.livello?` | Liv. ${x.livello} (suggerito)`:''}\n`);}
+  return o;
+}
+function copiaDatiHelios(){ if(_heliosVuoto()){alert('Nessun dato Helios: valida ADA e seleziona competenze.');return;} navigator.clipboard.writeText(_heliosTesto()).then(()=>alert('Dati Helios copiati negli appunti.')); }
+async function downloadHeliosDocx(){
+  try{
+    if(_heliosVuoto()){alert('Nessun dato Helios: valida ADA e seleziona competenze.');return;}
+    const M=_heliosModel(); let xml='';
+    xml+=_wH('DATI PER HELIOS',1);
+    xml+=_wP('Valori ufficiali pronti da ricopiare nella piattaforma Helios. Il livello di realizzazione/padronanza è un suggerimento, da confermare sulle evidenze del volontario.',{italic:true,sz:16,color:'666666'});
+    const adaBlocks=(tit,arr)=>{if(!arr.length)return;xml+=_wH(tit,2);arr.forEach(a=>{
+      xml+=_wH(a.code+' — '+a.titolo+(a.livello?'  [Liv. '+a.livello+' — suggerito, da confermare]':''),3);
+      xml+=_wDataTableW(['RA da selezionare','Attività ufficiali da selezionare su Helios'],
+        a.ra.map(r=>[r.code+' — '+r.titolo+(r.coverage?' ('+r.coverage+')':''), r.attivita.length?r.attivita.join('\n'):'— seleziona dalle attività del RA —']),[3,5]);
+      xml+=_wBr();});};
+    adaBlocks('ADA / RA — settore',M.ada); adaBlocks('DigComp (Quadro DigComp ↔ ADA)',M.digcomp);
+    if(M.lifecomp.length){xml+=_wH('LifeComp',2);xml+=_wDataTableW(['Area LifeComp','Competenza LifeComp','Livello (suggerito)'],M.lifecomp.map(x=>[x.area,x.nome,x.livello?String(x.livello)+' — da confermare':'—']),[3,4,3]);xml+=_wBr();}
+    if(M.entrecomp.length){xml+=_wH('EntreComp',2);xml+=_wDataTableW(['Competenza EntreComp','Area / Priorità tematica','Livello (suggerito)'],M.entrecomp.map(x=>[x.nome,x.area,x.livello?String(x.livello)+' — da confermare':'—']),[4,3,3]);}
+    const blob=await _assembleDocx(xml,'Dati per Helios');
+    _saveBlob(blob,`HubS_DatiHelios_${_ymd()}.docx`);
+  }catch(e){alert('Errore generazione Dati Helios: '+e.message);}
 }
 
 async function downloadModelloTrasparenza(){
