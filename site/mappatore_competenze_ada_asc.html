@@ -1846,6 +1846,7 @@ let _selSedeIdx = 0;
 let _attChecked = {};          // "sede-att" -> bool
 let PENDING_MAP = null;        // proposte ADA dalla chiamata unificata (con chiavi ks)
 let PENDING_MAP_SETTORE = null; // settore del catalogo usato per le proposte correnti
+let PENDING_OFF = new Set();    // coppie "key|ada_code" deselezionate dal tutor (default: tutte incluse)
 let _autoAnalisiFatta = false; // analisi automatica una sola volta per file
 
 const SETTORI_SCU = {
@@ -2174,6 +2175,7 @@ Restituisci SOLO il JSON.`;
     PROGETTO_PARSED = parsed;
     PENDING_MAP = Array.isArray(parsed.mappatura) ? parsed.mappatura : null;
     PENDING_MAP_SETTORE = PENDING_MAP ? (r.settore || null) : null;
+    PENDING_OFF = new Set();
     _selSedeIdx = 0; _attChecked = {}; PROG_ADA = {}; _progettistaView = false;
     renderProgettoUI();
   } catch (e) {
@@ -2201,15 +2203,29 @@ function renderProgettoUI(){
   const attList = (sede.attivita || []).map((a, j) => {
     const key = _selSedeIdx + '-' + j;
     const ck = _attChecked[key] !== false;
-    return `<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--bordo);border-radius:8px;background:${ck ? '#fff' : '#f5f5f5'};cursor:pointer;">
-      <input type="checkbox" ${ck ? 'checked' : ''} onchange="toggleAttProg('${key}', this.checked)" style="margin-top:3px;">
-      <span style="font-size:12px;line-height:1.45;">
-        ${a.rif ? `<span style="display:inline-block;background:var(--blu);color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700;margin-right:5px;vertical-align:1px;">${_escH(a.rif)}</span>` : ''}
-        <strong>${_escH(a.titolo)}</strong>
-        ${a.descrizione ? `<br><span style="color:var(--grigio);font-size:11px;">${_escH(a.descrizione)}</span>` : ''}
-        ${(PENDING_MAP || []).filter(m => (m.ks || []).includes(key)).map(m => `<span style="display:inline-block;margin:3px 4px 0 0;padding:1px 8px;border-radius:8px;font-size:9.5px;font-weight:700;background:var(--c-a4bg);color:var(--c-a4);font-family:Consolas,monospace;">${m.ada_code}</span>`).join('')}
-      </span>
-    </label>`;
+    const adaProposte = (PENDING_MAP || []).filter(m => (m.ks || []).includes(key));
+    const adaRows = adaProposte.map(m => {
+      const code = m.ada_code;
+      const titolo = _adaTitolo(code) || '';
+      const on = !PENDING_OFF.has(key + '|' + code);
+      return `<div style="display:flex;gap:7px;align-items:flex-start;padding:4px 6px;border-radius:6px;background:${on ? 'var(--c-a4bg)' : '#f1f3f4'};opacity:${on ? '1' : '.6'};">
+        <input type="checkbox" ${on ? 'checked' : ''} onchange="togglePendAda('${key}','${code}',this.checked)" title="Includi questa ADA nella mappatura" style="margin-top:2px;">
+        <span style="font-size:11px;line-height:1.4;">
+          <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-family:Consolas,monospace;font-weight:800;color:var(--c-a4);">${code}</a>${titolo ? ` <span style="color:var(--text);">— ${_escH(titolo)}</span>` : ''} <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--c-a1l);">scheda INAPP ↗</a>
+        </span>
+      </div>`;
+    }).join('');
+    return `<div style="padding:7px 10px;border:1px solid var(--bordo);border-radius:8px;background:${ck ? '#fff' : '#f5f5f5'};">
+      <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;">
+        <input type="checkbox" ${ck ? 'checked' : ''} onchange="toggleAttProg('${key}', this.checked)" style="margin-top:3px;">
+        <span style="font-size:12px;line-height:1.45;">
+          ${a.rif ? `<span style="display:inline-block;background:var(--blu);color:#fff;border-radius:8px;padding:1px 7px;font-size:9px;font-weight:700;margin-right:5px;vertical-align:1px;">${_escH(a.rif)}</span>` : ''}
+          <strong>${_escH(a.titolo)}</strong>
+          ${a.descrizione ? `<br><span style="color:var(--grigio);font-size:11px;">${_escH(a.descrizione)}</span>` : ''}
+        </span>
+      </label>
+      ${adaProposte.length ? `<div style="margin:6px 0 0 26px;display:flex;flex-direction:column;gap:3px;"><div style="font-size:9.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;font-weight:700;">ADA proposte — deseleziona quelle non pertinenti</div>${adaRows}</div>` : ''}
+    </div>`;
   }).join('');
   box.innerHTML = `
     <div style="border:1px solid var(--bordo);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#fff;">
@@ -2245,6 +2261,11 @@ function renderProgettoUI(){
 
 function selectSede(i){ _selSedeIdx = i; renderProgettoUI(); }
 function toggleAttProg(key, ck){ _attChecked[key] = ck; }
+function togglePendAda(key, code, on){
+  const k = key + '|' + code;
+  if (on) PENDING_OFF.delete(k); else PENDING_OFF.add(k);
+  renderProgettoUI();
+}
 
 async function ensureCatalogo(){
   if (CATALOGO) return CATALOGO;
@@ -2342,6 +2363,7 @@ async function rimappaProposte(sett){
   const parsed = _tryParseJson(raw);
   PENDING_MAP = Array.isArray(parsed.mappatura) ? parsed.mappatura.filter(m => m && m.ada_code) : [];
   PENDING_MAP_SETTORE = sett;
+  PENDING_OFF = new Set();
 }
 
 async function cambiaSettoreProgetto(nuovo){
@@ -2425,7 +2447,11 @@ async function applicaProgetto(autoAnalisi){
     // le proposte ADA sono già arrivate con la chiamata unificata: filtra per le attività selezionate
     const ks = new Set();
     (sede.attivita || []).forEach((a, j) => { if (_attChecked[_selSedeIdx + '-' + j] !== false) ks.add(_selSedeIdx + '-' + j); });
-    const pend = (PENDING_MAP || []).filter(m => !m.ks || !m.ks.length || m.ks.some(k => ks.has(k)));
+    const pend = (PENDING_MAP || []).map(m => {
+      if (!m.ks || !m.ks.length) return m;
+      const ksOk = m.ks.filter(k => ks.has(k) && !PENDING_OFF.has(k + '|' + m.ada_code));
+      return ksOk.length ? { ...m, ks: ksOk } : null;
+    }).filter(Boolean);
     if (pend.length) {
       applyFullMappatura({ mappatura: pend });
       goStep(3);
@@ -2469,6 +2495,10 @@ function _adaTitolo(code){
       const a = (CATALOGO.settori[k].ada || []).find(x => x.codice === code);
       if (a) return a.titolo;
     }
+  }
+  if (CATALOGO && CATALOGO.digcomp) {
+    const a = (CATALOGO.digcomp.ada || []).find(x => x.codice === code);
+    if (a) return a.titolo;
   }
   return '';
 }
