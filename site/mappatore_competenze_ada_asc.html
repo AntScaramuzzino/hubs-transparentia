@@ -638,6 +638,13 @@ details[open]{background:#fff}
       <button class="btn btn-success" style="width:100%;" onclick="downloadAttestato()">🎓 All. 6C — Attestato specifico .docx</button>
     </div>
 
+    <div class="section" style="background:#eef4fb;border-left:3px solid var(--blu);">
+      <div class="section-title" style="color:var(--blu);"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> REPORT DI VALIDAZIONE</div>
+      <div style="font-size:11px;color:#0d3b66;margin-bottom:10px;line-height:1.5;">Per ogni ADA: attività collegata, RA selezionati, <strong>livello suggerito vs validato</strong>, motivazione, rischio linguistico, fonte ufficiale e nota del tutor. Documento di tracciabilità della validazione, utile per audit e spendibilità istituzionale.</div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:6px;" onclick="renderReportValidazione()"><i class="fa-solid fa-eye" aria-hidden="true"></i> Anteprima report</button>
+      <button class="btn btn-success" style="width:100%;" onclick="downloadReportValidazione()"><i class="fa-solid fa-file-word" aria-hidden="true"></i> Scarica Report .docx</button>
+    </div>
+
     
     <details class="section" style="border:none;border-radius:0;background:#fafbfd;">
       <summary style="font-size:.78rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;cursor:pointer;padding:4px 0;"><i class="fa-solid fa-box-archive" aria-hidden="true"></i> Altri formati ed export</summary>
@@ -1068,9 +1075,10 @@ function generateMappings() {
       const ada = ADA_DB[ak];
       mappings[ak] = {
         adaKey: ak, validated: false,
-        livello: data.maxLevel, attivita: '',
+        livello: data.maxLevel, livelloSuggerito: data.maxLevel, attivita: '',
         comps: data.comps,
-        ra: ada?.ra?.map(r => ({...r, coverage: null, attivita: ''})) || []
+        ra: ada?.ra?.map(r => ({...r, coverage: null, attivita: ''})) || [],
+        motivazione: '', notaTutor: '', rischi: []
       };
     } else { mappings[ak].comps = data.comps; }
   });
@@ -1157,6 +1165,26 @@ function renderMappingCards() {
 
     const compTags = map.comps.map(c => `<span class="comp-tag">${c.name} · Liv.${c.level}</span>`).join('');
 
+    // --- Validazione del tutor: livello suggerito, rischio linguistico, motivazione, nota ---
+    const _lsug = (map.livelloSuggerito != null ? map.livelloSuggerito : map.livello);
+    const lsugHint = `<span style="font-weight:400;color:var(--grigio);"> · suggerito dall'AI: <strong>Liv. ${_lsug}</strong>${map.livello !== _lsug ? ' (modificato dal tutor)' : ''}</span>`;
+    const _rischi = (map.rischi || []).filter((v, i, a) => a.findIndex(x => x.nota === v.nota && x.attivita === v.attivita) === i);
+    const rischiHtml = _rischi.length ? `<div style="margin:2px 0 8px;padding:7px 10px;background:var(--c-a3bg);border:1px solid var(--c-a3l);border-radius:7px;font-size:11px;color:var(--c-a3);">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> <strong>Rischio linguistico sul ruolo OV (${_rischi.length}).</strong>
+        ${_rischi.map(r => `<div style="margin-top:3px;">• ${r.attivita ? '<em>' + _escH(r.attivita) + '</em> — ' : ''}${_escH(r.nota || 'Riformula con verbi propri del volontario (supportare, affiancare, collaborare).')}</div>`).join('')}
+      </div>` : '';
+    const tutorBlock = `
+        <details class="tutor-val" style="margin-top:10px;border:1px solid var(--bordo);border-radius:8px;background:#fafbfd;padding:0 10px;">
+          <summary style="cursor:pointer;font-size:11.5px;font-weight:700;color:var(--blu);padding:8px 0;list-style:none;"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Validazione del tutor${map.motivazione || map.notaTutor ? ' <span style="color:var(--verde);">●</span>' : ''}${_rischi.length ? ' <span style="color:var(--c-a3);">▲ rischio</span>' : ''}</summary>
+          <div style="padding:2px 0 10px;">
+            ${rischiHtml}
+            <label style="font-size:11px;">Motivazione della validazione (perché questa ADA e questo livello)</label>
+            <textarea style="min-height:46px;font-size:11.5px;width:100%;" placeholder="Es. attività di affiancamento documentata nel diario di bordo; livello 2 coerente con la supervisione dell'OLP." onchange="setMotivazione('${ak}',this.value)">${_escH(map.motivazione || '')}</textarea>
+            <label style="font-size:11px;margin-top:6px;">Nota del tutor</label>
+            <textarea style="min-height:40px;font-size:11.5px;width:100%;" placeholder="Annotazioni, evidenze, riserve…" onchange="setNotaTutor('${ak}',this.value)">${_escH(map.notaTutor || '')}</textarea>
+          </div>
+        </details>`;
+
     card.innerHTML = `
       <div class="ada-card-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1176,13 +1204,14 @@ function renderMappingCards() {
           <span class="livello-label">Livello realizzazione <span style="font-weight:400;color:var(--c-a3);">(suggerito — conferma sulle evidenze)</span>:</span>
           <div class="livello-btns">${lvlBtns}</div>
         </div>
-        <div class="livello-desc">${levelDescs[map.livello]||'—'}</div>
+        <div class="livello-desc">${levelDescs[map.livello]||'—'}${lsugHint}</div>
         <label style="margin-top:8px;">Attività svolta (per Sezione 4.1):</label>
         <input type="text" placeholder="Descrivi l'attività concreta svolta dal volontario..." value="${map.attivita||''}" onchange="setAttivita('${ak}',this.value)">
         <div class="ra-list">
           <div class="ra-label">Risultati Attesi (${map.ra.length} RA)</div>
           ${raRows}
         </div>
+        ${tutorBlock}
       </div>
       <div class="ada-card-actions">
         ${!map.validated
@@ -1223,6 +1252,8 @@ function renderMappingCards() {
 function setCoverage(ak,idx,val){ if(!mappings[ak])return; const r=mappings[ak].ra[idx]; r.coverage = r.coverage===val?null:val; renderMappingCards(); }
 function setRAAttivita(ak,idx,v){ if(mappings[ak]) mappings[ak].ra[idx].attivita=v; }
 function setAttivita(ak,v){ if(mappings[ak]) mappings[ak].attivita=v; }
+function setMotivazione(ak,v){ if(mappings[ak]) mappings[ak].motivazione=v; }
+function setNotaTutor(ak,v){ if(mappings[ak]) mappings[ak].notaTutor=v; }
 function setMapLevel(ak,l){ if(mappings[ak]){ mappings[ak].livello=l; renderMappingCards(); updateMapStats(); } }
 function validateADA(ak){ if(mappings[ak]){ mappings[ak].validated=true; renderMappingCards(); updateMapStats(); } }
 function unvalidateADA(ak){ if(mappings[ak]){ mappings[ak].validated=false; renderMappingCards(); updateMapStats(); } }
@@ -2821,7 +2852,7 @@ function applicaProgettista(){
     const ada = ADA_DB[code];
     if (!ada) return;
     if (!mappings[code]) {
-      mappings[code] = { adaKey: code, validated: false, livello: 2, attivita: byAda[code].slice(0, 3).join('; ').slice(0, 160), comps: [], ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' })) };
+      mappings[code] = { adaKey: code, validated: false, livello: 2, livelloSuggerito: 2, attivita: byAda[code].slice(0, 3).join('; ').slice(0, 160), comps: [], ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' })), motivazione: '', notaTutor: '', rischi: [] };
       n++;
     }
   });
@@ -2865,9 +2896,10 @@ function addAdaFromCatalog(code){
   if (!ada) { alert('ADA non trovata nel catalogo'); return; }
   if (!mappings[code]) {
     mappings[code] = {
-      adaKey: code, validated: false, livello: 2, attivita: '',
+      adaKey: code, validated: false, livello: 2, livelloSuggerito: 2, attivita: '',
       comps: [],
-      ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' }))
+      ra: (ada.ra || []).map(r => ({ ...r, coverage: null, attivita: '' })),
+      motivazione: '', notaTutor: '', rischi: []
     };
   }
   const box = document.getElementById('catalogo-results'); if (box) box.innerHTML = '';
@@ -3265,13 +3297,21 @@ function applyFullMappatura(parsed) {
         attivita: ''
       }));
 
+      // rischio linguistico: dalle attività della 5.3 collegate (item.ks) marcate rischio=true dall'AI
+      const _rischi = [];
+      (item.ks || []).forEach(k => {
+        const pp = String(k).split('-'); const si = +pp[0], ai = +pp[1];
+        const att = parsed.sedi && parsed.sedi[si] && parsed.sedi[si].attivita && parsed.sedi[si].attivita[ai];
+        if (att && att.rischio) _rischi.push({ attivita: att.titolo || att.descrizione || '', nota: att.rischio_nota || '' });
+      });
       if (!mappings[adaKey]) {
-        mappings[adaKey] = { adaKey, validated: false, livello, attivita: item.attivita || '', comps, ra: raWithCoverage, conf: item.conf || null };
+        mappings[adaKey] = { adaKey, validated: false, livello, livelloSuggerito: livello, attivita: item.attivita || '', comps, ra: raWithCoverage, conf: item.conf || null, motivazione: '', notaTutor: '', rischi: _rischi };
       } else {
         // Merge se stessa ADA appare più volte
         if (item.attivita) mappings[adaKey].attivita = mappings[adaKey].attivita ? mappings[adaKey].attivita + '; ' + item.attivita : item.attivita;
         comps.forEach(c => { if (!mappings[adaKey].comps.find(x => x.name === c.name)) mappings[adaKey].comps.push(c); });
         (item.ra_codes || []).forEach(rc => { const ra = mappings[adaKey].ra.find(r => r.code === rc); if (ra && !ra.coverage) ra.coverage = 'parziale'; });
+        if (_rischi.length) mappings[adaKey].rischi = (mappings[adaKey].rischi || []).concat(_rischi);
       }
     } else if (adaKey && adaKey !== 'ADA.XX.XX.XX') {
       // ADA non in database → aggiunge come manuale
@@ -3830,6 +3870,139 @@ async function downloadHeliosDocx(){
     const blob=await _assembleDocx(xml,'Dati per Helios');
     _saveBlob(blob,`HubS_DatiHelios_${_ymd()}.docx`);
   }catch(e){alert('Errore generazione Dati Helios: '+e.message);}
+}
+
+// ==================== REPORT DI VALIDAZIONE DELLA MAPPATURA ====================
+// Per ogni ADA: attività collegata, RA selezionati, livello suggerito vs validato,
+// motivazione, rischio linguistico, fonte ufficiale, nota del tutor, stato.
+function _reportRows(){
+  const lvlD = _LVL_DESC;
+  const rows = Object.values(mappings).map(m => {
+    const ada = ADA_DB[m.adaKey] || {};
+    const code = ada.code || m.adaKey;
+    const raSel = (m.ra || []).filter(r => r.coverage);
+    const lsug = (m.livelloSuggerito != null ? m.livelloSuggerito : m.livello);
+    const rischi = (m.rischi || []).filter((v, i, a) => a.findIndex(x => x.nota === v.nota && x.attivita === v.attivita) === i);
+    return {
+      code, titolo: ada.desc || '', livelloAda: ada.level || '',
+      attivita: m.attivita || '',
+      ra: raSel.map(r => ({ code: r.code, desc: _cleanRa(r.desc), coverage: r.coverage, attivita: r.attivita || '' })),
+      lsug, lval: m.livello, lsugDesc: lvlD[lsug] || '', lvalDesc: lvlD[m.livello] || '',
+      motivazione: m.motivazione || '', notaTutor: m.notaTutor || '',
+      rischi, fonte: _fonteAda(ada.code, ada.source),
+      inapp: (typeof ADA_LINKS !== 'undefined' && ADA_LINKS[code]) ? adaInappUrl(code) : '',
+      validated: !!m.validated
+    };
+  });
+  rows.sort((a, b) => (b.validated - a.validated) || a.code.localeCompare(b.code));
+  return rows;
+}
+function _reportMeta(){
+  const nome = (_modV('mod-vol-nome') + ' ' + _modV('mod-vol-cognome')).trim() || _modV('vol-nome');
+  const tutor = (_modV('mod-resp-nome') + ' ' + _modV('mod-resp-cognome')).trim() || _modV('vol-tutor');
+  const sett = _modV('mod-prog-settore') || (PROJECT && PROJECT.settore) || '';
+  return {
+    nome: nome || '—',
+    ente: _modV('mod-ente-denominazione') || (PROJECT && PROJECT.ente) || '—',
+    tutor: tutor || '—',
+    progetto: _modV('mod-prog-titolo') || (PROJECT && PROJECT.titolo) || '—',
+    settore: sett ? (SETTORI_SCU[sett] ? sett + ' — ' + SETTORI_SCU[sett] : sett) : '—',
+    data: new Date().toLocaleDateString('it-IT')
+  };
+}
+function renderReportValidazione(){
+  const box = document.getElementById('export-output'); if(!box) return;
+  const rows = _reportRows();
+  if(!rows.length){ box.innerHTML = '<div class="empty-mapping">Nessuna ADA in mappatura. Analizza il progetto e mappa le ADA prima di generare il report.</div>'; return; }
+  const M = _reportMeta();
+  const nVal = rows.filter(r => r.validated).length;
+  const nRisk = rows.filter(r => r.rischi.length).length;
+  const lvl = (s, v, d) => `<div><span style="color:var(--grigio);font-size:10px;">${s}</span><br><strong>${v ? 'Liv. ' + v : '—'}</strong>${d ? ' <span style="font-size:10px;color:var(--grigio);">' + _escH(d) + '</span>' : ''}</div>`;
+  const cards = rows.map((r, i) => `
+    <div class="ada-card" style="margin-bottom:12px;border-left:4px solid ${r.validated ? 'var(--verde)' : 'var(--arancio)'};">
+      <div class="ada-card-header">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="ada-code">${i + 1}. ${r.code}</span>
+          ${r.inapp ? `<a class="scheda-link scheda-online" href="${r.inapp}" target="_blank">scheda INAPP ↗</a>` : ''}
+          <span class="${r.validated ? 'validated-badge' : ''}" style="${r.validated ? '' : 'font-size:11px;color:var(--arancio);font-weight:700;'}">${r.validated ? '✅ Validata dal tutor' : '⏳ Da validare'}</span>
+          ${r.rischi.length ? `<span class="badge" style="background:var(--c-a3bg);color:var(--c-a3);">▲ rischio linguistico</span>` : ''}
+        </div>
+        <div class="ada-title">${_escH(r.titolo)}</div>
+        <div class="ada-source" style="margin-top:4px;">🔗 ${_escH(r.fonte)}</div>
+      </div>
+      <div class="ada-card-body">
+        <table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+          <tr><td style="vertical-align:top;padding:5px 8px;border:1px solid var(--border);width:34%;background:var(--grey);font-weight:600;">Attività collegata</td><td style="padding:5px 8px;border:1px solid var(--border);">${_escH(r.attivita) || '<span style="color:var(--sub);">—</span>'}</td></tr>
+          <tr><td style="vertical-align:top;padding:5px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">RA selezionati</td><td style="padding:5px 8px;border:1px solid var(--border);">${r.ra.length ? r.ra.map(x => `<div><strong>${x.code}</strong> — ${_escH(x.desc)} <em style="color:var(--sub);">(${x.coverage})</em>${x.attivita ? '<br><span style="color:var(--sub);">↳ ' + _escH(x.attivita) + '</span>' : ''}</div>`).join('') : '<span style="color:var(--sub);">nessun RA selezionato</span>'}</td></tr>
+          <tr><td style="padding:5px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Livello suggerito → validato</td><td style="padding:5px 8px;border:1px solid var(--border);"><strong>Liv. ${r.lsug}</strong> <span style="color:var(--sub);">(${_escH(r.lsugDesc)})</span> → <strong>Liv. ${r.lval}</strong> <span style="color:var(--sub);">(${_escH(r.lvalDesc)})</span>${r.lval !== r.lsug ? ' <span style="color:var(--c-a1);font-size:10px;">modificato dal tutor</span>' : ''}</td></tr>
+          <tr><td style="vertical-align:top;padding:5px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Motivazione</td><td style="padding:5px 8px;border:1px solid var(--border);">${_escH(r.motivazione) || '<span style="color:var(--sub);">— da compilare —</span>'}</td></tr>
+          <tr><td style="vertical-align:top;padding:5px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Rischio linguistico (ruolo OV)</td><td style="padding:5px 8px;border:1px solid var(--border);">${r.rischi.length ? r.rischi.map(x => `<div>▲ ${x.attivita ? '<em>' + _escH(x.attivita) + '</em> — ' : ''}${_escH(x.nota)}</div>`).join('') : '<span style="color:var(--verde);">Nessuno rilevato</span>'}</td></tr>
+          <tr><td style="vertical-align:top;padding:5px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Nota del tutor</td><td style="padding:5px 8px;border:1px solid var(--border);">${_escH(r.notaTutor) || '<span style="color:var(--sub);">—</span>'}</td></tr>
+        </table>
+      </div>
+    </div>`).join('');
+  box.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <h2>🛡️ Report di validazione della mappatura</h2>
+      <p style="font-size:12px;color:var(--sub);">Tracciabilità della validazione delle competenze rispetto all'Atlante del Lavoro INAPP. Il livello è un suggerimento dell'AI, confermato o modificato dal tutor sulle evidenze.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin:8px 0;">
+        <tr><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;width:25%;">Operatore volontario</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.nome)}</td><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;width:15%;">Ente</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.ente)}</td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Progetto</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.progetto)}</td><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Settore</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.settore)}</td></tr>
+        <tr><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Tutor / Responsabile</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.tutor)}</td><td style="padding:4px 8px;border:1px solid var(--border);background:var(--grey);font-weight:600;">Data</td><td style="padding:4px 8px;border:1px solid var(--border);">${_escH(M.data)}</td></tr>
+      </table>
+      <div style="font-size:12px;color:var(--grigio);">ADA totali: <strong>${rows.length}</strong> · validate: <strong style="color:var(--verde);">${nVal}</strong> · da validare: <strong style="color:var(--arancio);">${rows.length - nVal}</strong>${nRisk ? ` · con rischio linguistico: <strong style="color:var(--c-a3);">${nRisk}</strong>` : ''}</div>
+    </div>
+    ${cards}`;
+}
+async function downloadReportValidazione(){
+  try {
+    const rows = _reportRows();
+    if(!rows.length){ alert('Nessuna ADA in mappatura: analizza il progetto e mappa le ADA prima di generare il report.'); return; }
+    syncLegacyFields();
+    const M = _reportMeta();
+    const nVal = rows.filter(r => r.validated).length;
+    const nRisk = rows.filter(r => r.rischi.length).length;
+    let xml = '';
+    xml += _wH('Report di validazione della mappatura delle competenze', 1);
+    xml += _wP("Tracciabilità della validazione delle competenze degli operatori volontari rispetto all'Atlante del Lavoro e delle Qualificazioni (INAPP) e ai quadri europei. Il livello di realizzazione è un suggerimento, confermato o modificato dal tutor sulle evidenze del singolo volontario.", { italic: true, sz: 16, color: '666666' });
+    xml += _wBr();
+    xml += _wKVTable([
+      ['Operatore volontario', _uline(M.nome)],
+      ['Ente di Servizio civile', _uline(M.ente)],
+      ['Progetto', _uline(M.progetto)],
+      ['Settore SCU', _uline(M.settore)],
+      ['Tutor / Responsabile accompagnamento', _uline(M.tutor)],
+      ['Data del report', M.data],
+      ['Sintesi', `ADA totali: ${rows.length} · validate: ${nVal} · da validare: ${rows.length - nVal}${nRisk ? ' · con rischio linguistico: ' + nRisk : ''}`]
+    ]);
+    xml += _wBr();
+    rows.forEach((r, i) => {
+      xml += _wH((i + 1) + '. ' + r.code + (r.titolo ? ' — ' + r.titolo : ''), 3);
+      const raTxt = r.ra.length
+        ? r.ra.map(x => x.code + ' — ' + x.desc + ' (' + x.coverage + ')' + (x.attivita ? '\n   ↳ ' + x.attivita : '')).join('\n')
+        : 'Nessun RA selezionato';
+      const rischioTxt = r.rischi.length
+        ? r.rischi.map(x => '▲ ' + (x.attivita ? x.attivita + ' — ' : '') + (x.nota || 'da riformulare con verbi propri del volontario')).join('\n')
+        : 'Nessuno rilevato';
+      xml += _wKVTable([
+        ['Attività collegata', _uline(r.attivita)],
+        ['Risultati Attesi (RA) selezionati', raTxt],
+        ['Livello suggerito (AI)', 'Liv. ' + r.lsug + ' — ' + r.lsugDesc],
+        ['Livello validato (tutor)', 'Liv. ' + r.lval + ' — ' + r.lvalDesc + (r.lval !== r.lsug ? '  [modificato rispetto al suggerito]' : '')],
+        ['Motivazione della validazione', _uline(r.motivazione, 40)],
+        ['Rischio linguistico (ruolo OV)', rischioTxt],
+        ['Fonte ufficiale', r.fonte + (r.inapp ? '\nScheda Atlante INAPP: ' + r.inapp : '')],
+        ['Nota del tutor', _uline(r.notaTutor, 40)],
+        ['Stato', r.validated ? 'Validata dal tutor' : 'Da validare']
+      ]);
+      xml += _wBr();
+    });
+    xml += _wP('Il presente report attesta la validazione, da parte del tutor, della corrispondenza tra le attività svolte dall\'operatore volontario e le Aree di Attività (ADA) dell\'Atlante del Lavoro. Documento a supporto della messa in trasparenza ai sensi del D.lgs. 13/2013 e del D.M. 115/2024.', { sz: 16, color: '666666', italic: true });
+    xml += _wBr();
+    xml += _wSigTable(M.tutor, M.nome, _modV('mod-ril-luogo') || '____________', M.data);
+    const blob = await _assembleDocx(xml, 'Report di validazione della mappatura');
+    _saveBlob(blob, `HubS_ReportValidazione_${_ymd()}.docx`);
+  } catch(e){ alert('Errore generazione Report di validazione: ' + e.message); }
 }
 
 async function downloadModelloTrasparenza(){
