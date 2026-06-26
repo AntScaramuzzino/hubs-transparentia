@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guida — Mappatore ASC · HubS·TransparentIA</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--c-a1:#1a5276;--c-a1l:#2e86c1;--c-a1bg:#eaf2fb;--c-a2:#1b6b3a;--c-a2bg:#eafaf1;--c-a3:#a04000;--c-a3l:#e67e22;--c-a3bg:#fef5e7;--c-a4:#4a235a;--c-a4l:#8e44ad;--c-a4bg:#f5eef8;--c-a5:#7b241c;--c-a5l:#c0392b;--c-a5bg:#fdedec;--grey:#f1f3f7;--border:#d8dde6;--text:#12172e;--sub:#5c6470;--radius:12px;--shadow:0 2px 6px rgba(0,0,0,.07),0 6px 18px rgba(0,0,0,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:var(--text);background:#e8ecf2;line-height:1.6}
+#hdr{background:linear-gradient(90deg,#12172e,#1e2a4a);color:#fff;padding:0 22px;height:60px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10;box-shadow:0 2px 14px rgba(0,0,0,.38)}
+#hdr .logo{font-size:1.12rem;font-weight:800;display:flex;align-items:center;gap:9px}
+#hdr .logo i{color:#2ecc71}#hdr .logo span{color:#27ae60}
+#hdr .spacer{flex:1}
+.hbtn{background:#27ae60;border:none;color:#fff;padding:8px 15px;border-radius:7px;font-size:.85rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 60px}
+.hero{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px;margin-bottom:20px}
+.hero h1{font-size:1.5rem;margin-bottom:8px}
+.hero p{color:var(--sub)}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.toc a{font-size:.82rem;font-weight:600;background:var(--c-a1bg);color:var(--c-a1);padding:6px 12px;border-radius:999px;text-decoration:none}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+.card h2{font-size:1.2rem;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.card h2 .n{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;color:#fff;font-size:.9rem;flex-shrink:0}
+.card h3{font-size:1rem;margin:16px 0 6px}
+.card p,.card li{font-size:.93rem;color:var(--text)}
+.card ul,.card ol{margin:6px 0 6px 22px}
+.card li{margin-bottom:5px}
+.f0 .n{background:var(--c-a1)}.f1 .n{background:var(--c-a2)}.f2 .n{background:var(--c-a3)}.f3 .n{background:var(--c-a4)}.f4 .n{background:var(--c-a5)}
+.tag{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 9px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.tag-l1{background:var(--c-a2bg);color:var(--c-a2);border:1px solid var(--c-a2)}
+.tag-l2{background:var(--c-a3bg);color:var(--c-a3);border:1px solid var(--c-a3l)}
+.box{border-radius:9px;padding:12px 15px;margin:12px 0;font-size:.9rem}
+.box-info{background:var(--c-a1bg);border-left:3px solid var(--c-a1l);color:var(--c-a1)}
+.box-warn{background:var(--c-a3bg);border-left:3px solid var(--c-a3l);color:var(--c-a3)}
+.box-ok{background:var(--c-a2bg);border-left:3px solid var(--c-a2);color:var(--c-a2)}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--c-a4);color:#fff;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:9px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:.86rem;margin:10px 0}
+th,td{border:1px solid var(--border);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--grey)}
+code{background:var(--grey);padding:1px 6px;border-radius:5px;font-size:.85em;font-family:Consolas,monospace}
+.foot{text-align:center;color:var(--sub);font-size:.8rem;margin-top:30px}
+details{border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:8px;background:#fff}
+summary{font-weight:700;cursor:pointer;font-size:.92rem}
+details[open] summary{margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div class="logo"><i class="fa-solid fa-network-wired"></i>HubS<span>·</span>TransparentIA</div>
+  <div class="spacer"></div>
+  <a class="hbtn" href="/mappatura-asc"><i class="fa-solid fa-arrow-left"></i> Vai al Mappatore</a>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Guida al Mappatore ASC</h1>
+    <p>Dallo scheda progetto di Servizio Civile (Allegato 3A) ai documenti di trasparenza delle competenze, in tre fasi. Questa guida spiega cosa fa lo strumento, per chi, e come usarlo passo per passo.</p>
+    <div class="toc">
+      <a href="#cose">Cos'è</a>
+      <a href="#chi">Per chi</a>
+      <a href="#fasi">Le 3 fasi</a>
+      <a href="#progettista">Modalità Progettista</a>
+      <a href="#fonti">Le fonti dei dati</a>
+      <a href="#export">Documenti prodotti</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </div>
+
+  <div class="card" id="cose">
+    <h2><i class="fa-solid fa-circle-info" style="color:var(--c-a1)"></i> Cos'è</h2>
+    <p>Il <strong>Mappatore ASC</strong> è uno strumento web che aiuta enti e tutor del Servizio Civile Universale a <strong>mettere in trasparenza le competenze</strong> sviluppate dagli operatori volontari, ancorandole all'<strong>Atlante del Lavoro e delle Qualificazioni INAPP</strong> (Aree di Attività — ADA, Risultati Attesi — RA) e ai quadri europei <strong>DigComp, LifeComp ed EntreComp</strong>.</p>
+    <p>Parte dal progetto SCU (le voci 5.1 e 5.3 dell'Allegato 3A), propone le ADA pertinenti con l'aiuto dell'AI, fa validare al tutor, e genera i documenti ufficiali: <strong>Documento di trasparenza (All. 6D)</strong> e <strong>Attestato specifico (All. 6C)</strong>, oltre a un foglio <strong>Dati per Helios</strong>.</p>
+    <p style="margin-top:8px;">Indirizzo: <code>hubs-transparentia.vercel.app/mappatura-asc</code></p>
+  </div>
+
+  <div class="card" id="chi">
+    <h2><i class="fa-solid fa-users" style="color:var(--c-a1)"></i> Per chi è</h2>
+    <table>
+      <tr><th>Ruolo</th><th>Cosa fa con lo strumento</th></tr>
+      <tr><td><strong>Tutor / OLP</strong></td><td>Parte dalle attività effettivamente svolte dal volontario, valida le ADA proposte, imposta livello e copertura dei RA, genera i documenti di trasparenza 6C/6D.</td></tr>
+      <tr><td><strong>Progettista</strong></td><td>In fase di scrittura del progetto, associa a ogni attività della voce 5.3 il riferimento ADA corretto (filtrato per settore) e ottiene il testo annotato pronto da incollare nella scheda.</td></tr>
+    </table>
+  </div>
+
+  <div class="card f0" id="fasi">
+    <h2><span class="n">1</span> Fase Origine</h2>
+    <p>Punto di partenza. Due modi:</p>
+    <ul>
+      <li><strong>Da progetto (3A)</strong>: carichi la scheda progetto in <strong>PDF, .md o .txt</strong> (oppure incolli le voci 5.1/5.3). Lo strumento estrae le sedi di attuazione, le attività dei volontari, e <strong>rileva il settore SCU</strong> — di norma leggendolo dalla dichiarazione presente nella scheda.</li>
+      <li><strong>Descrizione libera</strong>: se non hai il PDF, descrivi a parole ciò che il volontario ha fatto.</li>
+    </ul>
+    <div class="box box-info"><i class="fa-solid fa-wand-magic-sparkles"></i> L'analisi parte da sola al caricamento: <strong>un'unica attesa</strong> produce sedi, attività, settore e <strong>proposte ADA</strong>. Ogni attività mostra le ADA proposte con codice, denominazione, link alla scheda INAPP e un badge di confidenza (alta / media / da verificare). Puoi <strong>deselezionare</strong> le ADA non pertinenti.</div>
+    <p>Se il settore proposto non è corretto, cambialo dal menù: le proposte ADA vengono <strong>rimappate automaticamente</strong> sul nuovo settore.</p>
+  </div>
+
+  <div class="card f1">
+    <h2><span class="n">2</span> Fase Mappatura ADA</h2>
+    <p>Qui validi e rifinisci. Tre modi di lavorare, nei sotto-tab:</p>
+    <ul>
+      <li><strong>Mappatura</strong>: per ogni ADA proposta imposti il <strong>livello di realizzazione</strong> (1–4) e la <strong>copertura dei RA</strong> (totale/parziale), poi <strong>validi</strong>. Filtri rapidi: Tutte / Da validare / Validate / L1 / L2.</li>
+      <li><strong>Quadri europei</strong>: selezioni manualmente DigComp, LifeComp, EntreComp, Competenze chiave UE.</li>
+      <li><strong>ADA SCU</strong>: sfogli l'elenco del Dipartimento per settore (A–G + Quadro DigComp), con RA e attività ufficiali, e aggiungi ciò che serve.</li>
+    </ul>
+    <div class="box box-warn"><i class="fa-solid fa-triangle-exclamation"></i> Il <strong>livello</strong> proposto dall'AI è solo un suggerimento: <strong>confermalo sulle evidenze</strong> del singolo volontario.</div>
+    <p><span class="tag tag-l1">L1 · Certificabile</span> ADA digitali dal Quadro DigComp (corrispondenza deterministica). <span class="tag tag-l2">L2 · Inferenziale</span> ADA di settore: codici ufficiali, ma la relazione con i quadri europei va verificata dal tutor.</p>
+  </div>
+
+  <div class="card f2">
+    <h2><span class="n">3</span> Fase Documenti</h2>
+    <p>Quando hai validato almeno un'ADA si sblocca la generazione dei documenti. Compili i dati di intestazione (ente, volontario, responsabile, progetto) e ottieni:</p>
+    <ul>
+      <li><strong>All. 6D — Documento di trasparenza</strong> (.docx): tabelle ufficiali con ADA/RA/livello/copertura, blocchi DigComp/LifeComp/EntreComp, evidenze, firme.</li>
+      <li><strong>All. 6C — Attestato specifico</strong> (.docx): testo ufficiale integrale precompilato con le competenze emerse.</li>
+      <li><strong>Dati per Helios</strong>: vista/copia/.docx coi campi pronti da ricopiare nella piattaforma (ADA, RA, attività da selezionare, LifeComp, EntreComp, DigComp).</li>
+      <li><strong>Altri formati</strong>: Sezione 4.1, Schede ADA, CSV, testo.</li>
+    </ul>
+  </div>
+
+  <div class="card f3" id="progettista">
+    <h2><i class="fa-solid fa-compass-drafting" style="color:var(--c-a4)"></i> Modalità Progettista</h2>
+    <p>Pensata per chi scrive il progetto. Dopo l'analisi, apri <strong>"Progettista: ADA per attività"</strong>: ottieni una tabella in cui ogni attività della 5.3 ha il suo riferimento ADA, <strong>filtrato sul settore</strong>. Se la 5.3 cita già un'ADA, viene riconosciuta. Puoi:</p>
+    <ul>
+      <li>far <strong>suggerire all'AI</strong> le ADA per le attività ancora scoperte;</li>
+      <li>scegliere o correggere manualmente da menù a tendina (settore + ADA.QE digitali);</li>
+      <li>esportare la <strong>tabella</strong> (.docx / copia per Excel) e il <strong>testo della voce 5.3 annotato</strong> con i riferimenti ADA, pronto da incollare nella scheda.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="fonti">
+    <h2><i class="fa-solid fa-database" style="color:var(--c-a1)"></i> Le fonti dei dati</h2>
+    <table>
+      <tr><th>Quadro</th><th>Fonte</th></tr>
+      <tr><td>ADA / RA di settore</td><td>Elenco per i 7 settori SCU filtrato dal Dipartimento per le politiche giovanili e il SCU (Atlante del Lavoro INAPP) — 251 ADA.</td></tr>
+      <tr><td>ADA digitali</td><td>Quadro DigComp 2.1 ↔ ADA del Dipartimento — 5 ADA trasversali.</td></tr>
+      <tr><td>LifeComp</td><td>Framework europeo ufficiale (JRC) — 9 competenze, 3 aree.</td></tr>
+      <tr><td>EntreComp</td><td>Framework europeo ufficiale (GU C189/2018, JRC) — 15 competenze, 3 aree.</td></tr>
+      <tr><td>Link schede ADA</td><td>Deep-link diretti alle schede di <code>atlantelavoro.inapp.org</code> (961 codici).</td></tr>
+    </table>
+    <div class="box box-ok"><i class="fa-solid fa-shield-halved"></i> Le proposte AI usano <strong>solo</strong> codici e valori presenti negli elenchi ufficiali: i codici fuori catalogo vengono scartati automaticamente. Il filtro è applicato nel codice, non solo nelle istruzioni all'AI.</div>
+  </div>
+
+  <div class="card" id="export">
+    <h2><i class="fa-solid fa-file-arrow-down" style="color:var(--c-a1)"></i> Riferimenti normativi dei documenti</h2>
+    <p>I modelli prodotti seguono gli allegati ufficiali della messa in trasparenza SCU (D.lgs. 13/2013; D.lgs. 40/2017; D.M. 115/2024): <strong>Allegato 6D</strong> (Documento di trasparenza) e <strong>Allegato 6C</strong> (Attestato specifico). I file <code>.docx</code> sono generati in formato OOXML conforme, apribili direttamente in Word.</p>
+  </div>
+
+  <div class="card" id="faq">
+    <h2><i class="fa-solid fa-circle-question" style="color:var(--c-a1)"></i> Domande frequenti</h2>
+    <details><summary>Il PDF del progetto è una scansione: l'estrazione non funziona.</summary><p>Lo strumento non fa OCR. Apri il PDF, copia le voci 5.1 e 5.3 e incollale nel riquadro "Incolla il testo" della fase Origine.</p></details>
+    <details><summary>Il settore proposto è sbagliato.</summary><p>Cambialo dal menù a tendina in Origine: catalogo ADA e proposte vengono rigenerati sul settore scelto.</p></details>
+    <details><summary>Posso fidarmi delle ADA proposte dall'AI?</summary><p>Sono un punto di partenza. Ogni proposta ha un badge di confidenza e il link alla scheda INAPP per verificare. La validazione finale è sempre del tutor.</p></details>
+    <details><summary>Che differenza c'è tra la voce 5.3 e la descrizione delle attività?</summary><p>La 5.3 è ciò che il progetto <em>prevede</em>; il Documento di trasparenza certifica ciò che il volontario ha <em>effettivamente svolto</em>. La fase Origine/Descrizione serve ad adattare il testo alla realtà del percorso.</p></details>
+    <details><summary>I dati che inserisco vengono salvati da qualche parte?</summary><p>No: l'elaborazione avviene nel browser. I testi inviati all'AI passano solo per generare le proposte. I documenti si scaricano in locale.</p></details>
+  </div>
+
+  <div style="text-align:center;">
+    <a class="cta" href="/mappatura-asc"><i class="fa-solid fa-play"></i> Apri il Mappatore</a>
+  </div>
+
+  <div class="foot">HubS · TransparentIA — INRETE Cooperativa Sociale + Arci Servizio Civile · Atlante del Lavoro INAPP</div>
+</div>
+</body>
+</html>
