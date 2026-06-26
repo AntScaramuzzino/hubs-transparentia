@@ -274,6 +274,9 @@ details[open]{background:#fff}
 <div id="hdr">
   <button id="menu-btn" onclick="toggleSidebar()" aria-label="Apri menu fasi"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
   <div class="logo"><i class="fa-solid fa-network-wired" aria-hidden="true"></i>HubS<span>·</span>TransparentIA</div>
+  <a id="logo-asc-wrap" href="https://www.arciserviziocivile.it" target="_blank" rel="noopener" title="Arci Servizio Civile — ASC APS" style="display:flex;align-items:center;margin-left:4px;padding-left:12px;border-left:1px solid rgba(255,255,255,.22);">
+    <img src="/asc-logo.png" alt="ASC APS" style="height:32px;width:auto;display:block;background:#fff;border-radius:6px;padding:2px 5px;" onerror="document.getElementById('logo-asc-wrap').style.display='none'">
+  </a>
   <div class="hdr-sub">Mappatore — Progetto SCU → Competenze → ADA · Atlante del Lavoro INAPP</div>
   <div class="spacer"></div>
   <a class="hbtn" href="/guida" target="_blank" rel="noopener"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Guida</a>
@@ -1076,6 +1079,12 @@ function setMapFilter(f){
   document.querySelectorAll('#map-filtri .tab').forEach(b => b.classList.toggle('active', b.dataset.mf === f));
   renderMappingCards();
 }
+function _confBadge(conf){
+  if(!conf) return '';
+  const m={alta:['var(--c-a2bg)','var(--c-a2)','● confidenza alta'],media:['var(--c-a3bg)','var(--c-a3)','● confidenza media'],verifica:['#fdecea','var(--c-a5l)','▲ da verificare']}[String(conf).toLowerCase()];
+  if(!m) return '';
+  return `<span class="badge" style="background:${m[0]};color:${m[1]};" title="Confidenza dell'abbinamento attività↔ADA proposto dall'AI">${m[2]}</span>`;
+}
 function renderMappingCards() {
   const c = document.getElementById('mapping-cards');
   let adaKeys = Object.keys(mappings);
@@ -1148,6 +1157,7 @@ function renderMappingCards() {
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="ada-code">${ada?.code||ak}</span>
           <span class="badge badge-${ada?.level==='L1'?'l1':'l2'}">${ada?.level==='L1'?'L1 · Certificabile':'L2 · Inferenziale — da verificare'}</span>
+          ${_confBadge(map.conf)}
           ${schedaBtn}
           ${map.validated?'<span class="validated-badge">✅ Validato dal tutor</span>':'<span style="font-size:11px;color:var(--grigio);">In attesa di validazione</span>'}
         </div>
@@ -2120,10 +2130,12 @@ REGOLE:
 - "settore": lettera del settore SCU più coerente con le attività. A=Assistenza; B=Protezione civile; C=Patrimonio ambientale e riqualificazione urbana; D=Patrimonio storico, artistico e culturale; E=Educazione e promozione culturale, paesaggistica, ambientale, del turismo sostenibile e sociale e dello sport; F=Agricoltura in zona di montagna, agricoltura sociale e biodiversità; G=Promozione della pace e diritti umani. Aggiungi "settore_motivo" (max 150 caratteri).
 - Se titolo/ente sono indicati nel messaggio, riportali; altrimenti deducili dal testo.
 
-- Se il messaggio contiene un CATALOGO ADA, aggiungi anche "mappatura": le ADA pertinenti alle attività dei volontari (SOLO codici del catalogo). Ogni voce: {"ada_code","ra_codes":[codici RA],"livello":1|2,"comp_ids":[max 3],"attivita":"nome breve","ks":["0-1"]} dove ks = indici sede-attività coperti (es. "0-1" = sede 0, attività 1). COMP_IDS validi: dc1..dc5, eu1, eu5, eu6, eu7, LifeComp: lc1, lcP2, lcP3, lc3, lc4, lc5, lc6, lc7, lcL3, EntreComp: ec11, ec1, ec13, ec14, ec15, ec21, ec3, ec4, ec24, ec25, ec5, ec6, ec33, ec7, ec35. Massimo 12 voci, raggruppa le attività nella stessa ADA.
+- Se il messaggio contiene un CATALOGO ADA, aggiungi anche "mappatura": le ADA pertinenti alle attività dei volontari (SOLO codici del catalogo). Ogni voce: {"ada_code","ra_codes":[codici RA],"livello":1|2,"comp_ids":[max 3],"attivita":"nome breve","ks":["0-1"],"conf":"alta|media|verifica"} dove conf = confidenza dell'abbinamento attività↔ADA (alta = corrispondenza evidente; media = plausibile; verifica = incerto, il tutor deve controllare sull'Atlante). dove ks = indici sede-attività coperti (es. "0-1" = sede 0, attività 1). COMP_IDS validi: dc1..dc5, eu1, eu5, eu6, eu7, LifeComp: lc1, lcP2, lcP3, lc3, lc4, lc5, lc6, lc7, lcL3, EntreComp: ec11, ec1, ec13, ec14, ec15, ec21, ec3, ec4, ec24, ec25, ec5, ec6, ec33, ec7, ec35. Massimo 12 voci, raggruppa le attività nella stessa ADA.
 
 OUTPUT — SOLO JSON, nessun testo prima o dopo:
-{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"...","rischio":false}]}],"mappatura":[{"ada_code":"ADA.18.01.06","ra_codes":["RA.18.01.06.1"],"livello":2,"comp_ids":["lc4"],"attivita":"...","ks":["0-0","0-1"]}]}`;
+{"titolo":"...","ente":"...","settore":"E","settore_motivo":"...","sedi":[{"nome":"...","ruolo":"...","attivita":[{"rif":"Azione 1 / Att. 1.2","titolo":"...","descrizione":"...","rischio":false}]}],"mappatura":[{"ada_code":"ADA.18.01.06","ra_codes":["RA.18.01.06.1"],"livello":2,"comp_ids":["lc4"],"attivita":"...","ks":["0-0","0-1"],"conf":"alta"}]}
+
+ESEMPIO (settore A). Attività: "i volontari affiancano gli operatori nell'accompagnamento di anziani non autosufficienti nelle attività quotidiane: pasti, igiene, compagnia". Output atteso: sede con quell'attività (rischio:false), settore "A", e mappatura [{"ada_code":"ADA.19.02.14","ra_codes":[...],"livello":2,"comp_ids":["lc3","ec7"],"attivita":"Supporto attività quotidiane","ks":["0-0"],"conf":"alta"}]. Nota: lc3=Empatia, ec7=Lavorare con gli altri.`;
 
 function _balanceJson(s){
   // taglia all'ultima chiusura strutturale e bilancia le parentesi rimaste aperte (string-aware)
@@ -2232,7 +2244,7 @@ function renderProgettoUI(){
       return `<div style="display:flex;gap:7px;align-items:flex-start;padding:4px 6px;border-radius:6px;background:${on ? 'var(--c-a4bg)' : '#f1f3f4'};opacity:${on ? '1' : '.6'};">
         <input type="checkbox" ${on ? 'checked' : ''} onchange="togglePendAda('${key}','${code}',this.checked)" title="Includi questa ADA nella mappatura" style="margin-top:2px;">
         <span style="font-size:11px;line-height:1.4;">
-          <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-family:Consolas,monospace;font-weight:800;color:var(--c-a4);">${code}</a>${titolo ? ` <span style="color:var(--text);">— ${_escH(titolo)}</span>` : ''} <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--c-a1l);">scheda INAPP ↗</a>
+          <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-family:Consolas,monospace;font-weight:800;color:var(--c-a4);">${code}</a>${titolo ? ` <span style="color:var(--text);">— ${_escH(titolo)}</span>` : ''} ${_confBadge(m.conf)} <a href="${adaInappUrl(code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--c-a1l);">scheda INAPP ↗</a>
         </span>
       </div>`;
     }).join('');
@@ -2370,7 +2382,7 @@ function registerCatalogAda(code){
 
 const RIMAPPA_SYS = `Mappi le attività dei volontari SCU sulle ADA dell'Atlante INAPP.
 Usa SOLO i codici del CATALOGO fornito (settore + ADA.QE digitali). Le ADA.QE solo per attività prevalentemente digitali.
-Rispondi SOLO JSON compatto: {"mappatura":[{"ada_code":"ADA.xx.xx.xx","ra_codes":["RA..."],"livello":1|2,"comp_ids":["lc4"],"attivita":"nome breve","ks":["0-1"]}]}
+Rispondi SOLO JSON compatto: {"mappatura":[{"ada_code":"ADA.xx.xx.xx","ra_codes":["RA..."],"livello":1|2,"comp_ids":["lc4"],"attivita":"nome breve","ks":["0-1"],"conf":"alta|media|verifica"}]} (conf = confidenza abbinamento attività↔ADA)
 ks = indici sede-attività coperti. Max 12 voci, raggruppa le attività nella stessa ADA. COMP_IDS validi: dc1..dc5, eu1, eu5, eu6, eu7, LifeComp: lc1, lcP2, lcP3, lc3, lc4, lc5, lc6, lc7, lcL3, EntreComp: ec11, ec1, ec13, ec14, ec15, ec21, ec3, ec4, ec24, ec25, ec5, ec6, ec33, ec7, ec35.`;
 
 async function rimappaProposte(sett){
@@ -3249,7 +3261,7 @@ function applyFullMappatura(parsed) {
       }));
 
       if (!mappings[adaKey]) {
-        mappings[adaKey] = { adaKey, validated: false, livello, attivita: item.attivita || '', comps, ra: raWithCoverage };
+        mappings[adaKey] = { adaKey, validated: false, livello, attivita: item.attivita || '', comps, ra: raWithCoverage, conf: item.conf || null };
       } else {
         // Merge se stessa ADA appare più volte
         if (item.attivita) mappings[adaKey].attivita = mappings[adaKey].attivita ? mappings[adaKey].attivita + '; ' + item.attivita : item.attivita;
